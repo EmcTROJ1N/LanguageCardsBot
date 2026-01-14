@@ -65,10 +65,7 @@ secrets.json
 !.env.example
 
 # App settings with secrets
-appsettings.json
-appsettings.*.json
 !appsettings.Development.json
-!appsettings.Example.json
 
 # User secrets (Windows)
 *.pfx
@@ -104,4 +101,3 @@ coverage/
 *.coveragexml
 
 *.db
-appsettings.Development.json
