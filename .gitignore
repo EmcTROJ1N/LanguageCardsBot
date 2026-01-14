@@ -1,0 +1,105 @@
+####################################
+# .NET / C#
+####################################
+bin/
+obj/
+out/
+
+####################################
+# Visual Studio
+####################################
+.vs/
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+####################################
+# Rider / JetBrains
+####################################
+.idea/
+*.sln.iml
+
+####################################
+# Build / publish
+####################################
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa]ny CPU/
+publish/
+
+####################################
+# Logs
+####################################
+*.log
+
+####################################
+# OS
+####################################
+.DS_Store
+Thumbs.db
+
+####################################
+# NuGet
+####################################
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+project.lock.json
+project.assets.json
+
+####################################
+# Secrets / tokens / env
+####################################
+
+# ASP.NET Core secrets
+secrets.json
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# App settings with secrets
+appsettings.json
+appsettings.*.json
+!appsettings.Development.json
+!appsettings.Example.json
+
+# User secrets (Windows)
+*.pfx
+*.snk
+*.key
+*.crt
+*.pem
+
+# Azure / cloud
+.azure/
+*.publishsettings
+
+# Docker secrets
+docker-compose.override.yml
+docker-compose.env
+
+####################################
+# Entity Framework
+####################################
+Migrations/
+!Migrations/*.cs
+
+####################################
+# Test results
+####################################
+TestResults/
+
+####################################
+# Coverage
+####################################
+coverage/
+*.coverage
+*.coveragexml
+
