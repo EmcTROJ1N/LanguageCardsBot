@@ -18,6 +18,7 @@ public class TelegramBotService(
     IConfiguration configuration,
     IUserRepository userRepository,
     ICardRepository cardRepository,
+    ICardsImportService cardsImportService,
     CardService cardService,
     StatsService statsService,
     ITranslationService translationService)
@@ -664,7 +665,8 @@ public class TelegramBotService(
             ms.Position = 0;
 
             // 3) Read JSON
-            using var sr = new StreamReader(ms, System.Text.Encoding.UTF8, detectEncodingFromByteOrderMarks: true, leaveOpen: true);
+            using var sr = new StreamReader(ms, System.Text.Encoding.UTF8, detectEncodingFromByteOrderMarks: true,
+                leaveOpen: true);
             var json = await sr.ReadToEndAsync(cancellationToken);
 
             if (string.IsNullOrWhiteSpace(json))
@@ -673,108 +675,36 @@ public class TelegramBotService(
                     chatId: message.Chat.Id,
                     text: "❌ Файл пустой. Проверьте содержимое JSON.",
                     cancellationToken: cancellationToken);
-                return;
             }
 
-            // 4) Parse payload
-            var payload = TryParseImportPayload(json);
+            var result = await cardsImportService.ImportCardsFromJsonAsync(json, user.Id, cancellationToken);
 
-            if (payload?.Cards == null || payload.Cards.Count == 0)
+            // Report
+            if (result is { IsSuccess: true, Data: not null })
             {
+                var report = $"✅ Импорт завершён.\n\n" +
+                             $"Добавлено карточек: {result.Data.Imported}\n" +
+                             $"Пропущено: {result.Data.Skipped}";
+                if (result.Data.Errors.Count > 0)
+                {
+                    const int maxErrorLines = 20;
+                    var shown = result.Data.Errors.Take(maxErrorLines).ToList();
+                    report += "\n\nОшибки/пропуски:\n" + string.Join("\n", shown);
+
+                    if (result.Data.Errors.Count > maxErrorLines)
+                        report += $"\n…и ещё {result.Data.Errors.Count - maxErrorLines} строк(и).";
+                }
+
                 await botClient.SendMessage(
                     chatId: message.Chat.Id,
-                    text: "❌ В файле не найден массив карточек `cards` или он пустой. Используйте /export для примера.",
+                    text: report,
                     cancellationToken: cancellationToken);
-                return;
             }
-
-            // Safety: limit count
-            const int maxCards = 5000;
-            if (payload.Cards.Count > maxCards)
-            {
+            else
                 await botClient.SendMessage(
                     chatId: message.Chat.Id,
-                    text: $"❌ Слишком много карточек ({payload.Cards.Count}). Максимум за раз: {maxCards}.",
+                    text: $"❌ {result.Errors.First().Message}",
                     cancellationToken: cancellationToken);
-                return;
-            }
-
-            // 5) Import
-            var imported = 0;
-            var skipped = 0;
-            var errors = new List<string>();
-
-            foreach (var c in payload.Cards)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                var term = (c.Term ?? "").Trim();
-                var translation = (c.Translation ?? "").Trim();
-
-                if (string.IsNullOrWhiteSpace(term) || string.IsNullOrWhiteSpace(translation))
-                {
-                    skipped++;
-                    errors.Add($"• Пропуск: term/translation пустые (term='{term}', translation='{translation}')");
-                    continue;
-                }
-
-                if (term.Length > 200 || translation.Length > 500)
-                {
-                    skipped++;
-                    errors.Add($"• Пропуск: слишком длинные поля (term={term.Length}, translation={translation.Length})");
-                    continue;
-                }
-
-                try
-                {
-                    var transcription = string.IsNullOrWhiteSpace(c.Transcription)
-                        ? $"/{term}/"
-                        : c.Transcription.Trim();
-
-                    var example = string.IsNullOrWhiteSpace(c.Example)
-                        ? null
-                        : c.Example.Trim();
-
-                    await cardService.AddCardAsync(
-                        user.Id,
-                        term,
-                        translation,
-                        transcription,
-                        example,
-                        cancellationToken);
-
-                    // NOTE:
-                    // Поля level/learned из файла сейчас не применяются, потому что текущая сигнатура AddCardAsync их не принимает.
-                    // Если нужно — добавь в CardService отдельный ImportCardAsync(...) или расширь AddCardAsync.
-
-                    imported++;
-                }
-                catch (Exception ex)
-                {
-                    skipped++;
-                    errors.Add($"• Ошибка для '{term}': {ex.Message}");
-                }
-            }
-
-            // 6) Report
-            var report = $"✅ Импорт завершён.\n\n" +
-                         $"Добавлено карточек: {imported}\n" +
-                         $"Пропущено: {skipped}";
-
-            if (errors.Count > 0)
-            {
-                const int maxErrorLines = 20;
-                var shown = errors.Take(maxErrorLines).ToList();
-                report += "\n\nОшибки/пропуски:\n" + string.Join("\n", shown);
-
-                if (errors.Count > maxErrorLines)
-                    report += $"\n…и ещё {errors.Count - maxErrorLines} строк(и).";
-            }
-
-            await botClient.SendMessage(
-                chatId: message.Chat.Id,
-                text: report,
-                cancellationToken: cancellationToken);
         }
         catch (JsonException ex)
         {
@@ -1095,85 +1025,4 @@ public class TelegramBotService(
         }
     }
 
-    // =========================
-    // Import helpers (DTO + parser)
-    // =========================
-    private static ImportPayload? TryParseImportPayload(string json)
-    {
-        var options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-            ReadCommentHandling = JsonCommentHandling.Skip,
-            AllowTrailingCommas = true
-        };
-
-        // 1) { version, exportedAt, totalCards, cards:[...] } or { cards:[...] }
-        try
-        {
-            var payload = JsonSerializer.Deserialize<ImportPayload>(json, options);
-            if (payload?.Cards != null && payload.Cards.Count > 0)
-                return payload;
-        }
-        catch
-        {
-            // ignore and try other shapes
-        }
-
-        // 2) Root array: [ {term, translation, ...}, ... ]
-        try
-        {
-            var cards = JsonSerializer.Deserialize<List<ImportCardDto>>(json, options);
-            if (cards != null && cards.Count > 0)
-                return new ImportPayload { Version = "unknown", Cards = cards };
-        }
-        catch
-        {
-            // ignore
-        }
-
-        // 3) Fallback: locate "cards" property case-insensitively
-        try
-        {
-            using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
-
-            if (root.ValueKind == JsonValueKind.Object)
-            {
-                foreach (var prop in root.EnumerateObject())
-                {
-                    if (string.Equals(prop.Name, "cards", StringComparison.OrdinalIgnoreCase) &&
-                        prop.Value.ValueKind == JsonValueKind.Array)
-                    {
-                        var cards = JsonSerializer.Deserialize<List<ImportCardDto>>(prop.Value.GetRawText(), options);
-                        if (cards != null && cards.Count > 0)
-                            return new ImportPayload { Version = "unknown", Cards = cards };
-                    }
-                }
-            }
-        }
-        catch
-        {
-            // ignore
-        }
-
-        return null;
-    }
-
-    private sealed class ImportPayload
-    {
-        public string? Version { get; set; }
-        public string? ExportedAt { get; set; }
-        public int? TotalCards { get; set; }
-        public List<ImportCardDto> Cards { get; set; } = [];
-    }
-
-    private sealed class ImportCardDto
-    {
-        public string? Term { get; set; }
-        public string? Translation { get; set; }
-        public string? Transcription { get; set; }
-        public string? Example { get; set; }
-        public int? Level { get; set; }
-        public bool? Learned { get; set; }
-    }
 }

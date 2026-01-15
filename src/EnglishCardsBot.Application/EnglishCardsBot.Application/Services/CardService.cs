@@ -4,24 +4,15 @@ using EnglishCardsBot.Domain.ValueObjects;
 
 namespace EnglishCardsBot.Application.Services;
 
-public class CardService
+public class CardService(ICardRepository cardRepository, IReviewRepository reviewRepository)
 {
-    private readonly ICardRepository _cardRepository;
-    private readonly IReviewRepository _reviewRepository;
-
-    public CardService(ICardRepository cardRepository, IReviewRepository reviewRepository)
-    {
-        _cardRepository = cardRepository;
-        _reviewRepository = reviewRepository;
-    }
-
     public async Task<Card> AddCardAsync(int userId, string term, string translation, string transcription, string? example, CancellationToken cancellationToken = default)
     {
         var now = DateTime.UtcNow;
         var firstInterval = ReviewIntervals.GetIntervalDays(1);
         var nextReview = now.AddDays(firstInterval);
 
-        var existingCard = (await _cardRepository.GetAllByUserIdAsync(userId, cancellationToken))
+        var existingCard = (await cardRepository.GetAllByUserIdAsync(userId, cancellationToken))
             .FirstOrDefault(c => c.Term.Equals(term, StringComparison.InvariantCultureIgnoreCase));
         if (existingCard is not null)
             return existingCard;
@@ -39,12 +30,12 @@ public class CardService
             CreatedAt = now
         };
 
-        return await _cardRepository.AddAsync(card, cancellationToken);
+        return await cardRepository.AddAsync(card, cancellationToken);
     }
 
     public async Task UpdateCardReviewAsync(int cardId, bool isCorrect, CancellationToken cancellationToken = default)
     {
-        var card = await _cardRepository.GetByIdAsync(cardId, cancellationToken);
+        var card = await cardRepository.GetByIdAsync(cardId, cancellationToken);
         if (card == null)
             return;
 
@@ -77,7 +68,7 @@ public class CardService
 
         card.LastReviewAt = now;
 
-        await _cardRepository.UpdateAsync(card, cancellationToken);
+        await cardRepository.UpdateAsync(card, cancellationToken);
 
         var review = new Review
         {
@@ -86,7 +77,7 @@ public class CardService
             ReviewedAt = now
         };
 
-        await _reviewRepository.AddAsync(review, cancellationToken);
+        await reviewRepository.AddAsync(review, cancellationToken);
     }
 }
 

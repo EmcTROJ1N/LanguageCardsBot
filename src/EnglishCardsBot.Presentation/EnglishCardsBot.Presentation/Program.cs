@@ -40,6 +40,7 @@ builder.Services.AddScoped<CardService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<StatsService>();
 builder.Services.AddScoped<ITranslationService, GoogleTranslationService>();
+builder.Services.AddScoped<ICardsImportService, CardsImportService>();
 
 // Telegram Bot
 builder.Services.AddHttpClient("telegram_bot_client")
