@@ -26,7 +26,6 @@ public class ReminderWorker(
 
                 var cardRepository = scope.ServiceProvider.GetRequiredService<ICardRepository>();
                 var botClient = scope.ServiceProvider.GetRequiredService<ITelegramBotClient>();
-                var botService = scope.ServiceProvider.GetRequiredService<TelegramBotService>();
                 var statsService = scope.ServiceProvider.GetRequiredService<StatsService>();
                 var userService = scope.ServiceProvider.GetRequiredService<UserService>();
 
@@ -39,7 +38,7 @@ public class ReminderWorker(
                         await ProcessRandomRemindersAsync(
                             user,
                             cardRepository,
-                            botService,
+                            botClient,
                             userService,
                             stoppingToken);
 
@@ -67,7 +66,7 @@ public class ReminderWorker(
     private async Task ProcessRandomRemindersAsync(
         Domain.Entities.User user,
         ICardRepository cardRepository,
-        TelegramBotService botService,
+        ITelegramBotClient botClient,
         UserService userService,
         CancellationToken cancellationToken)
     {
@@ -95,9 +94,10 @@ public class ReminderWorker(
                 ? $"{card.Term} — ||{card.Translation}||"
                 : $"{card.Term} — {card.Translation}";
 
-            await botService.SendFormattedMessageAsync(
+            await botClient.SendMessage(
                 chatId: user.ChatId,
                 text: text,
+                ParseMode.MarkdownV2,
                 cancellationToken: cancellationToken);
         }
 

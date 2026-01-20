@@ -1,8 +1,14 @@
 using EnglishCardsBot.Application.Interfaces;
 using EnglishCardsBot.Application.Services;
-using Microsoft.Extensions.Configuration;
-using System.Net.Http.Headers;
 using System.Text.Json;
+using EnglishCardsBot.Presentation.Commands.Clear;
+using EnglishCardsBot.Presentation.Commands.Export;
+using EnglishCardsBot.Presentation.Commands.Import;
+using EnglishCardsBot.Presentation.Commands.List;
+using EnglishCardsBot.Presentation.Commands.ReminderSettings;
+using EnglishCardsBot.Presentation.Commands.Start;
+using EnglishCardsBot.Presentation.Commands.Stats;
+using EnglishCardsBot.Presentation.Commands.Train;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -14,13 +20,11 @@ namespace EnglishCardsBot.Presentation.Services;
 
 public class TelegramBotService(
     ITelegramBotClient botClient,
-    IHttpClientFactory httpClientFactory,
-    IConfiguration configuration,
     IUserRepository userRepository,
     ICardRepository cardRepository,
     ICardsImportService cardsImportService,
     CardService cardService,
-    StatsService statsService,
+    IServiceProvider serviceProvider,
     ITranslationService translationService)
 {
     // =========================
@@ -110,143 +114,44 @@ public class TelegramBotService(
     {
         var command = text.Split(' ')[0].ToLower();
         var args = text.Split(' ').Skip(1).ToArray();
-
+        
         switch (command)
         {
             case "/start":
-                await HandleStartCommandAsync(message, user, cancellationToken);
+                await serviceProvider.GetRequiredService<StartCommandHandler>()
+                    .HandleAsync(new StartCommand(message.Chat.Id), user, cancellationToken);
                 break;
             case "/train":
-                await HandleTrainCommandAsync(message, user, cancellationToken);
+                await serviceProvider.GetRequiredService<TrainCommandHandle>()
+                    .HandleAsync(new TrainCommand(message.Chat.Id), user, cancellationToken);
                 break;
             case "/stats":
-                await HandleStatsCommandAsync(message, user, cancellationToken);
+                await serviceProvider.GetRequiredService<StatsCommandHandler>()
+                    .HandleAsync(new StatCommand(message.Chat.Id), user, cancellationToken);
                 break;
             case "/list":
             case "/cards":
-                await HandleListCommandAsync(message, user, cancellationToken);
+                await serviceProvider.GetRequiredService<ListCommandHandler>()
+                    .HandleAsync(new ListCommand(message.Chat.Id), user, cancellationToken);
                 break;
             case "/reminder_settings":
-                await HandleReminderSettingsCommandAsync(message, args, user, cancellationToken);
+                await serviceProvider.GetRequiredService<ReminderSettingsCommandHandler>()
+                    .HandleAsync(new ReminderSettingsCommand(message.Chat.Id, args), user, cancellationToken);
                 break;
             case "/clear":
-                await HandleClearCommandAsync(message, user, cancellationToken);
+                await serviceProvider.GetRequiredService<ClearCommandHandler>()
+                    .HandleAsync(new ClearCommand(message.Chat.Id), user, cancellationToken);
                 break;
             case "/export":
-                await HandleExportCommandAsync(message, user, cancellationToken);
+                await serviceProvider.GetRequiredService<ExportCommandHandler>()
+                    .HandleAsync(new ExportCommand(message.Chat.Id), user, cancellationToken);
                 break;
             case "/import":
-                await HandleImportCommandAsync(message, user, cancellationToken);
+                await serviceProvider.GetRequiredService<ImportCommandHandler>()
+                    .HandleAsync(new ImportCommand(message.Chat.Id), user, cancellationToken);
                 break;
         }
     }
-
-    private async Task HandleStartCommandAsync(Message message, Domain.Entities.User user, CancellationToken cancellationToken)
-    {
-        var keyboard = new ReplyKeyboardMarkup(new[]
-        {
-            new[] { new KeyboardButton("📚 Мои карточки"), new KeyboardButton("🎯 Тренировка") },
-            new[] { new KeyboardButton("📊 Статистика"), new KeyboardButton("⚙️ Настройки") },
-            new[] { new KeyboardButton("📤 Экспорт"), new KeyboardButton("📥 Импорт") }
-        })
-        {
-            ResizeKeyboard = true
-        };
-
-        var welcomeText = "Привет! Я бот для интервального повторения слов 🌟\n\n" +
-                          "Просто отправь мне слово (или несколько слов построчно) — " +
-                          "я найду перевод, добавлю карточки и буду напоминать.\n\n" +
-                          "📝 Форматы добавления:\n" +
-                          "• Просто слово — автоматический перевод\n" +
-                          "• слово | перевод — с вашим переводом\n" +
-                          "• слово: перевод — альтернативный формат\n\n" +
-                          "Используй меню внизу для быстрого доступа к функциям!";
-
-        await botClient.SendMessage(
-            chatId: message.Chat.Id,
-            text: welcomeText,
-            replyMarkup: keyboard,
-            cancellationToken: cancellationToken);
-    }
-
-    private async Task HandleTrainCommandAsync(Message message, Domain.Entities.User user, CancellationToken cancellationToken)
-    {
-        var card = await cardRepository.GetDueCardAsync(user.Id, cancellationToken);
-        if (card == null)
-        {
-            await botClient.SendMessage(
-                chatId: message.Chat.Id,
-                text: "Сейчас нет карточек, которые пора повторять 🎉\n\nДобавь новые слова или подожди до следующего интервала.",
-                cancellationToken: cancellationToken);
-            return;
-        }
-
-        var text = BuildTrainingMessage(card, user.HideTranslations);
-        var keyboard = new InlineKeyboardMarkup(new[]
-        {
-            new[]
-            {
-                InlineKeyboardButton.WithCallbackData("Знал 😎", $"know_{card.Id}"),
-                InlineKeyboardButton.WithCallbackData("Не знал 😕", $"dontknow_{card.Id}")
-            }
-        });
-
-        // ВНИМАНИЕ: SendFormattedMessageAsync экранирует весь текст и "ломает" Markdown.
-        // Если тебе нужно, чтобы * и || работали, здесь должен быть другой метод (без экранирования всего текста).
-        await SendFormattedMessageAsync(
-            chatId: message.Chat.Id,
-            text: text,
-            replyMarkup: keyboard,
-            cancellationToken: cancellationToken);
-    }
-
-    private async Task HandleStatsCommandAsync(Message message, Domain.Entities.User user, CancellationToken cancellationToken)
-    {
-        var stats = await statsService.GetTodayStatsAsync(user.Id, cancellationToken);
-
-        var msg = $"📊 *Статистика*\n\n" +
-                  $"Сегодня добавлено новых слов: *{stats.NewToday}*\n" +
-                  $"Сегодня повторений: *{stats.TotalReviewsToday}* " +
-                  $"(из них правильных: *{stats.CorrectReviewsToday}*)\n\n" +
-                  $"Всего карточек: *{stats.TotalCards}*\n" +
-                  $"Из них выучено: *{stats.LearnedCards}*";
-
-        if (!string.IsNullOrEmpty(stats.BestDay))
-        {
-            msg += $"\n\nЛучший день по повторениям: *{stats.BestDay}* — *{stats.BestCount}* повторений";
-        }
-
-        await SendFormattedMessageAsync(message.Chat.Id, msg, cancellationToken);
-    }
-
-    // =========================
-    // /cards -> InlineKeyboard list with pagination + details
-    // =========================
-    private async Task HandleListCommandAsync(Message message, Domain.Entities.User user, CancellationToken cancellationToken)
-    {
-        var cards = (await cardRepository.GetAllByUserIdAsync(user.Id, cancellationToken))
-            .OrderBy(c => c.Term)
-            .ToList();
-
-        if (!cards.Any())
-        {
-            await botClient.SendMessage(
-                chatId: message.Chat.Id,
-                text: "У вас пока нет карточек.\n\nОтправьте мне слова, и я добавлю их в ваш список!",
-                cancellationToken: cancellationToken);
-            return;
-        }
-
-        var page = 0;
-        var (text, keyboard) = BuildCardsListPage(cards, page);
-
-        await botClient.SendMessage(
-            chatId: message.Chat.Id,
-            text: text,                 // plain text, no markdown
-            replyMarkup: keyboard,
-            cancellationToken: cancellationToken);
-    }
-
     private (string Text, InlineKeyboardMarkup Keyboard) BuildCardsListPage(
         List<Domain.Entities.Card> cards,
         int page)
@@ -461,166 +366,6 @@ public class TelegramBotService(
         }
     }
 
-    private async Task HandleReminderSettingsCommandAsync(Message message, string[] args, Domain.Entities.User user, CancellationToken cancellationToken)
-    {
-        if (args.Length > 0)
-        {
-            var cmd = args[0].ToLower();
-            if (cmd is "hide" or "show" or "скрыть" or "показать")
-            {
-                user.HideTranslations = cmd is "hide" or "скрыть";
-                await userRepository.UpdateAsync(user, cancellationToken);
-
-                var status = user.HideTranslations ? "скрыты" : "показаны";
-                await SendFormattedMessageAsync(
-                    message.Chat.Id,
-                    $"✅ Настройка обновлена!\n\nПереводы теперь {status}.",
-                    cancellationToken);
-                return;
-            }
-
-            if (int.TryParse(args[0], out var interval) && interval >= 1)
-            {
-                user.ReminderIntervalMinutes = interval;
-                await userRepository.UpdateAsync(user, cancellationToken);
-
-                await SendFormattedMessageAsync(
-                    message.Chat.Id,
-                    $"✅ Частота напоминаний обновлена!\n\nТеперь напоминания будут проверяться каждые *{interval}* минут.",
-                    cancellationToken);
-                return;
-            }
-        }
-
-        var translationsStatus = user.HideTranslations ? "скрыты" : "показаны";
-        var settingsText = $"⚙️ *Настройки*\n\n" +
-                           $"🔔 Частота напоминаний:\n" +
-                           $"Текущая частота проверки: *{user.ReminderIntervalMinutes}* минут\n" +
-                           $"Чтобы изменить: `/reminder_settings <минуты>`\n\n" +
-                           $"👁️ Отображение переводов:\n" +
-                           $"Переводы: *{translationsStatus}*\n" +
-                           $"Чтобы изменить:\n" +
-                           $"`/reminder_settings hide` — скрыть переводы\n" +
-                           $"`/reminder_settings show` — показать переводы";
-
-        await SendFormattedMessageAsync(message.Chat.Id, settingsText, cancellationToken);
-    }
-
-    private async Task HandleClearCommandAsync(Message message, Domain.Entities.User user, CancellationToken cancellationToken)
-    {
-        var deletedCount = await cardRepository.DeleteAllByUserIdAsync(user.Id, cancellationToken);
-
-        await botClient.SendMessage(
-            chatId: message.Chat.Id,
-            text: deletedCount > 0
-                ? $"✅ Удалено карточек: {deletedCount}\n\nВсе карточки успешно очищены."
-                : "У вас нет карточек для удаления.",
-            cancellationToken: cancellationToken);
-    }
-
-    private async Task HandleExportCommandAsync(Message message, Domain.Entities.User user, CancellationToken cancellationToken)
-    {
-        var cards = (await cardRepository.GetAllByUserIdAsync(user.Id, cancellationToken)).ToList();
-
-        if (!cards.Any())
-        {
-            await botClient.SendMessage(
-                chatId: message.Chat.Id,
-                text: "У вас нет карточек для экспорта.",
-                cancellationToken: cancellationToken);
-            return;
-        }
-
-        try
-        {
-            var exportData = new
-            {
-                version = "1.0",
-                exportedAt = DateTime.UtcNow.ToString("O"),
-                totalCards = cards.Count,
-                cards = cards.Select(c => new
-                {
-                    term = c.Term,
-                    translation = c.Translation,
-                    transcription = c.Transcription,
-                    example = c.Example,
-                    level = c.Level,
-                    learned = c.Learned
-                }).ToList()
-            };
-
-            var json = JsonSerializer.Serialize(exportData, new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-            });
-
-            var tempFile = Path.Combine(Path.GetTempPath(), $"cards_export_{user.Id}_{DateTime.UtcNow:yyyyMMddHHmmss}.json");
-            await File.WriteAllTextAsync(tempFile, json, cancellationToken);
-
-            try
-            {
-                var botToken = configuration["Bot:Token"]
-                    ?? configuration["Token"]
-                    ?? Environment.GetEnvironmentVariable("BOT_TOKEN")
-                    ?? throw new InvalidOperationException("BOT_TOKEN not found");
-
-                var httpClient = httpClientFactory.CreateClient();
-                var apiUrl = $"https://api.telegram.org/bot{botToken}/sendDocument";
-
-                await using var fileStream = new FileStream(tempFile, FileMode.Open, FileAccess.Read);
-                var fileName = $"cards_export_{DateTime.UtcNow:yyyyMMdd}.json";
-
-                using var content = new MultipartFormDataContent();
-                content.Add(new StringContent(message.Chat.Id.ToString()), "chat_id");
-                content.Add(new StringContent($"✅ Экспортировано {cards.Count} карточек"), "caption");
-
-                var fileContent = new StreamContent(fileStream);
-                fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                content.Add(fileContent, "document", fileName);
-
-                var response = await httpClient.PostAsync(apiUrl, content, cancellationToken);
-                response.EnsureSuccessStatusCode();
-            }
-            finally
-            {
-                if (File.Exists(tempFile))
-                    File.Delete(tempFile);
-            }
-        }
-        catch (Exception ex)
-        {
-            await botClient.SendMessage(
-                chatId: message.Chat.Id,
-                text: $"❌ Ошибка при экспорте: {ex.Message}",
-                cancellationToken: cancellationToken);
-        }
-    }
-
-    private async Task HandleImportCommandAsync(Message message, Domain.Entities.User user, CancellationToken cancellationToken)
-    {
-        await botClient.SendMessage(
-            chatId: message.Chat.Id,
-            text: "📥 Для импорта карточек отправьте мне JSON файл с карточками.\n\n" +
-                  "Форматы:\n" +
-                  "1) Экспортный формат (через /export)\n" +
-                  "2) Упрощённый формат:\n" +
-                  "{\n" +
-                  "  \"cards\": [\n" +
-                  "    {\n" +
-                  "      \"term\": \"слово\",\n" +
-                  "      \"translation\": \"перевод\",\n" +
-                  "      \"transcription\": \"/транскрипция/\",\n" +
-                  "      \"example\": \"пример\",\n" +
-                  "      \"level\": 1,\n" +
-                  "      \"learned\": false\n" +
-                  "    }\n" +
-                  "  ]\n" +
-                  "}\n\n" +
-                  "Также поддерживается массив карточек в корне: [ {\"term\":\"...\",\"translation\":\"...\"}, ... ]",
-            cancellationToken: cancellationToken);
-    }
-
     // =========================
     // IMPLEMENTED: file import (.json)
     // =========================
@@ -727,32 +472,38 @@ public class TelegramBotService(
         // Handle menu buttons
         if (text == "📚 Мои карточки")
         {
-            await HandleListCommandAsync(message, user, cancellationToken);
+            await serviceProvider.GetRequiredService<ListCommandHandler>()
+                .HandleAsync(new ListCommand(message.Chat.Id), user, cancellationToken);
             return;
         }
         if (text == "🎯 Тренировка")
         {
-            await HandleTrainCommandAsync(message, user, cancellationToken);
+            await serviceProvider.GetRequiredService<TrainCommandHandle>()
+                .HandleAsync(new TrainCommand(message.Chat.Id), user, cancellationToken);
             return;
         }
         if (text == "📊 Статистика")
         {
-            await HandleStatsCommandAsync(message, user, cancellationToken);
+            await serviceProvider.GetRequiredService<StatsCommandHandler>()
+                .HandleAsync(new StatCommand(message.Chat.Id), user, cancellationToken);
             return;
         }
         if (text == "⚙️ Настройки")
         {
-            await HandleReminderSettingsCommandAsync(message, Array.Empty<string>(), user, cancellationToken);
+            await serviceProvider.GetRequiredService<ReminderSettingsCommandHandler>()
+                .HandleAsync(new ReminderSettingsCommand(message.Chat.Id, []), user, cancellationToken);
             return;
         }
         if (text == "📤 Экспорт")
         {
-            await HandleExportCommandAsync(message, user, cancellationToken);
+            await serviceProvider.GetRequiredService<ExportCommandHandler>()
+                .HandleAsync(new ExportCommand(message.Chat.Id), user, cancellationToken);
             return;
         }
         if (text == "📥 Импорт")
         {
-            await HandleImportCommandAsync(message, user, cancellationToken);
+            await serviceProvider.GetRequiredService<ImportCommandHandler>()
+                .HandleAsync(new ImportCommand(message.Chat.Id), user, cancellationToken);
             return;
         }
 

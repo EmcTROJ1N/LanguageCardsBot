@@ -4,6 +4,14 @@ using EnglishCardsBot.Infrastructure.Data;
 using EnglishCardsBot.Infrastructure.Repositories;
 using EnglishCardsBot.Infrastructure.Services;
 using EnglishCardsBot.Presentation;
+using EnglishCardsBot.Presentation.Commands.Clear;
+using EnglishCardsBot.Presentation.Commands.Export;
+using EnglishCardsBot.Presentation.Commands.Import;
+using EnglishCardsBot.Presentation.Commands.List;
+using EnglishCardsBot.Presentation.Commands.ReminderSettings;
+using EnglishCardsBot.Presentation.Commands.Start;
+using EnglishCardsBot.Presentation.Commands.Stats;
+using EnglishCardsBot.Presentation.Commands.Train;
 using EnglishCardsBot.Presentation.Services;
 using EnglishCardsBot.Presentation.Workers;
 using Telegram.Bot;
@@ -41,6 +49,17 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<StatsService>();
 builder.Services.AddScoped<ITranslationService, GoogleTranslationService>();
 builder.Services.AddScoped<ICardsImportService, CardsImportService>();
+
+
+// Handlers
+builder.Services.AddScoped<StartCommandHandler>();
+builder.Services.AddScoped<TrainCommandHandle>();
+builder.Services.AddScoped<StatsCommandHandler>();
+builder.Services.AddScoped<ListCommandHandler>();
+builder.Services.AddScoped<ReminderSettingsCommandHandler>();
+builder.Services.AddScoped<ClearCommandHandler>();
+builder.Services.AddScoped<ExportCommandHandler>();
+builder.Services.AddScoped<ImportCommandHandler>();
 
 // Telegram Bot
 builder.Services.AddHttpClient("telegram_bot_client")
