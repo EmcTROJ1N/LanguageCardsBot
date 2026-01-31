@@ -12,9 +12,13 @@ public class ReminderSettingsCommand
         if (args.Any())
         {
             var cmd = args[0].ToLower();
-            if (cmd is "hide" or "show" or "скрыть" or "показать")
-                HideTranslations = true;
-        
+            HideTranslations = cmd switch
+            {
+                "show" or "показать" => false,
+                "hide" or "скрыть" => true,
+                _ => HideTranslations
+            };
+
             if (int.TryParse(args[0], out var interval) && interval >= 1)
                 ReminderIntervalMinutes = interval;
         }

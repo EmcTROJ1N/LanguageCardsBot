@@ -630,9 +630,10 @@ public class TelegramBotService(
                 }
             });
 
-            await SendFormattedMessageAsync(
+            await botClient.SendMessage(
                 chatId: callbackQuery.Message!.Chat.Id,
                 text: text,
+                parseMode: ParseMode.MarkdownV2,
                 replyMarkup: keyboard,
                 cancellationToken: cancellationToken);
         }
@@ -647,7 +648,7 @@ public class TelegramBotService(
 
     private string BuildTrainingMessage(Domain.Entities.Card card, bool hideTranslation)
     {
-        var translation = hideTranslation ? $"||{card.Translation}||" : card.Translation;
+        var translation = $"||{card.Translation}||";
         var example = string.IsNullOrEmpty(card.Example)
             ? ""
             : hideTranslation ? $"||{card.Example}||" : card.Example;

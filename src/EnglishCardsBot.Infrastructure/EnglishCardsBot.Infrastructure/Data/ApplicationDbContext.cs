@@ -12,6 +12,7 @@ public class ApplicationDbContext
     {
         _connectionString = connectionString;
         DapperTypeHandlers.Register();
+        DefaultTypeMap.MatchNamesWithUnderscores = true;
     }
 
     public SqliteConnection CreateConnection()

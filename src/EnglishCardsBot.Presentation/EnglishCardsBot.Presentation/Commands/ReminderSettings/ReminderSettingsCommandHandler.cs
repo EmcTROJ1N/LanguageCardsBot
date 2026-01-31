@@ -18,7 +18,7 @@ public class ReminderSettingsCommandHandler(IUserRepository userRepository, ITel
             var status = user.HideTranslations ? "скрыты" : "показаны";
             await botClient.SendMessage(
                 chatId: command.ChatId,
-                text: $"✅ Настройка обновлена!\n\nПереводы теперь {status}.",
+                text: $"✅ Настройка обновлена\\!\n\nПереводы теперь {status}",
                 parseMode: ParseMode.MarkdownV2,
                 cancellationToken: cancellationToken);
 
@@ -32,7 +32,7 @@ public class ReminderSettingsCommandHandler(IUserRepository userRepository, ITel
 
             await botClient.SendMessage(
                 chatId: command.ChatId,
-                text: $"✅ Частота напоминаний обновлена!\n\nТеперь напоминания будут проверяться каждые *{command.ReminderIntervalMinutes}* минут.",
+                text: $"✅ Частота напоминаний обновлена\\!\n\nТеперь напоминания будут проверяться каждые *{command.ReminderIntervalMinutes}* минут",
                 parseMode: ParseMode.MarkdownV2,
                 cancellationToken: cancellationToken);
             return;
