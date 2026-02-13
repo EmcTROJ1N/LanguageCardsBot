@@ -94,11 +94,14 @@ public class CardRepository(ApplicationDbContext context) : ICardRepository
         var sql = @"
             SELECT * FROM cards
             WHERE user_id = @UserId AND learned = 0
-              AND (next_review_at IS NULL OR next_review_at <= @Now)
-            ORDER BY next_review_at ASC
-            LIMIT 1";
-        
-        return await connection.QueryFirstOrDefaultAsync<Card>(sql, new { UserId = userId, Now = now });
+              AND (next_review_at IS NULL OR next_review_at <= date('now'))
+            ORDER BY next_review_at ASC;  
+            ";
+        var dueCards = (await connection
+            .QueryAsync<Card>(sql, new { UserId = userId, Now = now }))
+            .AsList();
+
+        return dueCards[Random.Shared.Next(dueCards.Count)];
     }
 
     public async Task<Card?> GetRandomActiveCardAsync(int userId, CancellationToken cancellationToken = default)
