@@ -1,35 +1,23 @@
 version: "3.9"
 
 services:
-  language_cards_bot:
-    image: ghcr.io/emctroj1n/languagecardsbot:latest
-    container_name: language_cards_bot
+  english-cards-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: english_cards_bot
     restart: unless-stopped
-
     environment:
-      BOT_TOKEN: ${BOT_TOKEN}
-      DB_PATH: /app/data/bot.db
-      DAILY_SUMMARY_TIME: ${DAILY_SUMMARY_TIME:-21:00:00}
-      RANDOM_REMINDER_PROBABILITY: ${RANDOM_REMINDER_PROBABILITY:-1.0}
-
+      - BOT_TOKEN=${BOT_TOKEN}
+      - DB_PATH=/app/data/bot.db
+      - DAILY_SUMMARY_TIME=${DAILY_SUMMARY_TIME:-21:00:00}
+      - RANDOM_REMINDER_PROBABILITY=${RANDOM_REMINDER_PROBABILITY:-1.0}
     volumes:
       - ./data:/app/data
     networks:
-      - language_cards_network
-
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-    healthcheck:
-      test: ["CMD", "pgrep", "dotnet"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
+      - bot-network
 
 networks:
-  language_cards_network:
+  bot-network:
     driver: bridge
+
