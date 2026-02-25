@@ -28,7 +28,7 @@ public sealed class StartCommandHandler(ITelegramBotClient botClient): ICommandH
                                    "• слово: перевод — альтернативный формат\n\n" +
                                    "Используй меню внизу для быстрого доступа к функциям!";
 
-        const string test = "Its CI/CD test";
+        const string test = "Its CI/CD test v2";
         
         await botClient.SendMessage(
             chatId: command.ChatId,
