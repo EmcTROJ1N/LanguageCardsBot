@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>dotnet-EnglishCardsBot.Presentation-f6dc5290-beae-4e11-a0a3-e6cb70b7b98d</UserSecretsId>
+    <RootNamespace>EnglishCardsBot.Presentation</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,8 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\EnglishCardsBot.Domain\EnglishCardsBot.Domain\EnglishCardsBot.Domain.csproj" />
-    <ProjectReference Include="..\..\EnglishCardsBot.Application\EnglishCardsBot.Application\EnglishCardsBot.Application.csproj" />
-    <ProjectReference Include="..\..\EnglishCardsBot.Infrastructure\EnglishCardsBot.Infrastructure\EnglishCardsBot.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\EnglishCardsBot.Domain\LanguageCardsBot.Domain\LanguageCardsBot.Domain.csproj" />
+    <ProjectReference Include="..\..\EnglishCardsBot.Application\LanguageCardsBot.Application\LanguageCardsBot.Application.csproj" />
+    <ProjectReference Include="..\..\EnglishCardsBot.Infrastructure\LanguageCardsBot.Infrastructure\LanguageCardsBot.Infrastructure.csproj" />
   </ItemGroup>
 </Project>
