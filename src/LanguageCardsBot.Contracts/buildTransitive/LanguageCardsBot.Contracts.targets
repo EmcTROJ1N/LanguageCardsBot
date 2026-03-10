@@ -1,0 +1,12 @@
+<Project>
+    <PropertyGroup>
+        <LanguageCardsBotGrpcServices Condition="'$(LanguageCardsBotGrpcServices)' == ''">Both</LanguageCardsBotGrpcServices>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Protobuf Include="$(MSBuildThisFileDirectory)..\proto\**\*.proto"
+                  ProtoRoot="$(MSBuildThisFileDirectory)..\proto"
+                  GrpcServices="$(LanguageCardsBotGrpcServices)"
+                  CompileOutputs="true" />
+    </ItemGroup>
+</Project>
