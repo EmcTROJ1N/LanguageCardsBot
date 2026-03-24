@@ -13,7 +13,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="LanguageCardsBot.Contracts" Version="1.0.0" />
+    <PackageReference Include="LanguageCardsBot.Contracts.Cards" Version="1.0.0" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.1" />
     <PackageReference Include="Telegram.Bot" Version="22.7.6" />
   </ItemGroup>

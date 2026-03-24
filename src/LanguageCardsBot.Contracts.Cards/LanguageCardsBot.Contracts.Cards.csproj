@@ -9,11 +9,12 @@
         <IncludeBuildOutput>false</IncludeBuildOutput>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
-        <PackageId>LanguageCardsBot.Contracts</PackageId>
+        <PackageId>LanguageCardsBot.Contracts.Cards</PackageId>
         <Version>1.1.0</Version>
         <Authors>EmcTROJ1N team</Authors>
         <Description>Shared gRPC contracts</Description>
         <NoDefaultExcludes>true</NoDefaultExcludes>
+        <RootNamespace>LanguageCardsBot.Contracts</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

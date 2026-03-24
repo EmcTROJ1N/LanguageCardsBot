@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LanguageCardsBot.Domain", "LanguageCardsBot.Domain", "{10A47635-DFB6-28AC-6672-F416582627F9}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LanguageCardsBot", "LanguageCardsBot", "{10A47635-DFB6-28AC-6672-F416582627F9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LanguageCardsBot.Domain", "src\EnglishCardsBot.Domain\LanguageCardsBot.Domain\LanguageCardsBot.Domain.csproj", "{10B866DD-097A-48A1-A479-1165CB3CFC5C}"
 EndProject
@@ -21,7 +21,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cards.Presentation", "src\C
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Contracts", "Contracts", "{8DA74031-7644-4DB2-9DEF-73E3578597BF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LanguageCardsBot.Contracts", "src\LanguageCardsBot.Contracts\LanguageCardsBot.Contracts.csproj", "{FA073BF0-5F29-4CE6-9309-037450B6AF06}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LanguageCardsBot.Contracts.Cards", "src\LanguageCardsBot.Contracts.Cards\LanguageCardsBot.Contracts.Cards.csproj", "{FA073BF0-5F29-4CE6-9309-037450B6AF06}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
