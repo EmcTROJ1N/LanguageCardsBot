@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package languagecardsbot.cards.v4;
+
+option csharp_namespace = "LanguageCardsBot.Contracts.Cards.V4";
+
+import "common.proto";
+
+service CardService {
+  rpc AddCard (AddCardRequest) returns (AddCardResponse);
+  rpc UpdateCardReview (UpdateCardReviewRequest) returns (UpdateCardReviewResponse);
+}
+
+message AddCardRequest {
+  int32 user_id = 1;
+  string term = 2;
+  string translation = 3;
+  string transcription = 4;
+  optional string example = 5;
+}
+
+message AddCardResponse {
+  Card card = 1;
+}
+
+message UpdateCardReviewRequest {
+  int32 card_id = 1;
+  bool is_correct = 2;
+}
+
+message UpdateCardReviewResponse {
+  bool updated = 1;
+}

@@ -10,7 +10,7 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
         <PackageId>LanguageCardsBot.Contracts.Cards</PackageId>
-        <Version>1.1.0</Version>
+        <Version>2.0.0</Version>
         <Authors>EmcTROJ1N team</Authors>
         <Description>Shared gRPC contracts</Description>
         <NoDefaultExcludes>true</NoDefaultExcludes>
@@ -20,6 +20,10 @@
     <ItemGroup>
         <None Include="Protos\**\*.proto" Pack="true" PackagePath="proto\" />
         <None Include="buildTransitive\**\*" Pack="true" PackagePath="buildTransitive\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Protos\" />
     </ItemGroup>
     
 </Project>

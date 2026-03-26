@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package languagecardsbot.cards.v4;
+
+option csharp_namespace = "LanguageCardsBot.Contracts.Cards.V4";
+
+import "google/protobuf/timestamp.proto";
+
+message Empty {}
+
+message OperationError {
+  string message = 1;
+  string code = 2;
+  optional string target = 3;
+}
+
+message Card {
+  int32 id = 1;
+  int32 user_id = 2;
+  string term = 3;
+  string translation = 4;
+  string transcription = 5;
+  optional string example = 6;
+  int32 level = 7;
+  optional google.protobuf.Timestamp next_review_at = 8;
+  bool learned = 9;
+  google.protobuf.Timestamp created_at = 10;
+  optional google.protobuf.Timestamp last_review_at = 11;
+  int32 total_reviews = 12;
+  int32 correct_reviews = 13;
+}
+
+message User {
+  int32 id = 1;
+  int64 chat_id = 2;
+  optional string username = 3;
+  google.protobuf.Timestamp created_at = 4;
+  int32 reminder_interval_minutes = 5;
+  optional google.protobuf.Timestamp next_reminder_at_utc = 6;
+  bool hide_translations = 7;
+}
+
+message Review {
+  int32 id = 1;
+  int32 card_id = 2;
+  bool is_correct = 3;
+  google.protobuf.Timestamp reviewed_at = 4;
+}
+
+message TodayStats {
+  int32 new_today = 1;
+  int32 total_reviews_today = 2;
+  int32 correct_reviews_today = 3;
+  int32 total_cards = 4;
+  int32 learned_cards = 5;
+  optional string best_day = 6;
+  int32 best_count = 7;
+}
+
+message CardsImportResult {
+  int32 imported = 1;
+  int32 skipped = 2;
+  repeated string errors = 3;
+}
+
+message TranslationResult {
+  string translation = 1;
+  string transcription = 2;
+  string example = 3;
+}

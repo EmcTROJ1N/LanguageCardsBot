@@ -1,6 +1,8 @@
-namespace EnglishCardsBot.Domain.Entities;
+using Cards.Domain.Common;
 
-public class Card
+namespace Cards.Domain.Entities;
+
+public class CardEntity: IEntity
 {
     public int Id { get; set; }
     public int UserId { get; set; }
@@ -16,8 +18,8 @@ public class Card
     public int TotalReviews { get; set; } = 0;
     public int CorrectReviews { get; set; } = 0;
     
-    public virtual User User { get; set; } = null!;
-    public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+    public virtual UserEntity UserEntity { get; set; } = null!;
+    public virtual ICollection<ReviewEntity> Reviews { get; set; } = new List<ReviewEntity>();
     
     public bool IsDue()
     {

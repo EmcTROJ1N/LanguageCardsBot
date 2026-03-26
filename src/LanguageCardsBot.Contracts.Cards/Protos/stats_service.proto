@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package languagecardsbot.cards.v4;
+
+option csharp_namespace = "LanguageCardsBot.Contracts.Cards.V4";
+
+import "common.proto";
+
+service StatsService {
+  rpc GetTodayStats (GetTodayStatsRequest) returns (GetTodayStatsResponse);
+}
+
+message GetTodayStatsRequest {
+  int32 user_id = 1;
+}
+
+message GetTodayStatsResponse {
+  TodayStats stats = 1;
+}

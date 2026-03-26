@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package languagecardsbot.cards.v4;
+
+option csharp_namespace = "LanguageCardsBot.Contracts.Cards.V4";
+
+import "common.proto";
+
+service CardsImportService {
+  rpc ImportCardsFromJson (ImportCardsFromJsonRequest) returns (ImportCardsFromJsonResponse);
+}
+
+message ImportCardsFromJsonRequest {
+  string json = 1;
+  int32 user_id = 2;
+}
+
+message ImportCardsFromJsonResponse {
+  bool is_success = 1;
+  optional CardsImportResult data = 2;
+  repeated OperationError errors = 3;
+}

@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package languagecardsbot.cards.v4;
+
+option csharp_namespace = "LanguageCardsBot.Contracts.Cards.V4";
+
+import "google/protobuf/timestamp.proto";
+import "common.proto";
+
+service UserService {
+  rpc GetById (GetUserByIdRequest) returns (GetUserResponse);
+  rpc GetAll (GetAllUsersRequest) returns (GetAllUsersResponse);
+  rpc Add (AddUserRequest) returns (UserResponse);
+  rpc Update (UpdateUserRequest) returns (UpdateUserResponse);
+  rpc Delete (DeleteUserRequest) returns (DeleteUserResponse);
+  rpc GetByChatId (GetUserByChatIdRequest) returns (GetUserResponse);
+  rpc GetOrCreate (GetOrCreateUserRequest) returns (UserResponse);
+  rpc GetOrCreateAndSyncUsername (GetOrCreateAndSyncUsernameRequest) returns (UserResponse);
+  rpc UpdateNextReminderAtUtc (UpdateNextReminderAtUtcRequest) returns (UpdateNextReminderAtUtcResponse);
+}
+
+message GetUserByIdRequest {
+  int32 id = 1;
+}
+
+message GetAllUsersRequest {}
+
+message GetAllUsersResponse {
+  repeated User users = 1;
+}
+
+message AddUserRequest {
+  User user = 1;
+}
+
+message UpdateUserRequest {
+  User user = 1;
+}
+
+message DeleteUserRequest {
+  User user = 1;
+}
+
+message GetUserByChatIdRequest {
+  int64 chat_id = 1;
+}
+
+message GetOrCreateUserRequest {
+  int64 chat_id = 1;
+  optional string username = 2;
+}
+
+message GetOrCreateAndSyncUsernameRequest {
+  int64 chat_id = 1;
+  optional string username = 2;
+}
+
+message UpdateNextReminderAtUtcRequest {
+  int32 user_id = 1;
+  google.protobuf.Timestamp next_reminder_at_utc = 2;
+}
+
+message GetUserResponse {
+  optional User user = 1;
+}
+
+message UserResponse {
+  User user = 1;
+}
+
+message UpdateUserResponse {
+  bool updated = 1;
+}
+
+message DeleteUserResponse {
+  bool deleted = 1;
+}
+
+message UpdateNextReminderAtUtcResponse {
+  bool updated = 1;
+}

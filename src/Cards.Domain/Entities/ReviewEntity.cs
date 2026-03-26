@@ -1,12 +1,13 @@
-namespace EnglishCardsBot.Domain.Entities;
+using Cards.Domain.Common;
 
-public class Review
+namespace Cards.Domain.Entities;
+
+public class ReviewEntity: IEntity
 {
     public int Id { get; set; }
     public int CardId { get; set; }
     public bool IsCorrect { get; set; }
     public DateTime ReviewedAt { get; set; }
     
-    public virtual Card Card { get; set; } = null!;
+    public virtual CardEntity CardEntity { get; set; } = null!;
 }
-

@@ -4,15 +4,35 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.64.0" />
-    <PackageReference Include="LanguageCardsBot.Contracts.Cards" Version="1.1.0" />
+    <PackageReference Include="LanguageCardsBot.Contracts.Cards" Version="2.0.0" />
+    <PackageReference Include="Mapster" Version="10.0.6-a" />
   </ItemGroup>
 
   <PropertyGroup>
     <LanguageCardsBotGrpcServices>Server</LanguageCardsBotGrpcServices>
   </PropertyGroup> 
+
+  <ItemGroup>
+    <Protobuf Include="../LanguageCardsBot.Contracts.Cards/Protos/**/*.proto"
+              ProtoRoot="../LanguageCardsBot.Contracts.Cards/Protos"
+              GrpcServices="$(LanguageCardsBotGrpcServices)"
+              CompileOutputs="true" />
+  </ItemGroup> 
+
+  <ItemGroup>
+    <ProjectReference Include="..\Cards.Domain\Cards.Domain.csproj" />
+    <ProjectReference Include="..\Cards.Infrastructure\Cards.Infrastructure.csproj" />
+  </ItemGroup> 
+
+  <ItemGroup>
+    <Content Include="..\..\.dockerignore">
+      <Link>.dockerignore</Link>
+    </Content>
+  </ItemGroup>
 
 </Project>

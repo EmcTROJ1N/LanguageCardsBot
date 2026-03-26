@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package languagecardsbot.cards.v4;
+
+option csharp_namespace = "LanguageCardsBot.Contracts.Cards.V4";
+
+import "common.proto";
+
+service TranslationService {
+  rpc Translate (TranslateRequest) returns (TranslateResponse);
+}
+
+message TranslateRequest {
+  string term = 1;
+}
+
+message TranslateResponse {
+  TranslationResult result = 1;
+}

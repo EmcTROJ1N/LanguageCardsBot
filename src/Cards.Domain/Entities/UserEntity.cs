@@ -1,6 +1,8 @@
-namespace EnglishCardsBot.Domain.Entities;
+using Cards.Domain.Common;
 
-public class User
+namespace Cards.Domain.Entities;
+
+public class UserEntity: IEntity
 {
     public int Id { get; set; }
     public long ChatId { get; set; }
@@ -9,7 +11,6 @@ public class User
 
     public int ReminderIntervalMinutes { get; set; } = 1;
 
-    // NEW: когда следующее напоминание (UTC)
     public DateTime? NextReminderAtUtc { get; set; }
 
     public bool HideTranslations { get; set; } = true;
