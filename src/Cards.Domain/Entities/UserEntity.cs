@@ -2,7 +2,7 @@ using Cards.Domain.Common;
 
 namespace Cards.Domain.Entities;
 
-public class UserEntity: IEntity
+public class UserEntity: IEntityWithId
 {
     public int Id { get; set; }
     public long ChatId { get; set; }

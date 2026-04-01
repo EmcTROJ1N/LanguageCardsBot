@@ -28,9 +28,8 @@ public sealed class CardGrpcService(ICardRepository cardRepository) : CardServic
             Transcription = request.Transcription,
             Example = request.Example,
             Level = 1,
-            //TODO: fix in proto from timestamp to datetime
-            //NextReviewAt = nextReview,
-            //CreatedAt = now,
+            NextReviewAt = nextReview,
+            CreatedAt = now,
             Learned = false,
         };
 

@@ -1,10 +1,12 @@
 using Cards.Domain.Entities;
 using Cards.Infrastructure.Common.Abstractions;
+using Cards.Infrastructure.Data;
 using Cards.Infrastructure.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Cards.Infrastructure.Repositories;
 
-public class CardRepository: AbstractCrudRepository<CardEntity>, ICardRepository
+public class CardRepository(CardsMysqlDbContext dbContext): AbstractCrudRepository<CardEntity>(dbContext), ICardRepository
 {
     public Task<CardEntity?> GetDueCardAsync(int userId, CancellationToken cancellationToken = default)
     {
@@ -16,13 +18,21 @@ public class CardRepository: AbstractCrudRepository<CardEntity>, ICardRepository
         throw new NotImplementedException();
     }
 
-    public Task<IEnumerable<CardEntity>> GetAllByUserIdAsync(int userId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<CardEntity>> GetAllByUserIdAsync(
+        int userId,
+        CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return await dbContext.Set<CardEntity>()
+            .Where(x => x.UserId == userId)
+            .ToListAsync(cancellationToken);
     }
 
-    public Task<int> DeleteAllByUserIdAsync(int userId, CancellationToken cancellationToken = default)
+    public async Task<int> DeleteAllByUserIdAsync(
+        int userId,
+        CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return await dbContext.Set<CardEntity>()
+            .Where(x => x.UserId == userId)
+            .ExecuteDeleteAsync(cancellationToken);
     }
 }
