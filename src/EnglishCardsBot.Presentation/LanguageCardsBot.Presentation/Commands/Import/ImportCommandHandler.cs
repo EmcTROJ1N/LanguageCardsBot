@@ -1,5 +1,5 @@
-using EnglishCardsBot.Domain.Entities;
 using EnglishCardsBot.Presentation.Abstractions;
+using LanguageCardsBot.Contracts.Cards.V3;
 using Telegram.Bot;
 
 namespace EnglishCardsBot.Presentation.Commands.Import;

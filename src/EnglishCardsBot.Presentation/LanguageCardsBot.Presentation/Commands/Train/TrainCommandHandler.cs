@@ -1,18 +1,18 @@
-using EnglishCardsBot.Application.Interfaces;
-using EnglishCardsBot.Domain.Entities;
 using EnglishCardsBot.Presentation.Abstractions;
+using LanguageCardsBot.Contracts.Cards.V3;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace EnglishCardsBot.Presentation.Commands.Train;
 
-public class TrainCommandHandle(ITelegramBotClient botClient, ICardRepository cardRepository): ICommandHandler<TrainCommand>
+public class TrainCommandHandle(ITelegramBotClient botClient, CardService.CardServiceClient cardService): ICommandHandler<TrainCommand>
 {
     public async Task HandleAsync(TrainCommand command, User user, CancellationToken cancellationToken = default)
     {
-        var card = await cardRepository.GetDueCardAsync(user.Id, cancellationToken);
-        if (card == null)
+        var response = await cardService.GetDueCardAsync(new GetDueCardRequest { UserId = user.Id }, cancellationToken: cancellationToken);
+        
+        if (response == null)
         {
             await botClient.SendMessage(
                 chatId: command.ChatId,
@@ -21,11 +21,11 @@ public class TrainCommandHandle(ITelegramBotClient botClient, ICardRepository ca
             return;
         }
 
-        var text = BuildTrainingMessage(card, user.HideTranslations);
+        var text = BuildTrainingMessage(response.Card, user.HideTranslations);
         var keyboard = new InlineKeyboardMarkup([
             [
-                InlineKeyboardButton.WithCallbackData("Знал 😎", $"know_{card.Id}"),
-                InlineKeyboardButton.WithCallbackData("Не знал 😕", $"dontknow_{card.Id}")
+                InlineKeyboardButton.WithCallbackData("Знал 😎", $"know_{response.Card.Id}"),
+                InlineKeyboardButton.WithCallbackData("Не знал 😕", $"dontknow_{response.Card.Id}")
             ]
         ]);
 

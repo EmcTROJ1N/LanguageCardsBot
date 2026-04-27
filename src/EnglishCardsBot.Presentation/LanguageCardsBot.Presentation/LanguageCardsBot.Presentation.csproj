@@ -14,11 +14,15 @@
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
     <PackageReference Include="Telegram.Bot" Version="22.7.6" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.64.0" />
+    <PackageReference Include="LanguageCardsBot.Contracts.Cards" Version="3.0.1" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <LanguageCardsBotGrpcServices>Client</LanguageCardsBotGrpcServices>
+  </PropertyGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\..\EnglishCardsBot.Domain\LanguageCardsBot.Domain\LanguageCardsBot.Domain.csproj" />
-    <ProjectReference Include="..\..\EnglishCardsBot.Application\LanguageCardsBot.Application\LanguageCardsBot.Application.csproj" />
     <ProjectReference Include="..\..\EnglishCardsBot.Infrastructure\LanguageCardsBot.Infrastructure\LanguageCardsBot.Infrastructure.csproj" />
   </ItemGroup>
 </Project>

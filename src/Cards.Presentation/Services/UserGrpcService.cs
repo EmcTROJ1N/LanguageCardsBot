@@ -2,7 +2,7 @@ using Cards.Domain.Entities;
 using Cards.Infrastructure.Interfaces;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using LanguageCardsBot.Contracts.Cards.V4;
+using LanguageCardsBot.Contracts.Cards.V3;
 using Mapster;
 
 namespace Cards.Presentation.Services;

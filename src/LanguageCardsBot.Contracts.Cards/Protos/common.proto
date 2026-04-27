@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package languagecardsbot.cards.v4;
+package languagecardsbot.cards.v3;
 
-option csharp_namespace = "LanguageCardsBot.Contracts.Cards.V4";
+option csharp_namespace = "LanguageCardsBot.Contracts.Cards.V3";
 
 import "google/protobuf/timestamp.proto";
 

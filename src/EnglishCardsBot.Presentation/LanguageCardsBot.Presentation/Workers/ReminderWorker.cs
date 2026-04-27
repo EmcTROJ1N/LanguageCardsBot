@@ -1,6 +1,6 @@
-using EnglishCardsBot.Application.Interfaces;
-using EnglishCardsBot.Application.Services;
 using EnglishCardsBot.Presentation.Services;
+using Google.Protobuf.WellKnownTypes;
+using LanguageCardsBot.Contracts.Cards.V3;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
@@ -24,20 +24,20 @@ public class ReminderWorker(
             {
                 using var scope = serviceProvider.CreateScope();
 
-                var cardRepository = scope.ServiceProvider.GetRequiredService<ICardRepository>();
+                var cardService = scope.ServiceProvider.GetRequiredService<CardService.CardServiceClient>();
                 var botClient = scope.ServiceProvider.GetRequiredService<ITelegramBotClient>();
-                var statsService = scope.ServiceProvider.GetRequiredService<StatsService>();
-                var userService = scope.ServiceProvider.GetRequiredService<UserService>();
+                var statsService = scope.ServiceProvider.GetRequiredService<StatsService.StatsServiceClient>();
+                var userService = scope.ServiceProvider.GetRequiredService<UserService.UserServiceClient>();
 
-                var users = await userService.GetAllAsync(stoppingToken);
+                var response = await userService.GetAllAsync(new GetAllUsersRequest(), cancellationToken: stoppingToken);
 
-                foreach (var user in users)
+                foreach (var user in response.Users)
                 {
                     try
                     {
                         await ProcessRandomRemindersAsync(
                             user,
-                            cardRepository,
+                            cardService,
                             botClient,
                             userService,
                             stoppingToken);
@@ -64,10 +64,10 @@ public class ReminderWorker(
     }
 
     private async Task ProcessRandomRemindersAsync(
-        Domain.Entities.User user,
-        ICardRepository cardRepository,
+        User user,
+        CardService.CardServiceClient cardService,
         ITelegramBotClient botClient,
-        UserService userService,
+        UserService.UserServiceClient userService,
         CancellationToken cancellationToken)
     {
         var nowUtc = DateTime.UtcNow;
@@ -76,18 +76,23 @@ public class ReminderWorker(
         if (user.NextReminderAtUtc is null)
         {
             var next = nowUtc.AddMinutes(Math.Max(1, user.ReminderIntervalMinutes));
-            await userService.UpdateNextReminderAtUtcAsync(user.Id, next, cancellationToken);
-            var newuser = await userService.GetByIdAsync(user.Id, cancellationToken);
+
+            await userService.UpdateNextReminderAtUtcAsync(new UpdateNextReminderAtUtcRequest
+                { UserId = user.Id, NextReminderAtUtc = next.ToTimestamp() }, cancellationToken: cancellationToken);
             
-            user.NextReminderAtUtc = next;
+            var newUser = await userService.GetByIdAsync(new GetUserByIdRequest { Id = user.Id }, cancellationToken: cancellationToken);
+            
+            user.NextReminderAtUtc = Timestamp.FromDateTime(next);
             return;
         }
 
         // Рано — ничего не делаем
-        if (nowUtc < user.NextReminderAtUtc.Value)
+        if (nowUtc < user.NextReminderAtUtc.ToDateTime())
             return;
 
-        var card = await cardRepository.GetRandomActiveCardAsync(user.Id, cancellationToken);
+        Card card = null;
+        // TODO: GetRandomActiveCardAsync
+        //var card = await cardService.GetRandomActiveCardAsync(user.Id, cancellationToken);
         if (card != null)
         {
             var text = user.HideTranslations
@@ -102,13 +107,17 @@ public class ReminderWorker(
         }
 
         var nextReminder = nowUtc.AddMinutes(Math.Max(1, user.ReminderIntervalMinutes));
-        await userService.UpdateNextReminderAtUtcAsync(user.Id, nextReminder, cancellationToken);
-        user.NextReminderAtUtc = nextReminder;
+        await userService.UpdateNextReminderAtUtcAsync(new UpdateNextReminderAtUtcRequest()
+        {
+            UserId = user.Id, 
+            NextReminderAtUtc = nextReminder.ToTimestamp()
+        }, cancellationToken: cancellationToken);
+        user.NextReminderAtUtc = Timestamp.FromDateTime(nextReminder);
     }
 
     private async Task ProcessDailySummaryAsync(
-        Domain.Entities.User user,
-        StatsService statsService,
+        User user,
+        StatsService.StatsServiceClient statsService,
         ITelegramBotClient botClient,
         CancellationToken cancellationToken)
     {
@@ -118,18 +127,18 @@ public class ReminderWorker(
         if (Math.Abs((now - summaryTime).TotalMinutes) > 1)
             return;
 
-        var stats = await statsService.GetTodayStatsAsync(user.Id, cancellationToken);
+        var response = await statsService.GetTodayStatsAsync(new GetTodayStatsRequest() { UserId = user.Id }, cancellationToken: cancellationToken);
 
         var message = $"🌙 *Итоги дня*\n\n" +
-                     $"Новых слов сегодня: *{stats.NewToday}*\n" +
-                     $"Повторений сегодня: *{stats.TotalReviewsToday}* " +
-                     $"(правильных: *{stats.CorrectReviewsToday}*)\n\n" +
-                     $"Всего карточек: *{stats.TotalCards}*\n" +
-                     $"Выучено: *{stats.LearnedCards}*";
+                     $"Новых слов сегодня: *{response.Stats.NewToday}*\n" +
+                     $"Повторений сегодня: *{response.Stats.TotalReviewsToday}* " +
+                     $"(правильных: *{response.Stats.CorrectReviewsToday}*)\n\n" +
+                     $"Всего карточек: *{response.Stats.TotalCards}*\n" +
+                     $"Выучено: *{response.Stats.LearnedCards}*";
 
-        if (!string.IsNullOrEmpty(stats.BestDay))
+        if (!string.IsNullOrEmpty(response.Stats.BestDay))
         {
-            message += $"\n\nЛучший день: *{stats.BestDay}* — *{stats.BestCount}* повторений";
+            message += $"\n\nЛучший день: *{response.Stats.BestDay}* — *{response.Stats.BestCount}* повторений";
         }
 
         await botClient.SendMessage(

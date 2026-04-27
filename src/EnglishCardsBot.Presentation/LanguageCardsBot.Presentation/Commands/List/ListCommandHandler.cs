@@ -1,13 +1,12 @@
-using EnglishCardsBot.Application.Interfaces;
-using EnglishCardsBot.Domain.Entities;
 using EnglishCardsBot.Presentation.Abstractions;
+using LanguageCardsBot.Contracts.Cards.V3;
 using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace EnglishCardsBot.Presentation.Commands.List;
 
 public class ListCommandHandler(ITelegramBotClient botClient,
-    ICardRepository cardRepository): ICommandHandler<ListCommand>
+    CardService.CardServiceClient cardRepository): ICommandHandler<ListCommand>
 {
     
     // =========================
@@ -25,7 +24,9 @@ public class ListCommandHandler(ITelegramBotClient botClient,
     
     public async Task HandleAsync(ListCommand command, User user, CancellationToken cancellationToken = default)
     {
-        var cards = (await cardRepository.GetAllByUserIdAsync(user.Id, cancellationToken))
+        var cards = (await cardRepository.GetByUserIdAsync(new GetCardsByUserIdRequest() { UserId = user.Id }, 
+                cancellationToken: cancellationToken))
+            .Cards
             .OrderBy(c => c.Term)
             .ToList();
 

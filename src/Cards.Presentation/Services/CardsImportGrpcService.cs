@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Grpc.Core;
-using LanguageCardsBot.Contracts.Cards.V4;
+using LanguageCardsBot.Contracts.Cards.V3;
 
 namespace Cards.Presentation.Services;
 
@@ -76,7 +76,7 @@ public class CardsImportGrpcService(CardGrpcService cardService) : CardsImportSe
                     : card.Example.Trim();
 
                 // TODO: is that right?
-                await cardService.AddCard(new AddCardRequest()
+                await cardService.Add(new AddCardRequest
                 {
                     UserId = request.UserId,
                     Term = term,

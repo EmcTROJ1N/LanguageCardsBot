@@ -1,23 +1,23 @@
-using EnglishCardsBot.Application.Interfaces;
-using EnglishCardsBot.Domain.Entities;
 using EnglishCardsBot.Presentation.Abstractions;
+using LanguageCardsBot.Contracts.Cards.V3;
 using Telegram.Bot;
 
 namespace EnglishCardsBot.Presentation.Commands.Clear;
 
 public class ClearCommandHandler(ITelegramBotClient botClient,
-    ICardRepository cardRepository): ICommandHandler<ClearCommand>
+    CardService.CardServiceClient cardService): ICommandHandler<ClearCommand>
 {
     public async Task HandleAsync(ClearCommand command, User user, CancellationToken cancellationToken = default)
     {
-        var deletedCount = await cardRepository.DeleteAllByUserIdAsync(user.Id, cancellationToken);
-
+        var response = await cardService.DeleteByUserIdAsync(new DeleteCardsByUserIdRequest() { UserId = user.Id },
+            cancellationToken: cancellationToken);
+        
+        // TODO: return deleted cards count
         await botClient.SendMessage(
             chatId: command.ChatId,
-            text: deletedCount > 0
-                ? $"✅ Удалено карточек: {deletedCount}\n\nВсе карточки успешно очищены."
+            text: response.Deleted
+                ? $"✅ Все карточки успешно очищены."
                 : "У вас нет карточек для удаления.",
             cancellationToken: cancellationToken);
-
     }
 }

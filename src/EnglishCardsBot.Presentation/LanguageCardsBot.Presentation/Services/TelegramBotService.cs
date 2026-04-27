@@ -1,5 +1,3 @@
-using EnglishCardsBot.Application.Interfaces;
-using EnglishCardsBot.Application.Services;
 using System.Text.Json;
 using EnglishCardsBot.Presentation.Commands.Clear;
 using EnglishCardsBot.Presentation.Commands.Export;
@@ -9,23 +7,24 @@ using EnglishCardsBot.Presentation.Commands.ReminderSettings;
 using EnglishCardsBot.Presentation.Commands.Start;
 using EnglishCardsBot.Presentation.Commands.Stats;
 using EnglishCardsBot.Presentation.Commands.Train;
+using LanguageCardsBot.Contracts.Cards.V3;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using HandleErrorSource = Telegram.Bot.Polling.HandleErrorSource;
+using User = LanguageCardsBot.Contracts.Cards.V3.User;
+using UserService = LanguageCardsBot.Contracts.Cards.V3.UserService;
 
 namespace EnglishCardsBot.Presentation.Services;
 
 public class TelegramBotService(
     ITelegramBotClient botClient,
-    IUserRepository userRepository,
-    ICardRepository cardRepository,
-    ICardsImportService cardsImportService,
-    CardService cardService,
-    IServiceProvider serviceProvider,
-    ITranslationService translationService)
+    UserService.UserServiceClient userService,
+    CardService.CardServiceClient cardService,
+    CardsImportService.CardsImportServiceClient cardsImportService,
+    IServiceProvider serviceProvider)
 {
     // =========================
     // Cards list (InlineKeyboard)
@@ -85,15 +84,18 @@ public class TelegramBotService(
 
     private async Task HandleMessageAsync(Message message, CancellationToken cancellationToken)
     {
-        var user = await userRepository.GetOrCreateAsync(
-            message.Chat.Id,
-            message.From?.Username,
-            cancellationToken);
+        var response = await userService.GetOrCreateAsync(
+            new GetOrCreateUserRequest
+            {
+                ChatId = message.Chat.Id,
+                Username =  message.From?.Username,
+            },
+            cancellationToken: cancellationToken);
 
         // Handle document upload for import
         if (message.Document is { } document)
         {
-            await HandleDocumentAsync(message, document, user, cancellationToken);
+            await HandleDocumentAsync(message, document, response.User, cancellationToken);
             return;
         }
 
@@ -101,16 +103,16 @@ public class TelegramBotService(
         {
             if (text.StartsWith("/"))
             {
-                await HandleCommandAsync(message, text, user, cancellationToken);
+                await HandleCommandAsync(message, text, response.User, cancellationToken);
             }
             else
             {
-                await HandleTextMessageAsync(message, text, user, cancellationToken);
+                await HandleTextMessageAsync(message, text, response.User, cancellationToken);
             }
         }
     }
 
-    private async Task HandleCommandAsync(Message message, string text, Domain.Entities.User user, CancellationToken cancellationToken)
+    private async Task HandleCommandAsync(Message message, string text, User user, CancellationToken cancellationToken)
     {
         var command = text.Split(' ')[0].ToLower();
         var args = text.Split(' ').Skip(1).ToArray();
@@ -153,7 +155,7 @@ public class TelegramBotService(
         }
     }
     private (string Text, InlineKeyboardMarkup Keyboard) BuildCardsListPage(
-        List<Domain.Entities.Card> cards,
+        List<Card> cards,
         int page)
     {
         var total = cards.Count;
@@ -225,13 +227,21 @@ public class TelegramBotService(
         var messageId = callbackQuery.Message.MessageId;
 
         // user нужен, чтобы знать userId
-        var user = await userRepository.GetOrCreateAsync(
-            chatId,
-            callbackQuery.From?.Username,
-            cancellationToken);
+        var response = await userService.GetOrCreateAsync(
+            new GetOrCreateUserRequest
+            {
+                ChatId = chatId,
+                Username = callbackQuery.From.Username
+            },
+            cancellationToken: cancellationToken);
 
         // Stateless: берём актуальные карточки из репозитория (надежно при рестартах/масштабировании)
-        var cards = (await cardRepository.GetAllByUserIdAsync(user.Id, cancellationToken))
+
+        var cards = (await cardService.GetByUserIdAsync(new GetCardsByUserIdRequest
+        {
+            UserId =  response.User.Id,
+        }, cancellationToken: cancellationToken))
+            .Cards
             .OrderBy(c => c.Term)
             .ToList();
 
@@ -330,7 +340,7 @@ public class TelegramBotService(
             }
 
             // DELETE: adjust this line to your IRepository<T> contract if needed
-            await cardRepository.DeleteAsync(card, cancellationToken);
+            await cardService.DeleteByIdAsync(new DeleteCardByIdRequest { Id = card.Id }, cancellationToken: cancellationToken);
 
             await botClient.SendMessage(
                 chatId: chatId,
@@ -338,7 +348,10 @@ public class TelegramBotService(
                 cancellationToken: cancellationToken);
 
             // Refresh list message (same messageId as inline list)
-            var freshCards = (await cardRepository.GetAllByUserIdAsync(user.Id, cancellationToken))
+
+            var freshCards = (await cardService.GetByUserIdAsync(new GetCardsByUserIdRequest { UserId = response.User.Id }, 
+                    cancellationToken: cancellationToken))
+                .Cards
                 .OrderBy(c => c.Term)
                 .ToList();
 
@@ -369,7 +382,7 @@ public class TelegramBotService(
     // =========================
     // IMPLEMENTED: file import (.json)
     // =========================
-    private async Task HandleDocumentAsync(Message message, Document document, Domain.Entities.User user, CancellationToken cancellationToken)
+    private async Task HandleDocumentAsync(Message message, Document document, User user, CancellationToken cancellationToken)
     {
         // 1) Basic validation
         if (string.IsNullOrWhiteSpace(document.FileName) ||
@@ -422,7 +435,11 @@ public class TelegramBotService(
                     cancellationToken: cancellationToken);
             }
 
-            var result = await cardsImportService.ImportCardsFromJsonAsync(json, user.Id, cancellationToken);
+            var result = await cardsImportService.ImportCardsFromJsonAsync(new ImportCardsFromJsonRequest()
+            {
+                Json  = json,
+                UserId = user.Id
+            }, cancellationToken: cancellationToken);
 
             // Report
             if (result is { IsSuccess: true, Data: not null })
@@ -467,7 +484,7 @@ public class TelegramBotService(
         }
     }
 
-    private async Task HandleTextMessageAsync(Message message, string text, Domain.Entities.User user, CancellationToken cancellationToken)
+    private async Task HandleTextMessageAsync(Message message, string text, User user, CancellationToken cancellationToken)
     {
         // Handle menu buttons
         if (text == "📚 Мои карточки")
@@ -522,6 +539,8 @@ public class TelegramBotService(
 
                 if (useAuto)
                 {
+                    // TODO: do we need that?
+                    /*
                     var (trans, transcription, example) = await translationService.TranslateAsync(term, cancellationToken);
                     if (string.IsNullOrEmpty(trans))
                     {
@@ -529,9 +548,17 @@ public class TelegramBotService(
                         continue;
                     }
                     translation = trans;
+                    */
                 }
 
-                await cardService.AddCardAsync(user.Id, term, translation, $"/{term}/", null, cancellationToken);
+                await cardService.AddAsync(
+                    new AddCardRequest
+                    {
+                        UserId = user.Id,
+                        Term = term,
+                        Translation = translation,
+                    },
+                    cancellationToken: cancellationToken);
                 added.Add((term, translation));
             }
             catch (Exception ex)
@@ -583,15 +610,23 @@ public class TelegramBotService(
         }
 
         // Existing training callbacks
-        var user = await userRepository.GetOrCreateAsync(
-            callbackQuery.Message!.Chat.Id,
-            callbackQuery.From?.Username,
-            cancellationToken);
 
+        var response = await userService.GetOrCreateAsync(
+            new GetOrCreateUserRequest
+            {
+                ChatId = callbackQuery.Message!.Chat.Id,
+                Username = callbackQuery.From.Username
+            },
+            cancellationToken:  cancellationToken);
+        
         if (data.StartsWith("know_"))
         {
             var cardId = int.Parse(data.Split('_')[1]);
-            await cardService.UpdateCardReviewAsync(cardId, true, cancellationToken);
+            await cardService.UpdateCardReviewAsync(new UpdateCardReviewRequest()
+            {
+                CardId = cardId,
+                IsCorrect = true
+            }, cancellationToken: cancellationToken);
             await botClient.EditMessageReplyMarkup(
                 chatId: callbackQuery.Message.Chat.Id,
                 messageId: callbackQuery.Message.MessageId,
@@ -605,7 +640,11 @@ public class TelegramBotService(
         else if (data.StartsWith("dontknow_"))
         {
             var cardId = int.Parse(data.Split('_')[1]);
-            await cardService.UpdateCardReviewAsync(cardId, false, cancellationToken);
+            await cardService.UpdateCardReviewAsync(new UpdateCardReviewRequest()
+            {
+                CardId = cardId,
+                IsCorrect = false
+            }, cancellationToken: cancellationToken);
             await botClient.EditMessageReplyMarkup(
                 chatId: callbackQuery.Message.Chat.Id,
                 messageId: callbackQuery.Message.MessageId,
@@ -617,18 +656,16 @@ public class TelegramBotService(
                 cancellationToken: cancellationToken);
         }
 
-        var nextCard = await cardRepository.GetDueCardAsync(user.Id, cancellationToken);
-        if (nextCard != null)
+        var dueCardResponse = await cardService.GetDueCardAsync(new GetDueCardRequest { UserId = response.User.Id }, cancellationToken: cancellationToken);
+        if (dueCardResponse != null)
         {
-            var text = BuildTrainingMessage(nextCard, user.HideTranslations);
-            var keyboard = new InlineKeyboardMarkup(new[]
-            {
-                new[]
-                {
-                    InlineKeyboardButton.WithCallbackData("Знал 😎", $"know_{nextCard.Id}"),
-                    InlineKeyboardButton.WithCallbackData("Не знал 😕", $"dontknow_{nextCard.Id}")
-                }
-            });
+            var text = BuildTrainingMessage(dueCardResponse.Card, response.User.HideTranslations);
+            var keyboard = new InlineKeyboardMarkup([
+                [
+                    InlineKeyboardButton.WithCallbackData("Знал 😎", $"know_{dueCardResponse.Card.Id}"),
+                    InlineKeyboardButton.WithCallbackData("Не знал 😕", $"dontknow_{dueCardResponse.Card.Id}")
+                ]
+            ]);
 
             await botClient.SendMessage(
                 chatId: callbackQuery.Message!.Chat.Id,
@@ -646,7 +683,7 @@ public class TelegramBotService(
         }
     }
 
-    private string BuildTrainingMessage(Domain.Entities.Card card, bool hideTranslation)
+    private string BuildTrainingMessage(Card card, bool hideTranslation)
     {
         var translation = $"||{card.Translation}||";
         var example = string.IsNullOrEmpty(card.Example)

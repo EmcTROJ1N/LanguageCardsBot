@@ -1,15 +1,63 @@
 syntax = "proto3";
 
-package languagecardsbot.cards.v4;
+package languagecardsbot.cards.v3;
 
-option csharp_namespace = "LanguageCardsBot.Contracts.Cards.V4";
+option csharp_namespace = "LanguageCardsBot.Contracts.Cards.V3";
 
 import "common.proto";
 
 service CardService {
-  rpc AddCard (AddCardRequest) returns (AddCardResponse);
+  // READ
+  rpc GetById (GetCardByIdRequest) returns (GetCardResponse);
+  rpc GetAll (GetAllCardsRequest) returns (GetAllCardsResponse);
+  rpc GetByUserId (GetCardsByUserIdRequest) returns (GetCardsByUserIdResponse);
+  rpc GetDueCard (GetDueCardRequest) returns (GetDueCardResponse);
+
+  // CREATE
+  rpc Add (AddCardRequest) returns (CardResponse);
+
+  // UPDATE
+  rpc Update (UpdateCardRequest) returns (UpdateCardResponse);
   rpc UpdateCardReview (UpdateCardReviewRequest) returns (UpdateCardReviewResponse);
+
+  // DELETE
+  rpc DeleteById (DeleteCardByIdRequest) returns (DeleteCardResponse);
+  rpc DeleteByUserId (DeleteCardsByUserIdRequest) returns (DeleteCardsByUserIdResponse);
 }
+
+// ===== READ =====
+
+message GetCardByIdRequest {
+  int32 id = 1;
+}
+
+message GetAllCardsRequest {}
+
+message GetAllCardsResponse {
+  repeated Card cards = 1;
+}
+
+message GetCardsByUserIdRequest {
+  int32 user_id = 1;
+}
+
+message GetCardsByUserIdResponse {
+  repeated Card cards = 1;
+}
+
+message GetDueCardRequest {
+  int32 user_id = 1;
+}
+
+message GetDueCardResponse {
+  optional Card card = 1;
+}
+
+message GetCardResponse {
+  optional Card card = 1;
+}
+
+// ===== CREATE =====
 
 message AddCardRequest {
   int32 user_id = 1;
@@ -19,8 +67,23 @@ message AddCardRequest {
   optional string example = 5;
 }
 
-message AddCardResponse {
-  Card card = 1;
+// ===== UPDATE =====
+
+message UpdateCardRequest {
+  int32 id = 1;
+
+  // редактируемые поля
+  string term = 2;
+  string translation = 3;
+  string transcription = 4;
+  optional string example = 5;
+
+  // опционально можно дать менять статус
+  optional bool learned = 6;
+}
+
+message UpdateCardResponse {
+  bool updated = 1;
 }
 
 message UpdateCardReviewRequest {
@@ -30,4 +93,26 @@ message UpdateCardReviewRequest {
 
 message UpdateCardReviewResponse {
   bool updated = 1;
+}
+
+message CardResponse {
+  Card card = 1;
+}
+
+// ===== DELETE =====
+
+message DeleteCardByIdRequest {
+  int32 id = 1;
+}
+
+message DeleteCardsByUserIdRequest {
+  int32 user_id = 1;
+}
+
+message DeleteCardResponse {
+  bool deleted = 1;
+}
+
+message DeleteCardsByUserIdResponse {
+  bool deleted = 1;
 }

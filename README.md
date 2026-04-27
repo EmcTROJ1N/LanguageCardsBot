@@ -22,7 +22,7 @@ Telegram bot for spaced repetition learning with DDD architecture.
 ## Running with Docker
 
 ```bash
-docker-compose up -d
+docker compose -f src/Cards/docker-compose.yml up -d
 ```
 
 ## Running locally
@@ -41,4 +41,3 @@ dotnet run
 - Export/Import cards
 - Customizable reminder intervals
 - Show/hide translations option
-

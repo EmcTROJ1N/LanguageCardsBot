@@ -1,19 +1,18 @@
-using EnglishCardsBot.Application.Interfaces;
-using EnglishCardsBot.Domain.Entities;
 using EnglishCardsBot.Presentation.Abstractions;
+using LanguageCardsBot.Contracts.Cards.V3;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 
 namespace EnglishCardsBot.Presentation.Commands.ReminderSettings;
 
-public class ReminderSettingsCommandHandler(IUserRepository userRepository, ITelegramBotClient botClient): ICommandHandler<ReminderSettingsCommand>
+public class ReminderSettingsCommandHandler(UserService.UserServiceClient userService, ITelegramBotClient botClient): ICommandHandler<ReminderSettingsCommand>
 {
     public async Task HandleAsync(ReminderSettingsCommand command, User user, CancellationToken cancellationToken = default)
     {
         if (command.HideTranslations.HasValue)
         {
             user.HideTranslations = command.HideTranslations.Value;
-            await userRepository.UpdateAsync(user, cancellationToken);
+            await userService.UpdateAsync(new UpdateUserRequest { User = user }, cancellationToken: cancellationToken);
 
             var status = user.HideTranslations ? "скрыты" : "показаны";
             await botClient.SendMessage(
@@ -28,7 +27,7 @@ public class ReminderSettingsCommandHandler(IUserRepository userRepository, ITel
         if (command.ReminderIntervalMinutes.HasValue)
         {
             user.ReminderIntervalMinutes = command.ReminderIntervalMinutes.Value;
-            await userRepository.UpdateAsync(user, cancellationToken);
+            await userService.UpdateAsync(new UpdateUserRequest { User = user }, cancellationToken: cancellationToken);
 
             await botClient.SendMessage(
                 chatId: command.ChatId,

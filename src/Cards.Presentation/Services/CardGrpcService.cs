@@ -2,14 +2,14 @@ using Cards.Domain.Entities;
 using Cards.Domain.ValueObjects;
 using Cards.Infrastructure.Interfaces;
 using Grpc.Core;
-using LanguageCardsBot.Contracts.Cards.V4;
+using LanguageCardsBot.Contracts.Cards.V3;
 using Mapster;
 
 namespace Cards.Presentation.Services;
 
 public sealed class CardGrpcService(ICardRepository cardRepository) : CardService.CardServiceBase
 {
-    public override async Task<AddCardResponse> AddCard(AddCardRequest request, ServerCallContext context)
+    public override async Task<CardResponse> Add(AddCardRequest request, ServerCallContext context)
     {
         var now = DateTime.UtcNow;
         var firstInterval = ReviewIntervals.GetIntervalDays(1);
@@ -18,7 +18,7 @@ public sealed class CardGrpcService(ICardRepository cardRepository) : CardServic
         var existingCard = (await cardRepository.GetAllByUserIdAsync(request.UserId, context.CancellationToken))
             .FirstOrDefault(c => c.Term.Equals(request.Term, StringComparison.InvariantCultureIgnoreCase));
         if (existingCard is not null)
-            return new AddCardResponse { Card = existingCard.Adapt<Card>() };
+            return new CardResponse { Card = existingCard.Adapt<Card>() };
         
         var card = new CardEntity
         {
@@ -34,7 +34,7 @@ public sealed class CardGrpcService(ICardRepository cardRepository) : CardServic
         };
 
         var created = await cardRepository.AddAsync(card, context.CancellationToken);
-        return new AddCardResponse { Card = created.Adapt<Card>() };
+        return new CardResponse { Card = created.Adapt<Card>() };
     }
 
     public override Task<UpdateCardReviewResponse> UpdateCardReview(UpdateCardReviewRequest request, ServerCallContext context)

@@ -1,5 +1,5 @@
 using Grpc.Core;
-using LanguageCardsBot.Contracts.Cards.V4;
+using LanguageCardsBot.Contracts.Cards.V3;
 
 namespace Cards.Presentation.Services;
 

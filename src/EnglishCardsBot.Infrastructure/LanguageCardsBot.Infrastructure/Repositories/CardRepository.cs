@@ -1,3 +1,5 @@
+
+/*
 using Dapper;
 using EnglishCardsBot.Application.Interfaces;
 using EnglishCardsBot.Domain.Entities;
@@ -130,4 +132,6 @@ public class CardRepository(ApplicationDbContext context) : ICardRepository
         return await connection.ExecuteAsync(sql, new { UserId = userId });
     }
 }
+#1#
+*/
 

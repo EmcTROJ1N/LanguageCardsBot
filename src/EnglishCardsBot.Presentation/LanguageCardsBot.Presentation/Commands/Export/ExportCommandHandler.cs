@@ -1,8 +1,7 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
-using EnglishCardsBot.Application.Interfaces;
-using EnglishCardsBot.Domain.Entities;
 using EnglishCardsBot.Presentation.Abstractions;
+using LanguageCardsBot.Contracts.Cards.V3;
 using Telegram.Bot;
 
 namespace EnglishCardsBot.Presentation.Commands.Export;
@@ -10,11 +9,14 @@ namespace EnglishCardsBot.Presentation.Commands.Export;
 public class ExportCommandHandler(ITelegramBotClient botClient,
     IConfiguration configuration,
     IHttpClientFactory httpClientFactory,
-    ICardRepository cardRepository): ICommandHandler<ExportCommand>
+    CardService.CardServiceClient cardService): ICommandHandler<ExportCommand>
 {
     public async Task HandleAsync(ExportCommand command, User user, CancellationToken cancellationToken = default)
     {
-        var cards = (await cardRepository.GetAllByUserIdAsync(user.Id, cancellationToken)).ToList();
+        var cards = (await cardService.GetByUserIdAsync(new GetCardsByUserIdRequest
+        {
+            UserId =  user.Id
+        }, cancellationToken: cancellationToken)).Cards.ToList();
 
         if (!cards.Any())
         {
