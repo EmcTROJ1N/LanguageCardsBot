@@ -7,8 +7,10 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+
 COPY ["nuget.config", "./"]
 COPY [".nuget/local/", ".nuget/local/"]
+
 COPY ["src/Cards.Presentation/Cards.Presentation.csproj", "src/Cards.Presentation/"]
 COPY ["src/Cards.Domain/Cards.Domain.csproj", "src/Cards.Domain/"]
 COPY ["src/Cards.Infrastructure/Cards.Infrastructure.csproj", "src/Cards.Infrastructure/"]

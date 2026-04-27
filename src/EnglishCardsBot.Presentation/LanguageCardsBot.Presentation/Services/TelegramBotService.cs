@@ -794,23 +794,16 @@ public class TelegramBotService(
         return Task.CompletedTask;
     }
 
-    private class BotUpdateHandler : IUpdateHandler
+    private class BotUpdateHandler(TelegramBotService botService) : IUpdateHandler
     {
-        private readonly TelegramBotService _botService;
-
-        public BotUpdateHandler(TelegramBotService botService)
-        {
-            _botService = botService;
-        }
-
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            await _botService.HandleUpdateAsync(botClient, update, cancellationToken);
+            await botService.HandleUpdateAsync(botClient, update, cancellationToken);
         }
 
         public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, HandleErrorSource errorSource, CancellationToken cancellationToken)
         {
-            return _botService.HandlePollingErrorAsync(botClient, exception, cancellationToken);
+            return botService.HandlePollingErrorAsync(botClient, exception, cancellationToken);
         }
     }
 

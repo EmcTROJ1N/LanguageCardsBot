@@ -14,7 +14,7 @@ services:
       ASPNETCORE_URLS: http://+:8080
       Database__ConnectionString: ${DATABASE_CONNECTION_STRING}
     networks:
-      - bot-network
+      - shared-grpc
 
   mysql:
     image: mysql:8.4
@@ -36,11 +36,12 @@ services:
       retries: 10
       start_period: 20s
     networks:
-      - bot-network
+      - shared-grpc
 
 networks:
-  bot-network:
-    driver: bridge
+  shared-grpc:
+    name: language-cards-shared
+    external: true
 
 volumes:
   mysql-data:
