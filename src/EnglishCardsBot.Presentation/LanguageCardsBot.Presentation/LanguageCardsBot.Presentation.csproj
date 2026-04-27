@@ -21,8 +21,4 @@
   <PropertyGroup>
     <LanguageCardsBotGrpcServices>Client</LanguageCardsBotGrpcServices>
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\EnglishCardsBot.Infrastructure\LanguageCardsBot.Infrastructure\LanguageCardsBot.Infrastructure.csproj" />
-  </ItemGroup>
 </Project>
