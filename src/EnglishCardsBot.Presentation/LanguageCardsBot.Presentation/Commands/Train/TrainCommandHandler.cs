@@ -12,7 +12,7 @@ public class TrainCommandHandle(ITelegramBotClient botClient, CardService.CardSe
     {
         var response = await cardService.GetDueCardAsync(new GetDueCardRequest { UserId = user.Id }, cancellationToken: cancellationToken);
         
-        if (response == null)
+        if (response.Card is null)
         {
             await botClient.SendMessage(
                 chatId: command.ChatId,

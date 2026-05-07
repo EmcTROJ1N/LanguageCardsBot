@@ -25,6 +25,7 @@ public static class ServiceConfiguration
     public static IServiceCollection AddGrpcServices(this IServiceCollection services)
     {
         services.AddGrpc();
+        services.AddHttpClient(nameof(GoogleTranslationService));
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ICardRepository, CardRepository>();
         services.AddScoped<IReviewRepository, ReviewRepository>();
@@ -37,6 +38,7 @@ public static class ServiceConfiguration
         app.MapGrpcService<CardGrpcService>();
         app.MapGrpcService<StatsGrpcService>();
         app.MapGrpcService<UserGrpcService>();
+        app.MapGrpcService<GoogleTranslationService>();
         return app;
     }
     

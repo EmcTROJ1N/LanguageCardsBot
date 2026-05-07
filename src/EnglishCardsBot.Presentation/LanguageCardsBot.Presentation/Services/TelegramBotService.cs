@@ -657,7 +657,7 @@ public class TelegramBotService(
         }
 
         var dueCardResponse = await cardService.GetDueCardAsync(new GetDueCardRequest { UserId = response.User.Id }, cancellationToken: cancellationToken);
-        if (dueCardResponse != null)
+        if (dueCardResponse.Card is not null)
         {
             var text = BuildTrainingMessage(dueCardResponse.Card, response.User.HideTranslations);
             var keyboard = new InlineKeyboardMarkup([

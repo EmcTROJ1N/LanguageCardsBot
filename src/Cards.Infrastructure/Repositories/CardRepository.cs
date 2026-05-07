@@ -10,12 +10,31 @@ public class CardRepository(CardsMysqlDbContext dbContext): AbstractCrudReposito
 {
     public Task<CardEntity?> GetDueCardAsync(int userId, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var now = DateTime.UtcNow;
+
+        return dbContext.Set<CardEntity>()
+            .Where(x => x.UserId == userId &&
+                        !x.Learned &&
+                        (x.NextReviewAt == null || x.NextReviewAt <= now))
+            .OrderBy(x => x.NextReviewAt ?? DateTime.MinValue)
+            .ThenBy(x => x.CreatedAt)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public Task<CardEntity?> GetRandomActiveCardAsync(int userId, CancellationToken cancellationToken = default)
+    public async Task<CardEntity?> GetRandomActiveCardAsync(int userId, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var query = dbContext.Set<CardEntity>()
+            .Where(x => x.UserId == userId && !x.Learned)
+            .OrderBy(x => x.Id);
+
+        var count = await query.CountAsync(cancellationToken);
+        if (count == 0)
+            return null;
+
+        var offset = Random.Shared.Next(count);
+        return await query
+            .Skip(offset)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
     public async Task<IEnumerable<CardEntity>> GetAllByUserIdAsync(

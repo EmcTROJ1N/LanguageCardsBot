@@ -27,6 +27,7 @@ public class UserRepository(CardsMysqlDbContext dbContext): AbstractCrudReposito
         user = new UserEntity
         {
             ChatId = chatId,
+            CreatedAt = DateTime.UtcNow,
             Username = username
         };
 
