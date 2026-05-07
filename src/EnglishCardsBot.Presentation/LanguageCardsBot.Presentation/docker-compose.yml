@@ -1,0 +1,24 @@
+services:
+  language-cards-bot:
+    build:
+      context: ../../..
+      dockerfile: src/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation/Dockerfile
+    container_name: language_cards_bot
+    restart: unless-stopped
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+      Bot__DailySummaryTime: ${BOT_DAILY_SUMMARY_TIME:-21:00:00}
+      Database__ConnectionString: ${DATABASE_CONNECTION_STRING:-Data Source=data/bot.db}
+      Grpc__CardsServiceUrl: ${GRPC_CARDS_SERVICE_URL:-http://cards-presentation:8080}
+    volumes:
+      - language-cards-bot-data:/app/data
+    networks:
+      - shared-grpc
+
+networks:
+  shared-grpc:
+    name: language-cards-shared
+    external: true
+
+volumes:
+  language-cards-bot-data:
