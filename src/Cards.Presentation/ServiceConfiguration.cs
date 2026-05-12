@@ -1,6 +1,7 @@
 using Cards.Infrastructure.Data;
 using Cards.Infrastructure.Interfaces;
 using Cards.Infrastructure.Repositories;
+using Cards.Presentation.Interceptors;
 using Cards.Presentation.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,7 +25,7 @@ public static class ServiceConfiguration
     
     public static IServiceCollection AddGrpcServices(this IServiceCollection services)
     {
-        services.AddGrpc();
+        services.AddGrpc(options => options.Interceptors.Add<GrpcExceptionInterceptor>());
         services.AddHttpClient(nameof(GoogleTranslationService));
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ICardRepository, CardRepository>();

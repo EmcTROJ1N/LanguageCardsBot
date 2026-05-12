@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+
+        <IsPackable>true</IsPackable>
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+
+        <PackageId>LanguageCardsBot.Contracts.Common</PackageId>
+        <Version>1.0.0</Version>
+        <Authors>EmcTROJ1N team</Authors>
+        <Description>Shared gRPC error codes and typed exceptions for LanguageCardsBot services</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RootNamespace>LanguageCardsBot.Common</RootNamespace>
+    </PropertyGroup>
+
+</Project>
