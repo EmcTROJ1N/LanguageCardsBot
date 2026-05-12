@@ -15,13 +15,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cards.Presentation", "src\C
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Contracts", "Contracts", "{8DA74031-7644-4DB2-9DEF-73E3578597BF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LanguageCardsBot.Contracts.Cards", "src\LanguageCardsBot.Contracts.Cards\LanguageCardsBot.Contracts.Cards.csproj", "{FA073BF0-5F29-4CE6-9309-037450B6AF06}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts.Cards", "src\Contracts.Cards\Contracts.Cards.csproj", "{FA073BF0-5F29-4CE6-9309-037450B6AF06}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cards.Domain", "src\Cards.Domain\Cards.Domain.csproj", "{408CE933-46B8-4C99-8031-665A47F352E4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cards.Infrastructure", "src\Cards.Infrastructure\Cards.Infrastructure.csproj", "{A77AF37E-3744-4F6C-A21C-20087B723F8C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LanguageCardsBot.Contracts.Common", "src\LanguageCardsBot.Contracts.Common\LanguageCardsBot.Contracts.Common.csproj", "{6E2B498E-B95F-418D-AD0B-B378B408BB98}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts.Common", "src\Contracts.Common\Contracts.Common.csproj", "{6E2B498E-B95F-418D-AD0B-B378B408BB98}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

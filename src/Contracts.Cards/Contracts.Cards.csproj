@@ -9,7 +9,7 @@
         <IncludeBuildOutput>false</IncludeBuildOutput>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 
-        <PackageId>LanguageCardsBot.Contracts.Cards</PackageId>
+        <PackageId>Contracts.Cards</PackageId>
         <Version>3.0.1</Version>
         <Authors>EmcTROJ1N team</Authors>
         <Description>Shared gRPC contracts</Description>

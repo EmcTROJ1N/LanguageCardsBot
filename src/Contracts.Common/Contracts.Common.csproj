@@ -8,7 +8,7 @@
         <IsPackable>true</IsPackable>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 
-        <PackageId>LanguageCardsBot.Contracts.Common</PackageId>
+        <PackageId>Contracts.Common</PackageId>
         <Version>1.0.0</Version>
         <Authors>EmcTROJ1N team</Authors>
         <Description>Shared gRPC error codes and typed exceptions for LanguageCardsBot services</Description>
