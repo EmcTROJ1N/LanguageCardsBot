@@ -1,7 +1,7 @@
+using Cards.Application.Abstractions.Repositories;
 using Cards.Domain.Entities;
 using Cards.Infrastructure.Common.Abstractions;
 using Cards.Infrastructure.Data;
-using Cards.Infrastructure.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cards.Infrastructure.Repositories;

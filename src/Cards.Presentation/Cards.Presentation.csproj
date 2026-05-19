@@ -91,6 +91,7 @@
   </ItemGroup> 
 
   <ItemGroup>
+    <ProjectReference Include="..\Cards.Application\Cards.Application.csproj" />
     <ProjectReference Include="..\Cards.Domain\Cards.Domain.csproj" />
     <ProjectReference Include="..\Cards.Infrastructure\Cards.Infrastructure.csproj" />
   </ItemGroup> 
