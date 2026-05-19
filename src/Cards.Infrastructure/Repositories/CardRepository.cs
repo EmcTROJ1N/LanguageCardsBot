@@ -6,8 +6,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Cards.Infrastructure.Repositories;
 
+/// <summary>
+/// Provides EF Core persistence operations for cards.
+/// </summary>
 public class CardRepository(CardsMysqlDbContext dbContext): AbstractCrudRepository<CardEntity>(dbContext), ICardRepository
 {
+    /// <inheritdoc />
     public Task<CardEntity?> GetDueCardAsync(int userId, CancellationToken cancellationToken = default)
     {
         var now = DateTime.UtcNow;
@@ -21,6 +25,7 @@ public class CardRepository(CardsMysqlDbContext dbContext): AbstractCrudReposito
             .FirstOrDefaultAsync(cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<CardEntity?> GetRandomActiveCardAsync(int userId, CancellationToken cancellationToken = default)
     {
         var query = dbContext.Set<CardEntity>()
@@ -37,6 +42,7 @@ public class CardRepository(CardsMysqlDbContext dbContext): AbstractCrudReposito
             .FirstOrDefaultAsync(cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<CardEntity>> GetAllByUserIdAsync(
         int userId,
         CancellationToken cancellationToken = default)
@@ -46,6 +52,7 @@ public class CardRepository(CardsMysqlDbContext dbContext): AbstractCrudReposito
             .ToListAsync(cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<int> DeleteAllByUserIdAsync(
         int userId,
         CancellationToken cancellationToken = default)

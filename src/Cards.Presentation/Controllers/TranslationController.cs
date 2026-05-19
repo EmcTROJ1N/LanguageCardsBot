@@ -5,11 +5,17 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Cards.Presentation.Controllers;
 
+/// <summary>
+/// Exposes translation use cases through the public REST API.
+/// </summary>
 [ApiController]
 [Route("api/cards/v3/translation")]
 public sealed class TranslationController(ITranslationApplicationService translationApplicationService)
     : ControllerBase
 {
+    /// <summary>
+    /// Translates a term into the configured target language.
+    /// </summary>
     [HttpPost]
     public async Task<ActionResult<TranslateResponseDto>> Translate(
         TranslateRequestDto request,

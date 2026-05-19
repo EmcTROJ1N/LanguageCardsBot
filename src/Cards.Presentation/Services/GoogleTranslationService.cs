@@ -5,9 +5,15 @@ using LanguageCardsBot.Contracts.Cards.V3;
 
 namespace Cards.Presentation.Services;
 
+/// <summary>
+/// Adapts translation gRPC requests to the shared translation application use case.
+/// </summary>
 public sealed class GoogleTranslationService(ITranslationApplicationService translationApplicationService)
     : TranslationService.TranslationServiceBase
 {
+    /// <summary>
+    /// Handles a gRPC request to translate a term.
+    /// </summary>
     public override async Task<TranslateResponse> Translate(TranslateRequest request, ServerCallContext context)
     {
         try

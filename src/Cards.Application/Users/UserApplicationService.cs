@@ -3,18 +3,24 @@ using Cards.Domain.Entities;
 
 namespace Cards.Application.Users;
 
+/// <summary>
+/// Implements user use cases shared by gRPC and REST transports.
+/// </summary>
 public sealed class UserApplicationService(IUserRepository userRepository) : IUserApplicationService
 {
+    /// <inheritdoc />
     public Task<UserEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         return userRepository.GetByIdAsync(id, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyCollection<UserEntity>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return (await userRepository.GetAllAsync(cancellationToken)).ToList();
     }
 
+    /// <inheritdoc />
     public async Task<UserEntity> AddAsync(UserCommand command, CancellationToken cancellationToken = default)
     {
         var user = new UserEntity
@@ -31,6 +37,7 @@ public sealed class UserApplicationService(IUserRepository userRepository) : IUs
         return await userRepository.AddAsync(user, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<bool> UpdateAsync(UserCommand command, CancellationToken cancellationToken = default)
     {
         var existingUser = await userRepository.GetByIdAsync(command.Id, cancellationToken);
@@ -47,6 +54,7 @@ public sealed class UserApplicationService(IUserRepository userRepository) : IUs
         return true;
     }
 
+    /// <inheritdoc />
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
     {
         var user = await userRepository.GetByIdAsync(id, cancellationToken);
@@ -57,11 +65,13 @@ public sealed class UserApplicationService(IUserRepository userRepository) : IUs
         return true;
     }
 
+    /// <inheritdoc />
     public Task<UserEntity?> GetByChatIdAsync(long chatId, CancellationToken cancellationToken = default)
     {
         return userRepository.GetByChatIdAsync(chatId, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task<UserEntity> GetOrCreateAsync(
         long chatId,
         string? username,
@@ -70,6 +80,7 @@ public sealed class UserApplicationService(IUserRepository userRepository) : IUs
         return userRepository.GetOrCreateAsync(chatId, NormalizeUsername(username), cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<UserEntity> GetOrCreateAndSyncUsernameAsync(
         long chatId,
         string? username,
@@ -87,6 +98,7 @@ public sealed class UserApplicationService(IUserRepository userRepository) : IUs
         return user;
     }
 
+    /// <inheritdoc />
     public async Task<bool> UpdateNextReminderAtUtcAsync(
         int userId,
         DateTime? nextReminderAtUtc,
@@ -101,16 +113,25 @@ public sealed class UserApplicationService(IUserRepository userRepository) : IUs
         return true;
     }
 
+    /// <summary>
+    /// Converts blank usernames to null and trims real usernames.
+    /// </summary>
     private static string? NormalizeUsername(string? username)
     {
         return string.IsNullOrWhiteSpace(username) ? null : username.Trim();
     }
 
+    /// <summary>
+    /// Converts nullable date-time values to UTC.
+    /// </summary>
     private static DateTime? ToUtc(DateTime? value)
     {
         return value.HasValue ? ToUtc(value.Value) : null;
     }
 
+    /// <summary>
+    /// Converts a date-time value to UTC without changing unspecified values semantically.
+    /// </summary>
     private static DateTime ToUtc(DateTime value)
     {
         return value.Kind switch

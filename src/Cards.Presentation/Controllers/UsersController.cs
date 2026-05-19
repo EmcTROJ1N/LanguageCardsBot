@@ -4,10 +4,16 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Cards.Presentation.Controllers;
 
+/// <summary>
+/// Exposes user use cases through the public REST API.
+/// </summary>
 [ApiController]
 [Route("api/cards/v3/users")]
 public sealed class UsersController(IUserApplicationService userApplicationService) : ControllerBase
 {
+    /// <summary>
+    /// Gets a user by its identifier.
+    /// </summary>
     [HttpGet("{id:int}")]
     public async Task<ActionResult<GetUserResponseDto>> GetById(
         int id,
@@ -17,6 +23,9 @@ public sealed class UsersController(IUserApplicationService userApplicationServi
         return Ok(new GetUserResponseDto(user?.ToDto()));
     }
 
+    /// <summary>
+    /// Gets all users.
+    /// </summary>
     [HttpGet]
     public async Task<ActionResult<GetUsersResponseDto>> GetAll(CancellationToken cancellationToken)
     {
@@ -24,6 +33,9 @@ public sealed class UsersController(IUserApplicationService userApplicationServi
         return Ok(new GetUsersResponseDto(users.Select(x => x.ToDto()).ToList()));
     }
 
+    /// <summary>
+    /// Gets a user by Telegram chat identifier.
+    /// </summary>
     [HttpGet("by-chat/{chatId:long}")]
     public async Task<ActionResult<GetUserResponseDto>> GetByChatId(
         long chatId,
@@ -33,6 +45,9 @@ public sealed class UsersController(IUserApplicationService userApplicationServi
         return Ok(new GetUserResponseDto(user?.ToDto()));
     }
 
+    /// <summary>
+    /// Adds a user.
+    /// </summary>
     [HttpPost]
     public async Task<ActionResult<UserResponseDto>> Add(
         UserRequestDto request,
@@ -42,6 +57,9 @@ public sealed class UsersController(IUserApplicationService userApplicationServi
         return Ok(new UserResponseDto(user.ToDto()));
     }
 
+    /// <summary>
+    /// Updates an existing user.
+    /// </summary>
     [HttpPut("{id:int}")]
     public async Task<ActionResult<UpdateUserResponseDto>> Update(
         int id,
@@ -52,6 +70,9 @@ public sealed class UsersController(IUserApplicationService userApplicationServi
         return Ok(new UpdateUserResponseDto(updated));
     }
 
+    /// <summary>
+    /// Deletes a user by its identifier.
+    /// </summary>
     [HttpDelete("{id:int}")]
     public async Task<ActionResult<DeleteUserResponseDto>> Delete(
         int id,
@@ -61,6 +82,9 @@ public sealed class UsersController(IUserApplicationService userApplicationServi
         return Ok(new DeleteUserResponseDto(deleted));
     }
 
+    /// <summary>
+    /// Gets an existing user by chat identifier or creates one.
+    /// </summary>
     [HttpPost("get-or-create")]
     public async Task<ActionResult<UserResponseDto>> GetOrCreate(
         GetOrCreateUserRequestDto request,
@@ -74,6 +98,9 @@ public sealed class UsersController(IUserApplicationService userApplicationServi
         return Ok(new UserResponseDto(user.ToDto()));
     }
 
+    /// <summary>
+    /// Gets or creates a user and synchronizes the stored username.
+    /// </summary>
     [HttpPost("get-or-create-and-sync-username")]
     public async Task<ActionResult<UserResponseDto>> GetOrCreateAndSyncUsername(
         GetOrCreateUserRequestDto request,
@@ -87,6 +114,9 @@ public sealed class UsersController(IUserApplicationService userApplicationServi
         return Ok(new UserResponseDto(user.ToDto()));
     }
 
+    /// <summary>
+    /// Updates the next reminder timestamp for a user.
+    /// </summary>
     [HttpPatch("{userId:int}/next-reminder")]
     public async Task<ActionResult<UpdateNextReminderAtUtcResponseDto>> UpdateNextReminderAtUtc(
         int userId,
@@ -102,6 +132,9 @@ public sealed class UsersController(IUserApplicationService userApplicationServi
     }
 
     //TODO: use mapster
+    /// <summary>
+    /// Converts a REST user request to an application command.
+    /// </summary>
     private static UserCommand ToCommand(int id, UserRequestDto request)
     {
         return new UserCommand(

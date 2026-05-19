@@ -4,10 +4,16 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Cards.Presentation.Controllers;
 
+/// <summary>
+/// Exposes card use cases through the public REST API.
+/// </summary>
 [ApiController]
 [Route("api/cards/v3/cards")]
 public sealed class CardsController(ICardApplicationService cardApplicationService) : ControllerBase
 {
+    /// <summary>
+    /// Gets a card by its identifier.
+    /// </summary>
     [HttpGet("{id:int}")]
     public async Task<ActionResult<GetCardResponseDto>> GetById(
         int id,
@@ -17,6 +23,9 @@ public sealed class CardsController(ICardApplicationService cardApplicationServi
         return Ok(new GetCardResponseDto(card?.ToDto()));
     }
 
+    /// <summary>
+    /// Gets all cards.
+    /// </summary>
     [HttpGet]
     public async Task<ActionResult<GetCardsResponseDto>> GetAll(CancellationToken cancellationToken)
     {
@@ -24,6 +33,9 @@ public sealed class CardsController(ICardApplicationService cardApplicationServi
         return Ok(new GetCardsResponseDto(cards.Select(x => x.ToDto()).ToList()));
     }
 
+    /// <summary>
+    /// Gets all cards owned by a user.
+    /// </summary>
     [HttpGet("by-user/{userId:int}")]
     public async Task<ActionResult<GetCardsResponseDto>> GetByUserId(
         int userId,
@@ -33,6 +45,9 @@ public sealed class CardsController(ICardApplicationService cardApplicationServi
         return Ok(new GetCardsResponseDto(cards.Select(x => x.ToDto()).ToList()));
     }
 
+    /// <summary>
+    /// Gets the next card due for review for a user.
+    /// </summary>
     [HttpGet("due/{userId:int}")]
     public async Task<ActionResult<GetCardResponseDto>> GetDueCard(
         int userId,
@@ -42,6 +57,9 @@ public sealed class CardsController(ICardApplicationService cardApplicationServi
         return Ok(new GetCardResponseDto(card?.ToDto()));
     }
 
+    /// <summary>
+    /// Adds a card for a user.
+    /// </summary>
     [HttpPost]
     public async Task<ActionResult<CardResponseDto>> Add(
         AddCardRequestDto request,
@@ -59,6 +77,9 @@ public sealed class CardsController(ICardApplicationService cardApplicationServi
         return Ok(new CardResponseDto(card.ToDto()));
     }
 
+    /// <summary>
+    /// Updates editable fields for a card.
+    /// </summary>
     [HttpPut("{id:int}")]
     public async Task<ActionResult<UpdateCardResponseDto>> Update(
         int id,
@@ -79,6 +100,9 @@ public sealed class CardsController(ICardApplicationService cardApplicationServi
         return Ok(new UpdateCardResponseDto(updated));
     }
 
+    /// <summary>
+    /// Records a review result for a card.
+    /// </summary>
     [HttpPost("{cardId:int}/review")]
     public async Task<ActionResult<UpdateCardReviewResponseDto>> UpdateCardReview(
         int cardId,
@@ -93,6 +117,9 @@ public sealed class CardsController(ICardApplicationService cardApplicationServi
         return Ok(new UpdateCardReviewResponseDto(updated));
     }
 
+    /// <summary>
+    /// Deletes a card by its identifier.
+    /// </summary>
     [HttpDelete("{id:int}")]
     public async Task<ActionResult<DeleteCardResponseDto>> DeleteById(
         int id,
@@ -102,6 +129,9 @@ public sealed class CardsController(ICardApplicationService cardApplicationServi
         return Ok(new DeleteCardResponseDto(deleted));
     }
 
+    /// <summary>
+    /// Deletes all cards owned by a user.
+    /// </summary>
     [HttpDelete("by-user/{userId:int}")]
     public async Task<ActionResult<DeleteCardsByUserIdResponseDto>> DeleteByUserId(
         int userId,

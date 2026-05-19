@@ -6,8 +6,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Cards.Infrastructure.Repositories;
 
+/// <summary>
+/// Provides EF Core persistence operations for reviews.
+/// </summary>
 public class ReviewRepository(CardsMysqlDbContext context): AbstractCrudRepository<ReviewEntity>(context), IReviewRepository
 {
+    /// <inheritdoc />
     public async Task<IEnumerable<ReviewEntity>> GetTodayReviewsByUserIdAsync(int userId, CancellationToken cancellationToken = default)
     {
         var todayStart = DateTime.UtcNow.Date;
@@ -20,6 +24,7 @@ public class ReviewRepository(CardsMysqlDbContext context): AbstractCrudReposito
             .ToListAsync(cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<(int Total, int Correct)> GetTodayStatsByUserIdAsync(int userId, CancellationToken cancellationToken = default)
     {
         var todayStart = DateTime.UtcNow.Date;
@@ -41,6 +46,7 @@ public class ReviewRepository(CardsMysqlDbContext context): AbstractCrudReposito
         return (total, correct);
     }
 
+    /// <inheritdoc />
     public async Task<(string? BestDay, int BestCount)> GetBestDayStatsByUserIdAsync(int userId, CancellationToken cancellationToken = default)
     {
         var best = await context.Set<ReviewEntity>()

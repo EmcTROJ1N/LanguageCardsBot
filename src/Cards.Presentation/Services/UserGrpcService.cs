@@ -4,8 +4,14 @@ using LanguageCardsBot.Contracts.Cards.V3;
 
 namespace Cards.Presentation.Services;
 
+/// <summary>
+/// Adapts user gRPC requests to shared user application use cases.
+/// </summary>
 public sealed class UserGrpcService(IUserApplicationService userApplicationService) : UserService.UserServiceBase
 {
+    /// <summary>
+    /// Handles a gRPC request to get a user by identifier.
+    /// </summary>
     public override async Task<GetUserResponse> GetById(GetUserByIdRequest request, ServerCallContext context)
     {
         var user = await userApplicationService.GetByIdAsync(request.Id, context.CancellationToken);
@@ -14,6 +20,9 @@ public sealed class UserGrpcService(IUserApplicationService userApplicationServi
             : new GetUserResponse { User = user.ToGrpcUser() };
     }
 
+    /// <summary>
+    /// Handles a gRPC request to get all users.
+    /// </summary>
     public override async Task<GetAllUsersResponse> GetAll(GetAllUsersRequest request, ServerCallContext context)
     {
         var response = new GetAllUsersResponse();
@@ -22,24 +31,36 @@ public sealed class UserGrpcService(IUserApplicationService userApplicationServi
         return response;
     }
 
+    /// <summary>
+    /// Handles a gRPC request to add a user.
+    /// </summary>
     public override async Task<UserResponse> Add(AddUserRequest request, ServerCallContext context)
     {
         var user = await userApplicationService.AddAsync(ToCommand(request.User), context.CancellationToken);
         return new UserResponse { User = user.ToGrpcUser() };
     }
 
+    /// <summary>
+    /// Handles a gRPC request to update a user.
+    /// </summary>
     public override async Task<UpdateUserResponse> Update(UpdateUserRequest request, ServerCallContext context)
     {
         var updated = await userApplicationService.UpdateAsync(ToCommand(request.User), context.CancellationToken);
         return new UpdateUserResponse { Updated = updated };
     }
 
+    /// <summary>
+    /// Handles a gRPC request to delete a user.
+    /// </summary>
     public override async Task<DeleteUserResponse> Delete(DeleteUserRequest request, ServerCallContext context)
     {
         var deleted = await userApplicationService.DeleteAsync(request.User.Id, context.CancellationToken);
         return new DeleteUserResponse { Deleted = deleted };
     }
 
+    /// <summary>
+    /// Handles a gRPC request to get a user by Telegram chat identifier.
+    /// </summary>
     public override async Task<GetUserResponse> GetByChatId(GetUserByChatIdRequest request, ServerCallContext context)
     {
         var user = await userApplicationService.GetByChatIdAsync(request.ChatId, context.CancellationToken);
@@ -48,6 +69,9 @@ public sealed class UserGrpcService(IUserApplicationService userApplicationServi
             : new GetUserResponse { User = user.ToGrpcUser() };
     }
 
+    /// <summary>
+    /// Handles a gRPC request to get or create a user.
+    /// </summary>
     public override async Task<UserResponse> GetOrCreate(GetOrCreateUserRequest request, ServerCallContext context)
     {
         var user = await userApplicationService.GetOrCreateAsync(
@@ -58,6 +82,9 @@ public sealed class UserGrpcService(IUserApplicationService userApplicationServi
         return new UserResponse { User = user.ToGrpcUser() };
     }
 
+    /// <summary>
+    /// Handles a gRPC request to get or create a user and synchronize username.
+    /// </summary>
     public override async Task<UserResponse> GetOrCreateAndSyncUsername(GetOrCreateAndSyncUsernameRequest request, ServerCallContext context)
     {
         var user = await userApplicationService.GetOrCreateAndSyncUsernameAsync(
@@ -68,6 +95,9 @@ public sealed class UserGrpcService(IUserApplicationService userApplicationServi
         return new UserResponse { User = user.ToGrpcUser() };
     }
 
+    /// <summary>
+    /// Handles a gRPC request to update a user's next reminder timestamp.
+    /// </summary>
     public override async Task<UpdateNextReminderAtUtcResponse> UpdateNextReminderAtUtc(UpdateNextReminderAtUtcRequest request, ServerCallContext context)
     {
         var updated = await userApplicationService.UpdateNextReminderAtUtcAsync(
@@ -78,6 +108,9 @@ public sealed class UserGrpcService(IUserApplicationService userApplicationServi
         return new UpdateNextReminderAtUtcResponse { Updated = updated };
     }
 
+    /// <summary>
+    /// Converts a gRPC user contract to an application command.
+    /// </summary>
     private static UserCommand ToCommand(User user)
     {
         return new UserCommand(

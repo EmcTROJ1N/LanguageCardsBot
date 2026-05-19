@@ -6,14 +6,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Cards.Infrastructure.Repositories;
 
+/// <summary>
+/// Provides EF Core persistence operations for users.
+/// </summary>
 public class UserRepository(CardsMysqlDbContext dbContext): AbstractCrudRepository<UserEntity>(dbContext), IUserRepository
 {
+    /// <inheritdoc />
     public Task<UserEntity?> GetByChatIdAsync(long chatId, CancellationToken cancellationToken = default)
     {
         return dbContext.Set<UserEntity>()
             .FirstOrDefaultAsync(x => x.ChatId == chatId, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<UserEntity> GetOrCreateAsync(
         long chatId,
         string? username,

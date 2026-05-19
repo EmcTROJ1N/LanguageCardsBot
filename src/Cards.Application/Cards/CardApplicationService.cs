@@ -4,20 +4,26 @@ using Cards.Domain.ValueObjects;
 
 namespace Cards.Application.Cards;
 
+/// <summary>
+/// Implements card use cases shared by gRPC and REST transports.
+/// </summary>
 public sealed class CardApplicationService(
     ICardRepository cardRepository,
     IReviewRepository reviewRepository) : ICardApplicationService
 {
+    /// <inheritdoc />
     public Task<CardEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         return cardRepository.GetByIdAsync(id, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyCollection<CardEntity>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return (await cardRepository.GetAllAsync(cancellationToken)).ToList();
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyCollection<CardEntity>> GetByUserIdAsync(
         int userId,
         CancellationToken cancellationToken = default)
@@ -25,11 +31,13 @@ public sealed class CardApplicationService(
         return (await cardRepository.GetAllByUserIdAsync(userId, cancellationToken)).ToList();
     }
 
+    /// <inheritdoc />
     public Task<CardEntity?> GetDueCardAsync(int userId, CancellationToken cancellationToken = default)
     {
         return cardRepository.GetDueCardAsync(userId, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<CardEntity> AddAsync(AddCardCommand command, CancellationToken cancellationToken = default)
     {
         var term = (command.Term ?? string.Empty).Trim();
@@ -60,6 +68,7 @@ public sealed class CardApplicationService(
         return await cardRepository.AddAsync(card, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<bool> UpdateAsync(UpdateCardCommand command, CancellationToken cancellationToken = default)
     {
         var card = await cardRepository.GetByIdAsync(command.Id, cancellationToken);
@@ -86,6 +95,7 @@ public sealed class CardApplicationService(
         return true;
     }
 
+    /// <inheritdoc />
     public async Task<bool> UpdateReviewAsync(
         int cardId,
         bool isCorrect,
@@ -101,6 +111,7 @@ public sealed class CardApplicationService(
         return true;
     }
 
+    /// <inheritdoc />
     public async Task<bool> DeleteByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var card = await cardRepository.GetByIdAsync(id, cancellationToken);
@@ -111,6 +122,7 @@ public sealed class CardApplicationService(
         return true;
     }
 
+    /// <inheritdoc />
     public async Task<bool> DeleteByUserIdAsync(int userId, CancellationToken cancellationToken = default)
     {
         var deleted = await cardRepository.DeleteAllByUserIdAsync(userId, cancellationToken);

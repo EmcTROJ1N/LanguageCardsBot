@@ -12,8 +12,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Cards.Presentation;
 
+/// <summary>
+/// Registers cards service dependencies and transport endpoints.
+/// </summary>
 public static class ServiceConfiguration
 {
+    /// <summary>
+    /// Registers the MySQL EF Core database context.
+    /// </summary>
     public static IServiceCollection AddDbContext(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = GetConnectionString(configuration);
@@ -28,12 +34,18 @@ public static class ServiceConfiguration
     }
     
     
+    /// <summary>
+    /// Registers gRPC services and interceptors.
+    /// </summary>
     public static IServiceCollection AddGrpcServices(this IServiceCollection services)
     {
         services.AddGrpc(options => options.Interceptors.Add<GrpcExceptionInterceptor>());
         return services;
     }
 
+    /// <summary>
+    /// Registers infrastructure repository implementations.
+    /// </summary>
     public static IServiceCollection AddCardsInfrastructure(this IServiceCollection services)
     {
         services.AddScoped<IUserRepository, UserRepository>();
@@ -42,6 +54,9 @@ public static class ServiceConfiguration
         return services;
     }
 
+    /// <summary>
+    /// Registers application services shared by REST and gRPC transports.
+    /// </summary>
     public static IServiceCollection AddCardsApplicationServices(
         this IServiceCollection services,
         IConfiguration configuration)
@@ -56,6 +71,9 @@ public static class ServiceConfiguration
         return services;
     }
 
+    /// <summary>
+    /// Maps all cards gRPC services.
+    /// </summary>
     public static WebApplication MapGrpcServices(this WebApplication app)
     {
         app.MapGrpcService<CardsImportGrpcService>();
@@ -66,6 +84,9 @@ public static class ServiceConfiguration
         return app;
     }
     
+    /// <summary>
+    /// Resolves the cards database connection string from configuration or environment variables.
+    /// </summary>
     private static string GetConnectionString(IConfiguration configuration)
     {
         var values = new[]
@@ -79,6 +100,9 @@ public static class ServiceConfiguration
                ?? throw new InvalidOperationException("Connection string is not configured.");
     }
 
+    /// <summary>
+    /// Creates translation options from configuration or environment variables.
+    /// </summary>
     private static TranslationOptions CreateTranslationOptions(IConfiguration configuration)
     {
         var targetLanguage = configuration["Translation:TargetLanguage"]

@@ -3,11 +3,15 @@ using Cards.Application.Cards;
 
 namespace Cards.Application.Imports;
 
+/// <summary>
+/// Implements JSON card import use cases.
+/// </summary>
 public sealed class CardsImportApplicationService(ICardApplicationService cardApplicationService)
     : ICardsImportApplicationService
 {
     private const int MaxCards = 5000;
 
+    /// <inheritdoc />
     public async Task<ImportCardsFromJsonResult> ImportCardsFromJsonAsync(
         string json,
         int userId,
@@ -103,6 +107,9 @@ public sealed class CardsImportApplicationService(ICardApplicationService cardAp
             errors);
     }
 
+    /// <summary>
+    /// Parses supported JSON import payload shapes.
+    /// </summary>
     private static ImportPayload? TryParseImportPayload(string json)
     {
         var options = new JsonSerializerOptions
@@ -158,6 +165,9 @@ public sealed class CardsImportApplicationService(ICardApplicationService cardAp
         return null;
     }
 
+    /// <summary>
+    /// Represents the supported top-level card import JSON payload.
+    /// </summary>
     private sealed class ImportPayload
     {
         public string? Version { get; set; }
@@ -166,6 +176,9 @@ public sealed class CardsImportApplicationService(ICardApplicationService cardAp
         public List<ImportCardPayload> Cards { get; set; } = [];
     }
 
+    /// <summary>
+    /// Represents a card row inside an import payload.
+    /// </summary>
     private sealed class ImportCardPayload
     {
         public string? Term { get; set; }

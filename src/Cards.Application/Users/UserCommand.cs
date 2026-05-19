@@ -1,5 +1,8 @@
 namespace Cards.Application.Users;
 
+/// <summary>
+/// Represents user fields accepted by user mutation use cases.
+/// </summary>
 public sealed record UserCommand(
     int Id,
     long ChatId,

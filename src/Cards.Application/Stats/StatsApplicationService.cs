@@ -2,10 +2,14 @@ using Cards.Application.Abstractions.Repositories;
 
 namespace Cards.Application.Stats;
 
+/// <summary>
+/// Implements statistics use cases for cards and reviews.
+/// </summary>
 public sealed class StatsApplicationService(
     ICardRepository cardRepository,
     IReviewRepository reviewRepository) : IStatsApplicationService
 {
+    /// <inheritdoc />
     public async Task<TodayStatsResult> GetTodayStatsAsync(
         int userId,
         CancellationToken cancellationToken = default)

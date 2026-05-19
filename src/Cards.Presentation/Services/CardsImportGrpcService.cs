@@ -4,9 +4,15 @@ using LanguageCardsBot.Contracts.Cards.V3;
 
 namespace Cards.Presentation.Services;
 
+/// <summary>
+/// Adapts card import gRPC requests to shared import application use cases.
+/// </summary>
 public class CardsImportGrpcService(ICardsImportApplicationService cardsImportApplicationService)
     : CardsImportService.CardsImportServiceBase
 {
+    /// <summary>
+    /// Handles a gRPC request to import cards from a JSON document.
+    /// </summary>
     public override async Task<ImportCardsFromJsonResponse> ImportCardsFromJson(
         ImportCardsFromJsonRequest request,
         ServerCallContext context)
@@ -36,6 +42,9 @@ public class CardsImportGrpcService(ICardsImportApplicationService cardsImportAp
         return response;
     }
 
+    /// <summary>
+    /// Converts an application operation error to the gRPC contract type.
+    /// </summary>
     private static OperationError ToGrpcOperationError(OperationErrorResult error)
     {
         var operationError = new OperationError

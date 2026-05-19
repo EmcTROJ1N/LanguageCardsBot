@@ -2,10 +2,14 @@ using System.Text.Json;
 
 namespace Cards.Application.Translations;
 
+/// <summary>
+/// Implements translation use cases through the Google Translate HTTP endpoint.
+/// </summary>
 public sealed class GoogleTranslationApplicationService(
     HttpClient httpClient,
     TranslationOptions options) : ITranslationApplicationService
 {
+    /// <inheritdoc />
     public async Task<TranslationResult> TranslateAsync(
         string term,
         CancellationToken cancellationToken = default)
@@ -31,6 +35,9 @@ public sealed class GoogleTranslationApplicationService(
             string.Empty);
     }
 
+    /// <summary>
+    /// Extracts translated text from the provider response payload.
+    /// </summary>
     private static string ParseTranslation(string json)
     {
         using var document = JsonDocument.Parse(json);
