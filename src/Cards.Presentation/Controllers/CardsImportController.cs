@@ -1,5 +1,6 @@
 using Cards.Application.Imports;
 using Cards.Presentation.Contracts;
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cards.Presentation.Controllers;
@@ -8,7 +9,7 @@ namespace Cards.Presentation.Controllers;
 /// Exposes card import use cases through the public REST API.
 /// </summary>
 [ApiController]
-[Route("api/cards/v3/import")]
+[Route("import")]
 public sealed class CardsImportController(ICardsImportApplicationService cardsImportApplicationService) : ControllerBase
 {
     /// <summary>
@@ -24,6 +25,6 @@ public sealed class CardsImportController(ICardsImportApplicationService cardsIm
             request.UserId,
             cancellationToken);
 
-        return Ok(result.ToDto());
+        return Ok(result.Adapt<ImportCardsFromJsonResponseDto>());
     }
 }

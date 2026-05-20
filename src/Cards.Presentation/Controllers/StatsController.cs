@@ -1,5 +1,6 @@
 using Cards.Application.Stats;
 using Cards.Presentation.Contracts;
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cards.Presentation.Controllers;
@@ -20,6 +21,6 @@ public sealed class StatsController(IStatsApplicationService statsApplicationSer
         CancellationToken cancellationToken)
     {
         var stats = await statsApplicationService.GetTodayStatsAsync(userId, cancellationToken);
-        return Ok(new GetTodayStatsResponseDto(stats.ToDto()));
+        return Ok(new GetTodayStatsResponseDto(stats.Adapt<TodayStatsDto>()));
     }
 }

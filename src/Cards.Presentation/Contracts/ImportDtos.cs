@@ -1,5 +1,3 @@
-using Cards.Application.Imports;
-
 namespace Cards.Presentation.Contracts;
 
 /// <summary>
@@ -34,27 +32,3 @@ public sealed record ImportCardsFromJsonResponseDto(
     bool IsSuccess,
     CardsImportDataDto? Data,
     IReadOnlyCollection<OperationErrorDto> Errors);
-
-/// <summary>
-/// Provides mapping helpers for REST import DTOs.
-/// </summary>
-internal static partial class ApiMappingExtensions
-{
-    /// <summary>
-    /// Converts an application import result to a REST DTO.
-    /// </summary>
-    public static ImportCardsFromJsonResponseDto ToDto(this ImportCardsFromJsonResult result)
-    {
-        return new ImportCardsFromJsonResponseDto(
-            result.IsSuccess,
-            result.Data is null
-                ? null
-                : new CardsImportDataDto(
-                    result.Data.Imported,
-                    result.Data.Skipped,
-                    result.Data.Errors),
-            result.Errors
-                .Select(x => new OperationErrorDto(x.Message, x.Code, x.Target))
-                .ToList());
-    }
-}

@@ -1,5 +1,6 @@
 using Cards.Application.Cards;
 using Cards.Presentation.Contracts;
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cards.Presentation.Controllers;
@@ -8,7 +9,7 @@ namespace Cards.Presentation.Controllers;
 /// Exposes card use cases through the public REST API.
 /// </summary>
 [ApiController]
-[Route("api/cards/v3/cards")]
+[Route("cards")]
 public sealed class CardsController(ICardApplicationService cardApplicationService) : ControllerBase
 {
     /// <summary>
@@ -20,7 +21,7 @@ public sealed class CardsController(ICardApplicationService cardApplicationServi
         CancellationToken cancellationToken)
     {
         var card = await cardApplicationService.GetByIdAsync(id, cancellationToken);
-        return Ok(new GetCardResponseDto(card?.ToDto()));
+        return Ok(new GetCardResponseDto(card?.Adapt<CardDto>()));
     }
 
     /// <summary>
@@ -30,7 +31,7 @@ public sealed class CardsController(ICardApplicationService cardApplicationServi
     public async Task<ActionResult<GetCardsResponseDto>> GetAll(CancellationToken cancellationToken)
     {
         var cards = await cardApplicationService.GetAllAsync(cancellationToken);
-        return Ok(new GetCardsResponseDto(cards.Select(x => x.ToDto()).ToList()));
+        return Ok(new GetCardsResponseDto(cards.Adapt<List<CardDto>>()));
     }
 
     /// <summary>
@@ -42,7 +43,7 @@ public sealed class CardsController(ICardApplicationService cardApplicationServi
         CancellationToken cancellationToken)
     {
         var cards = await cardApplicationService.GetByUserIdAsync(userId, cancellationToken);
-        return Ok(new GetCardsResponseDto(cards.Select(x => x.ToDto()).ToList()));
+        return Ok(new GetCardsResponseDto(cards.Adapt<List<CardDto>>()));
     }
 
     /// <summary>
@@ -54,7 +55,7 @@ public sealed class CardsController(ICardApplicationService cardApplicationServi
         CancellationToken cancellationToken)
     {
         var card = await cardApplicationService.GetDueCardAsync(userId, cancellationToken);
-        return Ok(new GetCardResponseDto(card?.ToDto()));
+        return Ok(new GetCardResponseDto(card?.Adapt<CardDto>()));
     }
 
     /// <summary>
@@ -66,15 +67,10 @@ public sealed class CardsController(ICardApplicationService cardApplicationServi
         CancellationToken cancellationToken)
     {
         var card = await cardApplicationService.AddAsync(
-            new AddCardCommand(
-                request.UserId,
-                request.Term,
-                request.Translation,
-                request.Transcription,
-                request.Example),
+            request.Adapt<AddCardCommand>(),
             cancellationToken);
 
-        return Ok(new CardResponseDto(card.ToDto()));
+        return Ok(new CardResponseDto(card.Adapt<CardDto>()));
     }
 
     /// <summary>
@@ -87,14 +83,7 @@ public sealed class CardsController(ICardApplicationService cardApplicationServi
         CancellationToken cancellationToken)
     {
         var updated = await cardApplicationService.UpdateAsync(
-            new UpdateCardCommand(
-                id,
-                request.Term,
-                request.Translation,
-                request.Transcription,
-                request.HasExample,
-                request.Example,
-                request.Learned),
+            request.Adapt<UpdateCardCommand>() with { Id = id },
             cancellationToken);
 
         return Ok(new UpdateCardResponseDto(updated));

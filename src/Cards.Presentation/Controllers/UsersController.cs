@@ -1,5 +1,6 @@
 using Cards.Application.Users;
 using Cards.Presentation.Contracts;
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cards.Presentation.Controllers;
@@ -20,7 +21,7 @@ public sealed class UsersController(IUserApplicationService userApplicationServi
         CancellationToken cancellationToken)
     {
         var user = await userApplicationService.GetByIdAsync(id, cancellationToken);
-        return Ok(new GetUserResponseDto(user?.ToDto()));
+        return Ok(new GetUserResponseDto(user?.Adapt<UserDto>()));
     }
 
     /// <summary>
@@ -30,7 +31,7 @@ public sealed class UsersController(IUserApplicationService userApplicationServi
     public async Task<ActionResult<GetUsersResponseDto>> GetAll(CancellationToken cancellationToken)
     {
         var users = await userApplicationService.GetAllAsync(cancellationToken);
-        return Ok(new GetUsersResponseDto(users.Select(x => x.ToDto()).ToList()));
+        return Ok(new GetUsersResponseDto(users.Adapt<List<UserDto>>()));
     }
 
     /// <summary>
@@ -42,7 +43,7 @@ public sealed class UsersController(IUserApplicationService userApplicationServi
         CancellationToken cancellationToken)
     {
         var user = await userApplicationService.GetByChatIdAsync(chatId, cancellationToken);
-        return Ok(new GetUserResponseDto(user?.ToDto()));
+        return Ok(new GetUserResponseDto(user?.Adapt<UserDto>()));
     }
 
     /// <summary>
@@ -53,8 +54,8 @@ public sealed class UsersController(IUserApplicationService userApplicationServi
         UserRequestDto request,
         CancellationToken cancellationToken)
     {
-        var user = await userApplicationService.AddAsync(ToCommand(0, request), cancellationToken);
-        return Ok(new UserResponseDto(user.ToDto()));
+        var user = await userApplicationService.AddAsync(request.Adapt<UserCommand>(), cancellationToken);
+        return Ok(new UserResponseDto(user.Adapt<UserDto>()));
     }
 
     /// <summary>
@@ -66,7 +67,10 @@ public sealed class UsersController(IUserApplicationService userApplicationServi
         UserRequestDto request,
         CancellationToken cancellationToken)
     {
-        var updated = await userApplicationService.UpdateAsync(ToCommand(id, request), cancellationToken);
+        var updated = await userApplicationService.UpdateAsync(
+            request.Adapt<UserCommand>() with { Id = id },
+            cancellationToken);
+
         return Ok(new UpdateUserResponseDto(updated));
     }
 
@@ -95,7 +99,7 @@ public sealed class UsersController(IUserApplicationService userApplicationServi
             request.Username,
             cancellationToken);
 
-        return Ok(new UserResponseDto(user.ToDto()));
+        return Ok(new UserResponseDto(user.Adapt<UserDto>()));
     }
 
     /// <summary>
@@ -111,7 +115,7 @@ public sealed class UsersController(IUserApplicationService userApplicationServi
             request.Username,
             cancellationToken);
 
-        return Ok(new UserResponseDto(user.ToDto()));
+        return Ok(new UserResponseDto(user.Adapt<UserDto>()));
     }
 
     /// <summary>
@@ -129,21 +133,5 @@ public sealed class UsersController(IUserApplicationService userApplicationServi
             cancellationToken);
 
         return Ok(new UpdateNextReminderAtUtcResponseDto(updated));
-    }
-
-    //TODO: use mapster
-    /// <summary>
-    /// Converts a REST user request to an application command.
-    /// </summary>
-    private static UserCommand ToCommand(int id, UserRequestDto request)
-    {
-        return new UserCommand(
-            id,
-            request.ChatId,
-            request.Username,
-            request.CreatedAt,
-            request.ReminderIntervalMinutes,
-            request.NextReminderAtUtc,
-            request.HideTranslations);
     }
 }

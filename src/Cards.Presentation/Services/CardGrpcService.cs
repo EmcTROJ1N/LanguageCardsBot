@@ -1,6 +1,7 @@
 using Cards.Application.Cards;
 using Grpc.Core;
 using LanguageCardsBot.Contracts.Cards.V3;
+using Mapster;
 
 namespace Cards.Presentation.Services;
 
@@ -17,7 +18,7 @@ public sealed class CardGrpcService(ICardApplicationService cardApplicationServi
         var card = await cardApplicationService.GetByIdAsync(request.Id, context.CancellationToken);
         return card is null
             ? new GetCardResponse()
-            : new GetCardResponse { Card = card.ToGrpcCard() };
+            : new GetCardResponse { Card = card.Adapt<Card>() };
     }
 
     /// <summary>
@@ -27,7 +28,7 @@ public sealed class CardGrpcService(ICardApplicationService cardApplicationServi
     {
         var cards = await cardApplicationService.GetAllAsync(context.CancellationToken);
         var response = new GetAllCardsResponse();
-        response.Cards.AddRange(cards.Select(x => x.ToGrpcCard()));
+        response.Cards.AddRange(cards.Adapt<List<Card>>());
         return response;
     }
 
@@ -38,7 +39,7 @@ public sealed class CardGrpcService(ICardApplicationService cardApplicationServi
     {
         var cards = await cardApplicationService.GetByUserIdAsync(request.UserId, context.CancellationToken);
         var response = new GetCardsByUserIdResponse();
-        response.Cards.AddRange(cards.Select(x => x.ToGrpcCard()));
+        response.Cards.AddRange(cards.Adapt<List<Card>>());
         return response;
     }
 
@@ -50,7 +51,7 @@ public sealed class CardGrpcService(ICardApplicationService cardApplicationServi
         var card = await cardApplicationService.GetDueCardAsync(request.UserId, context.CancellationToken);
         return card is null
             ? new GetDueCardResponse()
-            : new GetDueCardResponse { Card = card.ToGrpcCard() };
+            : new GetDueCardResponse { Card = card.Adapt<Card>() };
     }
 
     /// <summary>
@@ -67,7 +68,7 @@ public sealed class CardGrpcService(ICardApplicationService cardApplicationServi
                 request.HasExample ? request.Example : null),
             context.CancellationToken);
 
-        return new CardResponse { Card = created.ToGrpcCard() };
+        return new CardResponse { Card = created.Adapt<Card>() };
     }
 
     /// <summary>

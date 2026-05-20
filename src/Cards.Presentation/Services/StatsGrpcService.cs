@@ -1,6 +1,7 @@
 using Cards.Application.Stats;
 using Grpc.Core;
 using LanguageCardsBot.Contracts.Cards.V3;
+using Mapster;
 
 namespace Cards.Presentation.Services;
 
@@ -19,16 +20,7 @@ public sealed class StatsGrpcService(IStatsApplicationService statsApplicationSe
 
         return new GetTodayStatsResponse
         {
-            Stats = new TodayStats
-            {
-                NewToday = stats.NewToday,
-                TotalReviewsToday = stats.TotalReviewsToday,
-                CorrectReviewsToday = stats.CorrectReviewsToday,
-                TotalCards = stats.TotalCards,
-                LearnedCards = stats.LearnedCards,
-                BestDay = stats.BestDay,
-                BestCount = stats.BestCount
-            }
+            Stats = stats.Adapt<TodayStats>()
         };
     }
 }

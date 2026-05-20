@@ -77,7 +77,9 @@ There are currently no test projects in the solution. For code changes, at minim
 
 - Target framework is `net8.0`; nullable reference types and implicit usings are enabled.
 - Follow existing C# style: file-scoped namespaces, constructor injection where already used, async APIs for I/O and gRPC calls.
-- Keep comments sparse and useful. Do not add comments that simply restate code.
+- Always add XML documentation comments for new classes, interfaces, records, and methods.
+- When working with existing C# code and a touched class, interface, record, or method lacks XML documentation, add it as part of the change.
+- Keep inline comments sparse and useful. Do not add inline comments that simply restate code.
 - Use UTC for reminder and review scheduling data that crosses service boundaries.
 - Keep Telegram MarkdownV2 escaping in mind. Use existing helpers such as `SendFormattedMessageAsync` when sending user-provided text.
 - Keep callback payloads short; Telegram callback data is limited to 64 bytes.

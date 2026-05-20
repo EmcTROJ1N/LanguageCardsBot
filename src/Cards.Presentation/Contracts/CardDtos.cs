@@ -1,5 +1,3 @@
-using Cards.Domain.Entities;
-
 namespace Cards.Presentation.Contracts;
 
 /// <summary>
@@ -87,30 +85,3 @@ public sealed record DeleteCardResponseDto(bool Deleted);
 /// Represents the REST response for deleting cards by user identifier.
 /// </summary>
 public sealed record DeleteCardsByUserIdResponseDto(bool Deleted);
-
-/// <summary>
-/// Provides mapping helpers for REST DTOs.
-/// </summary>
-internal static partial class ApiMappingExtensions
-{
-    /// <summary>
-    /// Converts a card entity to a REST DTO.
-    /// </summary>
-    public static CardDto ToDto(this CardEntity entity)
-    {
-        return new CardDto(
-            entity.Id,
-            entity.UserId,
-            entity.Term,
-            entity.Translation,
-            entity.Transcription,
-            entity.Example,
-            entity.Level,
-            entity.NextReviewAt,
-            entity.Learned,
-            entity.CreatedAt,
-            entity.LastReviewAt,
-            entity.TotalReviews,
-            entity.CorrectReviews);
-    }
-}

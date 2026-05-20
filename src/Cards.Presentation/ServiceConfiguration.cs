@@ -1,3 +1,4 @@
+using System.Reflection;
 using Cards.Application.Abstractions.Repositories;
 using Cards.Application.Cards;
 using Cards.Application.Imports;
@@ -9,6 +10,7 @@ using Cards.Infrastructure.Repositories;
 using Cards.Presentation.Interceptors;
 using Cards.Presentation.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 namespace Cards.Presentation;
 
@@ -72,6 +74,30 @@ public static class ServiceConfiguration
     }
 
     /// <summary>
+    /// Registers Swagger/OpenAPI generation for the public REST API.
+    /// </summary>
+    public static IServiceCollection AddSwaggerDocumentation(this IServiceCollection services)
+    {
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Title = "LanguageCardsBot Cards API",
+                Version = "v3",
+                Description = "REST API for cards, users, statistics, imports, and translations."
+            });
+
+            var xmlFileName = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlFilePath = Path.Combine(AppContext.BaseDirectory, xmlFileName);
+            if (File.Exists(xmlFilePath))
+                options.IncludeXmlComments(xmlFilePath, includeControllerXmlComments: true);
+        });
+
+        return services;
+    }
+
+    /// <summary>
     /// Maps all cards gRPC services.
     /// </summary>
     public static WebApplication MapGrpcServices(this WebApplication app)
@@ -81,6 +107,21 @@ public static class ServiceConfiguration
         app.MapGrpcService<StatsGrpcService>();
         app.MapGrpcService<UserGrpcService>();
         app.MapGrpcService<GoogleTranslationService>();
+        return app;
+    }
+
+    /// <summary>
+    /// Enables Swagger JSON and Swagger UI endpoints.
+    /// </summary>
+    public static WebApplication UseSwaggerDocumentation(this WebApplication app)
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI(options =>
+        {
+            options.RoutePrefix = "swagger";
+            options.SwaggerEndpoint("./v1/swagger.json", "LanguageCardsBot Cards API");
+        });
+
         return app;
     }
     

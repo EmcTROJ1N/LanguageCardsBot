@@ -1,6 +1,7 @@
 using Cards.Application.Users;
 using Grpc.Core;
 using LanguageCardsBot.Contracts.Cards.V3;
+using Mapster;
 
 namespace Cards.Presentation.Services;
 
@@ -17,7 +18,7 @@ public sealed class UserGrpcService(IUserApplicationService userApplicationServi
         var user = await userApplicationService.GetByIdAsync(request.Id, context.CancellationToken);
         return user is null
             ? new GetUserResponse()
-            : new GetUserResponse { User = user.ToGrpcUser() };
+            : new GetUserResponse { User = user.Adapt<User>() };
     }
 
     /// <summary>
@@ -27,7 +28,7 @@ public sealed class UserGrpcService(IUserApplicationService userApplicationServi
     {
         var response = new GetAllUsersResponse();
         var users = await userApplicationService.GetAllAsync(context.CancellationToken);
-        response.Users.AddRange(users.Select(x => x.ToGrpcUser()));
+        response.Users.AddRange(users.Adapt<List<User>>());
         return response;
     }
 
@@ -36,8 +37,8 @@ public sealed class UserGrpcService(IUserApplicationService userApplicationServi
     /// </summary>
     public override async Task<UserResponse> Add(AddUserRequest request, ServerCallContext context)
     {
-        var user = await userApplicationService.AddAsync(ToCommand(request.User), context.CancellationToken);
-        return new UserResponse { User = user.ToGrpcUser() };
+        var user = await userApplicationService.AddAsync(request.User.Adapt<UserCommand>(), context.CancellationToken);
+        return new UserResponse { User = user.Adapt<User>() };
     }
 
     /// <summary>
@@ -45,7 +46,7 @@ public sealed class UserGrpcService(IUserApplicationService userApplicationServi
     /// </summary>
     public override async Task<UpdateUserResponse> Update(UpdateUserRequest request, ServerCallContext context)
     {
-        var updated = await userApplicationService.UpdateAsync(ToCommand(request.User), context.CancellationToken);
+        var updated = await userApplicationService.UpdateAsync(request.User.Adapt<UserCommand>(), context.CancellationToken);
         return new UpdateUserResponse { Updated = updated };
     }
 
@@ -66,7 +67,7 @@ public sealed class UserGrpcService(IUserApplicationService userApplicationServi
         var user = await userApplicationService.GetByChatIdAsync(request.ChatId, context.CancellationToken);
         return user is null
             ? new GetUserResponse()
-            : new GetUserResponse { User = user.ToGrpcUser() };
+            : new GetUserResponse { User = user.Adapt<User>() };
     }
 
     /// <summary>
@@ -79,7 +80,7 @@ public sealed class UserGrpcService(IUserApplicationService userApplicationServi
             request.HasUsername ? request.Username : null,
             context.CancellationToken);
 
-        return new UserResponse { User = user.ToGrpcUser() };
+        return new UserResponse { User = user.Adapt<User>() };
     }
 
     /// <summary>
@@ -92,7 +93,7 @@ public sealed class UserGrpcService(IUserApplicationService userApplicationServi
             request.HasUsername ? request.Username : null,
             context.CancellationToken);
 
-        return new UserResponse { User = user.ToGrpcUser() };
+        return new UserResponse { User = user.Adapt<User>() };
     }
 
     /// <summary>
@@ -106,20 +107,5 @@ public sealed class UserGrpcService(IUserApplicationService userApplicationServi
             context.CancellationToken);
 
         return new UpdateNextReminderAtUtcResponse { Updated = updated };
-    }
-
-    /// <summary>
-    /// Converts a gRPC user contract to an application command.
-    /// </summary>
-    private static UserCommand ToCommand(User user)
-    {
-        return new UserCommand(
-            user.Id,
-            user.ChatId,
-            user.HasUsername ? user.Username : null,
-            user.CreatedAt?.ToDateTime(),
-            user.ReminderIntervalMinutes,
-            user.NextReminderAtUtc?.ToDateTime(),
-            user.HideTranslations);
     }
 }

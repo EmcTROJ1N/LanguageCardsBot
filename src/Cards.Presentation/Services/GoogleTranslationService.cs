@@ -2,6 +2,7 @@ using System.Text.Json;
 using Cards.Application.Translations;
 using Grpc.Core;
 using LanguageCardsBot.Contracts.Cards.V3;
+using Mapster;
 
 namespace Cards.Presentation.Services;
 
@@ -24,12 +25,7 @@ public sealed class GoogleTranslationService(ITranslationApplicationService tran
 
             return new TranslateResponse
             {
-                Result = new LanguageCardsBot.Contracts.Cards.V3.TranslationResult
-                {
-                    Translation = result.Translation,
-                    Transcription = result.Transcription,
-                    Example = result.Example
-                }
+                Result = result.Adapt<LanguageCardsBot.Contracts.Cards.V3.TranslationResult>()
             };
         }
         catch (ArgumentException ex)

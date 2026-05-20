@@ -1,5 +1,3 @@
-using Cards.Domain.Entities;
-
 namespace Cards.Presentation.Contracts;
 
 /// <summary>
@@ -73,24 +71,3 @@ public sealed record DeleteUserResponseDto(bool Deleted);
 /// Represents the REST response for updating the next reminder timestamp.
 /// </summary>
 public sealed record UpdateNextReminderAtUtcResponseDto(bool Updated);
-
-/// <summary>
-/// Provides mapping helpers for REST user DTOs.
-/// </summary>
-internal static partial class ApiMappingExtensions
-{
-    /// <summary>
-    /// Converts a user entity to a REST DTO.
-    /// </summary>
-    public static UserDto ToDto(this UserEntity entity)
-    {
-        return new UserDto(
-            entity.Id,
-            entity.ChatId,
-            entity.Username,
-            entity.CreatedAt,
-            entity.ReminderIntervalMinutes,
-            entity.NextReminderAtUtc,
-            entity.HideTranslations);
-    }
-}

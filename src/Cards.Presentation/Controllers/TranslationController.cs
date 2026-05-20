@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Cards.Application.Translations;
 using Cards.Presentation.Contracts;
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cards.Presentation.Controllers;
@@ -27,11 +28,7 @@ public sealed class TranslationController(ITranslationApplicationService transla
                 request.Term,
                 cancellationToken);
 
-            return Ok(new TranslateResponseDto(
-                new TranslationResultDto(
-                    result.Translation,
-                    result.Transcription,
-                    result.Example)));
+            return Ok(new TranslateResponseDto(result.Adapt<TranslationResultDto>()));
         }
         catch (ArgumentException ex)
         {

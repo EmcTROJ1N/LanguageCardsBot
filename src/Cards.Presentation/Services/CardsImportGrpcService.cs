@@ -1,6 +1,7 @@
 using Cards.Application.Imports;
 using Grpc.Core;
 using LanguageCardsBot.Contracts.Cards.V3;
+using Mapster;
 
 namespace Cards.Presentation.Services;
 
@@ -29,33 +30,12 @@ public class CardsImportGrpcService(ICardsImportApplicationService cardsImportAp
 
         if (result.Data is not null)
         {
-            response.Data = new CardsImportResult
-            {
-                Imported = result.Data.Imported,
-                Skipped = result.Data.Skipped
-            };
+            response.Data = result.Data.Adapt<CardsImportResult>();
             response.Data.Errors.AddRange(result.Data.Errors);
         }
 
-        response.Errors.AddRange(result.Errors.Select(ToGrpcOperationError));
+        response.Errors.AddRange(result.Errors.Adapt<List<OperationError>>());
 
         return response;
-    }
-
-    /// <summary>
-    /// Converts an application operation error to the gRPC contract type.
-    /// </summary>
-    private static OperationError ToGrpcOperationError(OperationErrorResult error)
-    {
-        var operationError = new OperationError
-        {
-            Message = error.Message,
-            Code = error.Code ?? string.Empty
-        };
-
-        if (error.Target is not null)
-            operationError.Target = error.Target;
-
-        return operationError;
     }
 }
