@@ -7,6 +7,7 @@ using EnglishCardsBot.Presentation.Commands.ReminderSettings;
 using EnglishCardsBot.Presentation.Commands.Start;
 using EnglishCardsBot.Presentation.Commands.Stats;
 using EnglishCardsBot.Presentation.Commands.Train;
+using EnglishCardsBot.Presentation.Commands.UserId;
 using EnglishCardsBot.Presentation.Services;
 using EnglishCardsBot.Presentation.Workers;
 using LanguageCardsBot.Contracts.Cards.V3;
@@ -40,6 +41,7 @@ builder.Services.AddScoped<ReminderSettingsCommandHandler>();
 builder.Services.AddScoped<ClearCommandHandler>();
 builder.Services.AddScoped<ExportCommandHandler>();
 builder.Services.AddScoped<ImportCommandHandler>();
+builder.Services.AddScoped<UserIdCommandHandler>();
 
 // Telegram Bot
 builder.Services.AddHttpClient("telegram_bot_client")

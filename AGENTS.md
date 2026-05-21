@@ -61,8 +61,8 @@ There are currently no test projects in the solution. For code changes, at minim
 - Required bot setting: `BOT_TOKEN`.
 - Required bot gRPC setting: `Grpc:CardsServiceUrl` or `Grpc__CardsServiceUrl`.
 - Required cards service database setting: `Database:ConnectionString`, `Database__ConnectionString`, `DATABASE_CONNECTION_STRING`, or `DB_PATH`.
-- The cards backend is configured for MySQL via EF Core. The root compose file exposes MySQL on `3306` and the cards gRPC service on `8080`.
-- `Cards.Presentation` requires HTTP/2 for gRPC. Keep Kestrel protocol settings compatible with gRPC.
+- The cards backend is configured for MySQL via EF Core. The cards service exposes gRPC on `8080` and REST on `8081`; MySQL is exposed on `3306`.
+- `Cards.Presentation` requires HTTP/2 for gRPC. Keep the gRPC endpoint on HTTP/2 and REST endpoints on HTTP/1-compatible ports unless TLS negotiation is configured.
 
 ## NuGet And Contracts
 

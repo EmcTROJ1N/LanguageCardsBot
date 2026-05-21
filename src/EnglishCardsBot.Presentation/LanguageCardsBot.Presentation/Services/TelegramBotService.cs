@@ -7,6 +7,7 @@ using EnglishCardsBot.Presentation.Commands.ReminderSettings;
 using EnglishCardsBot.Presentation.Commands.Start;
 using EnglishCardsBot.Presentation.Commands.Stats;
 using EnglishCardsBot.Presentation.Commands.Train;
+using EnglishCardsBot.Presentation.Commands.UserId;
 using LanguageCardsBot.Contracts.Cards.V3;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
@@ -19,6 +20,9 @@ using UserService = LanguageCardsBot.Contracts.Cards.V3.UserService;
 
 namespace EnglishCardsBot.Presentation.Services;
 
+/// <summary>
+/// Coordinates Telegram updates, command dispatching, callbacks, and card text input handling.
+/// </summary>
 public class TelegramBotService(
     ITelegramBotClient botClient,
     UserService.UserServiceClient userService,
@@ -112,6 +116,9 @@ public class TelegramBotService(
         }
     }
 
+    /// <summary>
+    /// Dispatches slash commands to the registered command handlers.
+    /// </summary>
     private async Task HandleCommandAsync(Message message, string text, User user, CancellationToken cancellationToken)
     {
         var command = text.Split(' ')[0].ToLower();
@@ -151,6 +158,11 @@ public class TelegramBotService(
             case "/import":
                 await serviceProvider.GetRequiredService<ImportCommandHandler>()
                     .HandleAsync(new ImportCommand(message.Chat.Id), user, cancellationToken);
+                break;
+            case "/user_id":
+            case "/id":
+                await serviceProvider.GetRequiredService<UserIdCommandHandler>()
+                    .HandleAsync(new UserIdCommand(message.Chat.Id), user, cancellationToken);
                 break;
         }
     }

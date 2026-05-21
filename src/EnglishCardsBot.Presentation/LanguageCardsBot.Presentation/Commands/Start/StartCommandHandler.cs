@@ -5,8 +5,14 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace EnglishCardsBot.Presentation.Commands.Start;
 
+/// <summary>
+/// Handles the initial bot command and sends the main reply keyboard.
+/// </summary>
 public sealed class StartCommandHandler(ITelegramBotClient botClient): ICommandHandler<StartCommand>
 {
+    /// <summary>
+    /// Sends the welcome message and main keyboard.
+    /// </summary>
     public async Task HandleAsync(StartCommand command, User _, CancellationToken cancellationToken = default)
     {
         var keyboard = new ReplyKeyboardMarkup([
@@ -25,6 +31,7 @@ public sealed class StartCommandHandler(ITelegramBotClient botClient): ICommandH
                                    "• Просто слово — автоматический перевод\n" +
                                    "• слово | перевод — с вашим переводом\n" +
                                    "• слово: перевод — альтернативный формат\n\n" +
+                                   "Для Chrome-расширения: /user_id\n\n" +
                                    "Используй меню внизу для быстрого доступа к функциям!";
 
         await botClient.SendMessage(
