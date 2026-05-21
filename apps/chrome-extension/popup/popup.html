@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Language Cards</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main class="popup">
+      <header class="header">
+        <h1>Language Cards</h1>
+        <a href="../options/options.html" target="_blank" rel="noreferrer">Options</a>
+      </header>
+
+      <label>
+        Term
+        <textarea id="term" rows="3" autocomplete="off" spellcheck="true"></textarea>
+      </label>
+
+      <div class="actions">
+        <button id="translate" type="button">Translate</button>
+        <button id="save" type="button">Save card</button>
+      </div>
+
+      <section class="fields" aria-label="Card details">
+        <label>
+          Translation
+          <input id="translation" type="text" autocomplete="off">
+        </label>
+        <label>
+          Transcription
+          <input id="transcription" type="text" autocomplete="off">
+        </label>
+        <label>
+          Example
+          <textarea id="example" rows="3" autocomplete="off" spellcheck="true"></textarea>
+        </label>
+      </section>
+
+      <p id="status" class="status" role="status"></p>
+    </main>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

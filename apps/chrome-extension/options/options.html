@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Language Cards Options</title>
+    <link rel="stylesheet" href="options.css">
+  </head>
+  <body>
+    <main class="page">
+      <h1>Language Cards Options</h1>
+
+      <form id="settings" class="form">
+        <label>
+          API base URL
+          <input id="apiBaseUrl" name="apiBaseUrl" type="url" required>
+        </label>
+
+        <label>
+          User ID
+          <input id="userId" name="userId" type="number" min="1" step="1" required>
+        </label>
+
+        <button type="submit">Save</button>
+      </form>
+
+      <p id="status" class="status" role="status"></p>
+    </main>
+
+    <script type="module" src="options.js"></script>
+  </body>
+</html>
