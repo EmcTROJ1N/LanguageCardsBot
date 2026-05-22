@@ -25,6 +25,33 @@
       </form>
 
       <p id="status" class="status" role="status"></p>
+
+      <section class="providers-section">
+        <h2>Subtitle Providers</h2>
+        <p class="providers-hint">
+          Add a custom CSS selector for subtitle text on any site.
+          Open DevTools on the target page, inspect the subtitle element, and copy its selector.
+        </p>
+
+        <table class="providers-table">
+          <thead>
+            <tr>
+              <th>Domain</th>
+              <th>CSS Selector</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="providersBody"></tbody>
+        </table>
+
+        <div class="add-provider">
+          <input id="providerHostname" type="text" placeholder="e.g. coursera.org" autocomplete="off">
+          <input id="providerSelector" type="text" placeholder="e.g. .rc-SubtitleViewer" autocomplete="off">
+          <button id="addProvider" type="button">Add</button>
+        </div>
+
+        <p id="providersStatus" class="status" role="status"></p>
+      </section>
     </main>
 
     <script type="module" src="options.js"></script>

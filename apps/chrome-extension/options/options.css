@@ -10,13 +10,18 @@ body {
 }
 
 .page {
-  width: min(520px, calc(100% - 32px));
+  width: min(560px, calc(100% - 32px));
   margin: 48px auto;
 }
 
 h1 {
   margin: 0 0 20px;
   font-size: 24px;
+}
+
+h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
 }
 
 .form {
@@ -56,4 +61,72 @@ button {
 .status {
   min-height: 20px;
   color: #486177;
+}
+
+.providers-section {
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.providers-hint {
+  margin: 0 0 16px;
+  color: #486177;
+  font-size: 14px;
+}
+
+.providers-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.providers-table th {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 2px solid #c8d2df;
+  font-weight: 650;
+}
+
+.providers-table td {
+  padding: 8px;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+}
+
+.providers-empty {
+  color: #486177;
+  font-style: italic;
+}
+
+code {
+  font-family: ui-monospace, "Cascadia Code", monospace;
+  font-size: 13px;
+  background: #eef2f7;
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+.delete-btn {
+  padding: 4px 10px;
+  font-size: 13px;
+  background: #dc2626;
+}
+
+.add-provider {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.add-provider input {
+  flex: 1;
+  min-width: 140px;
+}
+
+.add-provider button {
+  justify-self: auto;
+  white-space: nowrap;
 }
