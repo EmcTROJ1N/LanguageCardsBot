@@ -35,7 +35,8 @@ function startMutationObserverStrategy() {
 function startPollingStrategy() {
   let lastText = "";
 
-  setInterval(() => {
+  // eslint-disable-next-line no-unused-vars
+  const pollingId = setInterval(() => {
     const el = document.querySelector("media-captions");
     if (!el) return;
     const text = el.textContent.trim();
@@ -51,19 +52,25 @@ function startPollingStrategy() {
 // On kino.pub, Vidstack renders subtitles as HTML overlay (not via native <track>),
 // so this strategy may produce no output — that outcome is expected and informative.
 function startTextTrackStrategy() {
+  function attachTrackListener(track) {
+    let lastText = "";
+    track.addEventListener("cuechange", () => {
+      const cue = track.activeCues?.[0];
+      if (!cue) return;
+      const text = (cue.text || "").trim();
+      if (text && text !== lastText) {
+        lastText = text;
+        console.log("[TextTrack]", text);
+      }
+    });
+  }
+
   function attachToVideo(video) {
+    for (const track of video.textTracks) {
+      attachTrackListener(track);
+    }
     video.textTracks.addEventListener("addtrack", (event) => {
-      const track = event.track;
-      let lastText = "";
-      track.addEventListener("cuechange", () => {
-        const cue = track.activeCues?.[0];
-        if (!cue) return;
-        const text = (cue.text || "").trim();
-        if (text && text !== lastText) {
-          lastText = text;
-          console.log("[TextTrack]", text);
-        }
-      });
+      attachTrackListener(event.track);
     });
   }
 
