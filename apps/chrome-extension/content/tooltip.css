@@ -82,12 +82,9 @@
   font-size: 13px;
 }
 
-/* Overlay for mutation mode (Vidstack and similar players) */
+/* Overlay for mutation mode (Vidstack and similar players). top/left set in JS. */
 #lc-mutation-overlay {
   position: fixed;
-  bottom: 60px;
-  left: 50%;
-  transform: translateX(-50%);
   z-index: 2147483646;
   text-align: center;
   pointer-events: auto;

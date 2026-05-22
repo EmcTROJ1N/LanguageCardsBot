@@ -74,6 +74,16 @@
     el.style.visibility = "hidden";
     overlay.style.display = "";
     wrapWords(overlay, text);
+    positionMutationOverlay(overlay, el);
+  }
+
+  function positionMutationOverlay(overlay, subtitleEl) {
+    const rect = subtitleEl.getBoundingClientRect();
+    const oh = overlay.offsetHeight || 36;
+    const top = Math.max(rect.top + 4, rect.bottom - oh - 40);
+    overlay.style.top = top + "px";
+    overlay.style.left = (rect.left + rect.width / 2) + "px";
+    overlay.style.transform = "translateX(-50%)";
   }
 
   function getSubtitleText(el) {
