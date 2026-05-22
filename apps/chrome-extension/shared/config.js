@@ -21,6 +21,15 @@ export async function saveSettings(settings) {
   return nextSettings;
 }
 
+export async function getCustomProviders() {
+  const result = await chrome.storage.local.get({ customProviders: [] });
+  return result.customProviders;
+}
+
+export async function saveCustomProviders(providers) {
+  await chrome.storage.local.set({ customProviders: providers });
+}
+
 function normalizeBaseUrl(value) {
   return String(value ?? DEFAULT_SETTINGS.apiBaseUrl).trim().replace(/\/+$/, "");
 }
