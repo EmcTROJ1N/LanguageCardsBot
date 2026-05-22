@@ -5,11 +5,53 @@ const elements = {
   example: document.querySelector("#example"),
   status: document.querySelector("#status"),
   translate: document.querySelector("#translate"),
-  save: document.querySelector("#save")
+  save: document.querySelector("#save"),
+  subtitleToggle: document.querySelector("#subtitleToggle")
 };
 
 elements.translate.addEventListener("click", translateTerm);
 elements.save.addEventListener("click", saveCard);
+elements.subtitleToggle.addEventListener("click", toggleSubtitleClicker);
+
+let currentHostname = null;
+initSubtitleToggle();
+
+async function initSubtitleToggle() {
+  try {
+    const [tab] = await new Promise(resolve =>
+      chrome.tabs.query({ active: true, currentWindow: true }, resolve)
+    );
+    if (!tab?.url || !tab.url.startsWith("http")) {
+      elements.subtitleToggle.disabled = true;
+      return;
+    }
+    currentHostname = new URL(tab.url).hostname;
+    const response = await sendMessage({ type: "subtitles.getStatus", hostname: currentHostname });
+    setToggleState(response.enabled);
+  } catch {
+    elements.subtitleToggle.disabled = true;
+  }
+}
+
+async function toggleSubtitleClicker() {
+  if (!currentHostname) return;
+  const isOn = elements.subtitleToggle.getAttribute("aria-pressed") === "true";
+  await runAction(async () => {
+    if (isOn) {
+      await sendMessage({ type: "subtitles.disable", hostname: currentHostname });
+      setToggleState(false);
+    } else {
+      await sendMessage({ type: "subtitles.enable", hostname: currentHostname });
+      setToggleState(true);
+    }
+  });
+}
+
+function setToggleState(enabled) {
+  elements.subtitleToggle.setAttribute("aria-pressed", String(enabled));
+  elements.subtitleToggle.textContent = enabled ? "On" : "Off";
+  elements.subtitleToggle.classList.toggle("is-on", enabled);
+}
 
 async function translateTerm() {
   await runAction(async () => {

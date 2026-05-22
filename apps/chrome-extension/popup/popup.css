@@ -35,6 +35,34 @@ a {
   text-decoration: none;
 }
 
+.subtitle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.subtitle-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.toggle-btn {
+  padding: 4px 14px;
+  background: #94a3b8;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 650;
+  min-width: 48px;
+  color: #ffffff;
+}
+
+.toggle-btn.is-on {
+  background: #2357a5;
+}
+
 label {
   display: grid;
   gap: 6px;
