@@ -12,21 +12,12 @@
     "type": "module"
   },
   "options_page": "options/options.html",
-  "content_scripts": [
-    {
-      "matches": ["*://kino.pub/*"],
-      "js": ["content/subtitle-logger.js"],
-      "run_at": "document_idle"
-    }
-  ],
   "permissions": [
-    "storage"
+    "storage",
+    "scripting",
+    "tabs"
   ],
   "host_permissions": [
-    "http://localhost/*",
-    "https://localhost/*",
-    "http://127.0.0.1/*",
-    "https://127.0.0.1/*",
-    "*://kino.pub/*"
+    "<all_urls>"
   ]
 }
