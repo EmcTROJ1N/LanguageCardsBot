@@ -1,0 +1,103 @@
+/* Clickable word spans injected into subtitle containers */
+[data-lc-word] {
+  cursor: pointer;
+  border-radius: 2px;
+  transition: background 0.1s;
+}
+
+[data-lc-word]:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Tooltip */
+#lc-tooltip {
+  position: fixed;
+  z-index: 2147483647;
+  background: #182230;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 12px 14px;
+  min-width: 160px;
+  max-width: 280px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.lc-word {
+  font-size: 16px;
+  font-weight: 650;
+  margin-bottom: 6px;
+}
+
+.lc-transcription {
+  color: #9aafc4;
+  font-size: 13px;
+  margin-bottom: 2px;
+}
+
+.lc-translation {
+  margin-bottom: 4px;
+}
+
+.lc-loading {
+  color: #9aafc4;
+}
+
+.lc-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  align-items: center;
+}
+
+.lc-btn {
+  border: 0;
+  border-radius: 5px;
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #ffffff;
+}
+
+.lc-btn-translate {
+  background: #2357a5;
+}
+
+.lc-btn-save {
+  background: #12b76a;
+}
+
+.lc-btn:disabled {
+  opacity: 0.65;
+  cursor: progress;
+}
+
+.lc-saved {
+  color: #12b76a;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* Custom overlay for TextTrack mode (sites with native <track> elements) */
+#lc-texttrack-overlay {
+  position: fixed;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2147483646;
+  text-align: center;
+  pointer-events: auto;
+  font-family: system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+  background: rgba(0, 0, 0, 0.55);
+  padding: 4px 14px;
+  border-radius: 4px;
+  max-width: 80vw;
+}
