@@ -82,6 +82,26 @@
   font-size: 13px;
 }
 
+/* Overlay for mutation mode (Vidstack and similar players) */
+#lc-mutation-overlay {
+  position: fixed;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2147483646;
+  text-align: center;
+  pointer-events: auto;
+  font-family: system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+  background: rgba(0, 0, 0, 0.55);
+  padding: 4px 14px;
+  border-radius: 4px;
+  max-width: 80vw;
+}
+
 /* Custom overlay for TextTrack mode (sites with native <track> elements) */
 #lc-texttrack-overlay {
   position: fixed;

@@ -61,10 +61,50 @@
   }
 
   function processSubtitleEl(el) {
-    const text = el.textContent.trim();
-    if (!text || text === lastWrappedText) return;
+    const text = getSubtitleText(el);
+    if (text === lastWrappedText) return;
     lastWrappedText = text;
-    wrapWords(el, text);
+    const overlay = getOrCreateMutationOverlay();
+    if (!text) {
+      overlay.style.display = "none";
+      overlay.innerHTML = "";
+      el.style.visibility = "";
+      return;
+    }
+    el.style.visibility = "hidden";
+    overlay.style.display = "";
+    wrapWords(overlay, text);
+  }
+
+  function getSubtitleText(el) {
+    const parts = [];
+    function collectLeaves(node) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const t = node.textContent.trim();
+        if (t) parts.push(t);
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const hasElementChild = Array.from(node.childNodes).some(n => n.nodeType === Node.ELEMENT_NODE);
+        if (hasElementChild) {
+          for (const child of node.childNodes) collectLeaves(child);
+        } else {
+          const t = node.textContent.trim();
+          if (t) parts.push(t);
+        }
+      }
+    }
+    for (const child of el.childNodes) collectLeaves(child);
+    return parts.join(" ").replace(/\s+/g, " ").trim();
+  }
+
+  function getOrCreateMutationOverlay() {
+    let overlay = document.getElementById("lc-mutation-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.id = "lc-mutation-overlay";
+      overlay.style.display = "none";
+      document.body.appendChild(overlay);
+    }
+    return overlay;
   }
 
   // --- TextTrack mode ---
