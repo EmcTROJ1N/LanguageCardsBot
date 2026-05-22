@@ -27,14 +27,19 @@ async function handleMessage(message) {
       return settings;
 
     case "subtitles.getStatus": {
-      const id = `subtitle-clicker-${message.hostname}`;
+      const hostname = message.hostname;
+      const id = `subtitle-clicker-${hostname}`;
       const scripts = await chrome.scripting.getRegisteredContentScripts({ ids: [id] });
       return { enabled: scripts.length > 0 };
     }
 
     case "subtitles.enable": {
-      const id = `subtitle-clicker-${message.hostname}`;
-      const pattern = `*://${message.hostname}/*`;
+      const hostname = message.hostname;
+      if (!hostname || !/^[a-zA-Z0-9.-]+$/.test(hostname)) {
+        throw new Error(`Invalid hostname: ${hostname}`);
+      }
+      const id = `subtitle-clicker-${hostname}`;
+      const pattern = `*://${hostname}/*`;
       const existing = await chrome.scripting.getRegisteredContentScripts({ ids: [id] });
       if (existing.length === 0) {
         await chrome.scripting.registerContentScripts([{
@@ -50,17 +55,18 @@ async function handleMessage(message) {
         await chrome.scripting.insertCSS({
           target: { tabId: tab.id },
           files: ["content/tooltip.css"]
-        }).catch(() => {});
+        }).catch(err => console.warn("[subtitle-clicker] CSS injection failed:", err.message));
         await chrome.scripting.executeScript({
           target: { tabId: tab.id },
           files: ["content/subtitle-clicker.js"]
-        }).catch(() => {});
+        }).catch(err => console.warn("[subtitle-clicker] Script injection failed:", err.message));
       }
       return {};
     }
 
     case "subtitles.disable": {
-      const id = `subtitle-clicker-${message.hostname}`;
+      const hostname = message.hostname;
+      const id = `subtitle-clicker-${hostname}`;
       const existing = await chrome.scripting.getRegisteredContentScripts({ ids: [id] });
       if (existing.length > 0) {
         await chrome.scripting.unregisterContentScripts({ ids: [id] });
