@@ -1,0 +1,30 @@
+@Passport.Presentation_HostAddress = http://localhost:5286
+@AccessToken = paste-access-token-here
+
+POST {{Passport.Presentation_HostAddress}}/api/passport/v1/auth/register
+Content-Type: application/json
+
+{
+  "email": "demo@example.com",
+  "password": "password",
+  "firstName": "Demo",
+  "lastName": "User"
+}
+
+###
+
+POST {{Passport.Presentation_HostAddress}}/api/passport/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "demo@example.com",
+  "password": "password"
+}
+
+###
+
+GET {{Passport.Presentation_HostAddress}}/api/passport/v1/auth/me
+Accept: application/json
+Authorization: Bearer {{AccessToken}}
+
+###

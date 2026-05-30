@@ -2,6 +2,7 @@ using Cards.Domain.Common;
 
 namespace Cards.Infrastructure.Common.Interfaces;
 
+// TODO: move into Contracts.Common
 public interface ICrudRepository<T>: IRepository<T> where T : IEntityWithId
 {
     Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
