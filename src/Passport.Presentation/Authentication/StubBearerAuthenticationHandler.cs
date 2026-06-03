@@ -1,3 +1,4 @@
+/*
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
@@ -60,3 +61,4 @@ public sealed class StubBearerAuthenticationHandler(
         return AuthenticateResult.Success(ticket);
     }
 }
+*/

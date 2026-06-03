@@ -1,85 +1,97 @@
-using Passport.Application.Abstractions.Repositories;
+using Keycloak.AuthServices.Sdk.Admin;
+using Keycloak.AuthServices.Sdk.Admin.Models;
+using Keycloak.AuthServices.Sdk.Admin.Requests.Users;
+using Microsoft.Extensions.Configuration;
+using Passport.Application.Abstractions.Clients;
 using Passport.Application.Abstractions.Services;
 using Passport.Application.Models;
 using Passport.Domain.ValueObjects;
 
 namespace Passport.Application.Services;
 
-/// <summary>
-/// Implements passport authentication use cases.
-/// </summary>
-public sealed class AuthService(IKeycloakRepository keycloakRepository) : IAuthService
+public sealed class AuthService(
+    IKeycloakUserClient keycloakUserClient,
+    IKeycloakTokenClient tokenClient,
+    IConfiguration configuration) : IAuthService
 {
-    /// <inheritdoc />
-    public async Task<bool> RegisterAsync(
-        RegisterUserCommand command,
-        CancellationToken cancellationToken = default)
+    private string Realm { get; } = configuration["Keycloak:Realm"]
+        ?? throw new InvalidOperationException("Keycloak:Realm is not configured.");
+
+    public async Task<bool> RegisterAsync(RegisterUserCommand command, CancellationToken cancellationToken = default)
     {
         var email = Email.Create(command.Email);
         var password = NormalizeRequired(command.Password, nameof(command.Password));
         var firstName = NormalizeRequired(command.FirstName, nameof(command.FirstName));
         var lastName = NormalizeRequired(command.LastName, nameof(command.LastName));
 
-        if (await keycloakRepository.UserExistsByEmailAsync(email.Value, cancellationToken))
-            return false;
-
-        var user = await keycloakRepository.CreateUserAsync(
-            email.Value,
-            password,
-            firstName,
-            lastName,
+        var existing = await keycloakUserClient.GetUsersAsync(Realm,
+            new GetUsersRequestParameters { Email = email.Value, Exact = true },
             cancellationToken);
 
-        return user is not null;
+        if (existing.Any())
+            return false;
+
+        await keycloakUserClient.CreateUserAsync(Realm, new UserRepresentation
+        {
+            Username = email.Value,
+            Email = email.Value,
+            FirstName = firstName,
+            LastName = lastName,
+            Enabled = true,
+            Credentials =
+            [
+                new CredentialRepresentation
+                {
+                    Type = "password",
+                    Value = password,
+                    Temporary = false
+                }
+            ]
+        }, cancellationToken);
+
+        return true;
     }
 
-    /// <inheritdoc />
-    public Task<AuthToken?> LoginAsync(
-        LoginUserCommand command,
-        CancellationToken cancellationToken = default)
+    public Task<AuthToken?> LoginAsync(LoginUserCommand command, CancellationToken cancellationToken = default)
     {
         var email = Email.Create(command.Email);
         var password = NormalizeRequired(command.Password, nameof(command.Password));
-
-        return keycloakRepository.SignInAsync(email.Value, password, cancellationToken);
+        return tokenClient.SignInAsync(email.Value, password, cancellationToken);
     }
 
-    /// <inheritdoc />
-    public Task<AuthToken?> RefreshTokenAsync(
-        string refreshToken,
-        CancellationToken cancellationToken = default)
+    public Task<AuthToken?> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
-        var normalizedRefreshToken = NormalizeRequired(refreshToken, nameof(refreshToken));
-        return keycloakRepository.RefreshTokenAsync(normalizedRefreshToken, cancellationToken);
+        var normalizedToken = NormalizeRequired(refreshToken, nameof(refreshToken));
+        return tokenClient.RefreshTokenAsync(normalizedToken, cancellationToken);
     }
 
-    /// <inheritdoc />
-    public Task<AuthUser?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<AuthUser?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        return keycloakRepository.GetUserByIdAsync(userId, cancellationToken);
+        try
+        {
+            var user = await keycloakUserClient.GetUserAsync(Realm, userId.ToString(),
+                cancellationToken: cancellationToken);
+            return MapUser(user);
+        }
+        catch (HttpRequestException)
+        {
+            return null;
+        }
     }
 
-    /// <inheritdoc />
-    public Task<AuthUser?> GetUserByAccessTokenAsync(
-        string accessToken,
-        CancellationToken cancellationToken = default)
-    {
-        var normalizedAccessToken = NormalizeRequired(accessToken, nameof(accessToken));
-        return keycloakRepository.GetUserByAccessTokenAsync(normalizedAccessToken, cancellationToken);
-    }
+    private static AuthUser MapUser(UserRepresentation user) => new(
+        Guid.Parse(user.Id!),
+        user.Email!,
+        user.FirstName ?? string.Empty,
+        user.LastName ?? string.Empty,
+        "User",
+        DateTimeOffset.FromUnixTimeMilliseconds(user.CreatedTimestamp ?? 0).UtcDateTime);
 
-    /// <summary>
-    /// Trims and validates a required string value.
-    /// </summary>
-    /// <param name="value">Raw value.</param>
-    /// <param name="parameterName">Parameter name used in validation errors.</param>
-    /// <returns>Trimmed value.</returns>
     private static string NormalizeRequired(string? value, string parameterName)
     {
         var normalized = (value ?? string.Empty).Trim();
         if (string.IsNullOrWhiteSpace(normalized))
             throw new ArgumentException($"{parameterName} is required.", parameterName);
-
         return normalized;
     }
 }

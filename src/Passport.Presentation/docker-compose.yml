@@ -14,6 +14,8 @@ services:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
       ASPNETCORE_HTTP_PORTS: "8080"
       Keycloak__Authority: ${KEYCLOAK_AUTHORITY:-http://keycloak:8080/realms/languagecards}
+      Keycloak__AuthServerUrl: ${KEYCLOAK_AUTH_SERVER_URL:-http://keycloak:8080}
+      KeycloakPublicClient__TokenEndpoint: ${KEYCLOAK_TOKEN_ENDPOINT:-http://keycloak:8080/realms/languagecards/protocol/openid-connect/token}
     networks:
       - passport
 

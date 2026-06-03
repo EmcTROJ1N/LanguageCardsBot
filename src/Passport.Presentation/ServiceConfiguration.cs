@@ -1,107 +1,93 @@
-using System.Reflection;
-using Microsoft.AspNetCore.Authentication;
-using Passport.Application.Abstractions.Repositories;
+using Keycloak.AuthServices.Authentication;
+using Keycloak.AuthServices.Authorization;
+using Keycloak.AuthServices.Sdk;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.OpenApi;
+using Passport.Application.Abstractions.Clients;
 using Passport.Application.Abstractions.Services;
 using Passport.Application.Services;
+using Passport.Infrastructure.Authentication;
 using Passport.Infrastructure.Repositories;
-using Passport.Presentation.Authentication;
 
 namespace Passport.Presentation;
 
-/// <summary>
-/// Registers passport service dependencies and HTTP pipeline components.
-/// </summary>
 public static class ServiceConfiguration
 {
-    /// <summary>
-    /// Registers passport application services.
-    /// </summary>
-    /// <param name="services">Service collection.</param>
-    /// <returns>The updated service collection.</returns>
     public static IServiceCollection AddPassportApplicationServices(this IServiceCollection services)
     {
         services.AddScoped<IAuthService, AuthService>();
         return services;
     }
 
-    /// <summary>
-    /// Registers passport infrastructure dependencies.
-    /// </summary>
-    /// <param name="services">Service collection.</param>
-    /// <returns>The updated service collection.</returns>
-    public static IServiceCollection AddPassportInfrastructure(this IServiceCollection services)
+    public static IServiceCollection AddPassportInfrastructure(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
-        services.AddSingleton<IKeycloakRepository, KeycloakRepository>();
+        services.AddSingleton<KeycloakAdminAuthHandler>();
+        services.AddKeycloakAdminHttpClient(configuration)
+            .AddHttpMessageHandler<KeycloakAdminAuthHandler>();
+        services.AddHttpClient("keycloak-token");
+        services.AddScoped<IKeycloakTokenClient, KeycloakTokenClient>();
         return services;
     }
 
-    /// <summary>
-    /// Registers local stub bearer authentication.
-    /// </summary>
-    /// <param name="services">Service collection.</param>
-    /// <returns>The updated service collection.</returns>
-    public static IServiceCollection AddPassportAuthentication(this IServiceCollection services)
+    public static IServiceCollection AddPassportAuthentication(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
-        services
-            .AddAuthentication(StubBearerAuthenticationHandler.SchemeName)
-            .AddScheme<AuthenticationSchemeOptions, StubBearerAuthenticationHandler>(
-                StubBearerAuthenticationHandler.SchemeName,
-                _ => { });
-
-        services.AddAuthorization();
+        services.AddKeycloakWebApiAuthentication(configuration, options =>
+        {
+            options.RequireHttpsMetadata = configuration.GetValue<bool?>("RequireHttpsMetadata") ?? false;
+        });
+        return services;
+    }
+    
+    public static IServiceCollection AddAuthorization(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.AddKeycloakAuthorization();
+        services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminAndUser", builder =>
+                {
+                    builder
+                        .RequireRealmRoles("User") // Realm role is fetched from token
+                        .RequireResourceRoles("Admin"); // Resource/Client role is fetched from token
+                });
+            })
+            .AddKeycloakAuthorization(configuration);
 
         return services;
     }
 
-    /// <summary>
-    /// Registers Swagger/OpenAPI generation for the passport API.
-    /// </summary>
-    /// <param name="services">Service collection.</param>
-    /// <returns>The updated service collection.</returns>
     public static IServiceCollection AddPassportSwaggerDocumentation(this IServiceCollection services)
     {
-        services.AddEndpointsApiExplorer();
-        
-        // TODO: was broken after migration to .net 10, fix later
-        /*services.AddSwaggerGen(options =>
+        services.AddOpenApi(options =>
         {
-            options.SwaggerDoc("v1", new OpenApiInfo
+            options.AddDocumentTransformer((document, _, _) =>
             {
-                Title = "LanguageCardsBot Passport API",
-                Version = "v1",
-                Description = "REST API for local passport authentication flows."
-            });
-
-            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            {
-                Name = "Authorization",
-                Type = SecuritySchemeType.Http,
-                Scheme = "bearer",
-                BearerFormat = "stub",
-                In = ParameterLocation.Header,
-                Description = "Use the access token returned by the login endpoint."
-            });
-
-            options.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
+                document.Info = new OpenApiInfo
                 {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    Array.Empty<string>()
-                }
-            });
+                    Title = "LanguageCardsBot Passport API",
+                    Version = "v1",
+                    Description = "Authentication and user management service for LanguageCardsBot."
+                };
 
-            var xmlFileName = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-            var xmlFilePath = Path.Combine(AppContext.BaseDirectory, xmlFileName);
-            if (File.Exists(xmlFilePath))
-                options.IncludeXmlComments(xmlFilePath, includeControllerXmlComments: true);
-        });*/
+                document.Components ??= new OpenApiComponents();
+                document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
+                document.Components.SecuritySchemes[JwtBearerDefaults.AuthenticationScheme] = new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.Http,
+                    In = ParameterLocation.Header,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    Description = "Enter your JWT access token."
+                };
+
+                return Task.CompletedTask;
+            });
+        });
 
         return services;
     }

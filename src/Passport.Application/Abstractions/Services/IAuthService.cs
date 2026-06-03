@@ -39,11 +39,4 @@ public interface IAuthService
     /// <returns>User profile, or <c>null</c> when the user does not exist.</returns>
     Task<AuthUser?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken = default);
 
-    /// <summary>
-    /// Gets a user profile from an issued access token.
-    /// </summary>
-    /// <param name="accessToken">Access token.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>User profile, or <c>null</c> when the token is invalid.</returns>
-    Task<AuthUser?> GetUserByAccessTokenAsync(string accessToken, CancellationToken cancellationToken = default);
 }

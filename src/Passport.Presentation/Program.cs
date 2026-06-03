@@ -1,11 +1,19 @@
+using Keycloak.AuthServices.Authentication;
+using Keycloak.AuthServices.Authorization;
+using Keycloak.AuthServices.Common;
+using Keycloak.AuthServices.Sdk;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Passport.Infrastructure.Authentication;
 using Passport.Presentation;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
-    .AddPassportInfrastructure()
+    .AddPassportInfrastructure(builder.Configuration)
     .AddPassportApplicationServices()
-    .AddPassportAuthentication();
+    .AddPassportAuthentication(builder.Configuration)
+    .AddAuthorization(builder.Configuration);
 
 builder.Services.AddControllers();
 builder.Services.AddPassportSwaggerDocumentation();
@@ -14,11 +22,11 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
+    app.MapOpenApi();
+    app.MapScalarApiReference(options =>
     {
-        options.RoutePrefix = "swagger";
-        options.SwaggerEndpoint("./v1/swagger.json", "LanguageCardsBot Passport API");
+        options.Title = "LanguageCardsBot Passport API";
+        options.AddPreferredSecuritySchemes("Bearer");
     });
 }
 
