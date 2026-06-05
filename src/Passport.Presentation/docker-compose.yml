@@ -69,6 +69,7 @@ services:
 networks:
   passport:
     name: passport
+    external: true
 
 volumes:
   passport-mysql-data:

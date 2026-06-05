@@ -9,8 +9,12 @@
       ASPNETCORE_URLS: http://+:5050
     networks:
       - shared-grpc
+      - passport
 
 networks:
   shared-grpc:
     name: language-cards-shared
+    external: true
+  passport:
+    name: passport
     external: true
