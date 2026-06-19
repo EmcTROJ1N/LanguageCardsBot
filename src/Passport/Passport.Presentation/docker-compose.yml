@@ -1,8 +1,8 @@
 services:
   passport-presentation:
     build:
-      context: ../..
-      dockerfile: src/Passport.Presentation/Dockerfile
+      context: ../../..
+      dockerfile: src/Passport/Passport.Presentation/Dockerfile
     container_name: passport_presentation
     restart: unless-stopped
     depends_on:

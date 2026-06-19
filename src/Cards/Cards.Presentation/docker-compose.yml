@@ -1,8 +1,8 @@
 services:
   cards-presentation:
     build:
-      context: ../..
-      dockerfile: src/Cards.Presentation/Dockerfile
+      context: ../../..
+      dockerfile: src/Cards/Cards.Presentation/Dockerfile
     container_name: cards_presentation
     restart: unless-stopped
     depends_on:

@@ -11,14 +11,13 @@ WORKDIR /src
 COPY ["nuget.config", "./"]
 COPY [".nuget/local/", ".nuget/local/"]
 
-COPY ["src/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation/LanguageCardsBot.Presentation.csproj", "src/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation/"]
-COPY ["src/LanguageCardsBot.Contracts.Cards/LanguageCardsBot.Contracts.Cards.csproj", "src/LanguageCardsBot.Contracts.Cards/"]
+COPY ["src/LanguageCardsBot/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation/LanguageCardsBot.Presentation.csproj", "src/LanguageCardsBot/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation/"]
 
-RUN dotnet restore "src/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation/LanguageCardsBot.Presentation.csproj" --configfile /src/nuget.config
+RUN dotnet restore "src/LanguageCardsBot/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation/LanguageCardsBot.Presentation.csproj" --configfile /src/nuget.config
 
 COPY . .
 
-WORKDIR "/src/src/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation"
+WORKDIR "/src/src/LanguageCardsBot/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation"
 RUN dotnet build "./LanguageCardsBot.Presentation.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish

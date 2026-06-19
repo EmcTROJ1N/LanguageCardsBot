@@ -1,8 +1,8 @@
 services:
   language-cards-bot:
     build:
-      context: ../../..
-      dockerfile: src/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation/Dockerfile
+      context: ../../../..
+      dockerfile: src/LanguageCardsBot/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation/Dockerfile
     container_name: language_cards_bot
     restart: unless-stopped
     environment:

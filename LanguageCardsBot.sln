@@ -7,23 +7,23 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LanguageCardsBot", "LanguageCardsBot", "{10A47635-DFB6-28AC-6672-F416582627F9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LanguageCardsBot.Presentation", "src\EnglishCardsBot.Presentation\LanguageCardsBot.Presentation\LanguageCardsBot.Presentation.csproj", "{35C7DB1C-B25E-487F-B521-1BC716224B46}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LanguageCardsBot.Presentation", "src\LanguageCardsBot\EnglishCardsBot.Presentation\LanguageCardsBot.Presentation\LanguageCardsBot.Presentation.csproj", "{35C7DB1C-B25E-487F-B521-1BC716224B46}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Cards", "Cards", "{C4C27542-91B6-43F2-AB52-F086A8A3F5F9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cards.Presentation", "src\Cards.Presentation\Cards.Presentation.csproj", "{85C14A22-CFF3-4D6B-8D43-1F1A02F387FB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cards.Presentation", "src\Cards\Cards.Presentation\Cards.Presentation.csproj", "{85C14A22-CFF3-4D6B-8D43-1F1A02F387FB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Contracts", "Contracts", "{8DA74031-7644-4DB2-9DEF-73E3578597BF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts.Cards", "src\Contracts.Cards\Contracts.Cards.csproj", "{FA073BF0-5F29-4CE6-9309-037450B6AF06}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts.Cards", "src\Contracts\Contracts.Cards\Contracts.Cards.csproj", "{FA073BF0-5F29-4CE6-9309-037450B6AF06}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cards.Domain", "src\Cards.Domain\Cards.Domain.csproj", "{408CE933-46B8-4C99-8031-665A47F352E4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cards.Domain", "src\Cards\Cards.Domain\Cards.Domain.csproj", "{408CE933-46B8-4C99-8031-665A47F352E4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cards.Application", "src\Cards.Application\Cards.Application.csproj", "{7F3F4960-6B55-4C4C-86C4-D1A9262AA5EC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cards.Application", "src\Cards\Cards.Application\Cards.Application.csproj", "{7F3F4960-6B55-4C4C-86C4-D1A9262AA5EC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cards.Infrastructure", "src\Cards.Infrastructure\Cards.Infrastructure.csproj", "{A77AF37E-3744-4F6C-A21C-20087B723F8C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cards.Infrastructure", "src\Cards\Cards.Infrastructure\Cards.Infrastructure.csproj", "{A77AF37E-3744-4F6C-A21C-20087B723F8C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts.Common", "src\Contracts.Common\Contracts.Common.csproj", "{6E2B498E-B95F-418D-AD0B-B378B408BB98}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts.Common", "src\Contracts\Contracts.Common\Contracts.Common.csproj", "{6E2B498E-B95F-418D-AD0B-B378B408BB98}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ApiGateway", "ApiGateway", "{A7DBDDE5-013E-4353-A8FE-9D900B3D68EA}"
 EndProject
@@ -33,13 +33,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Passport", "Passport", "{7CA73363-9E9A-4A6E-9449-F0BBD14A4C08}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Passport.Presentation", "src\Passport.Presentation\Passport.Presentation.csproj", "{001DD21F-581C-4987-A196-5F0F2F246CA3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Passport.Presentation", "src\Passport\Passport.Presentation\Passport.Presentation.csproj", "{001DD21F-581C-4987-A196-5F0F2F246CA3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Passport.Application", "src\Passport.Application\Passport.Application.csproj", "{856410BF-01D4-4191-AC87-F2ABA8BC364A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Passport.Application", "src\Passport\Passport.Application\Passport.Application.csproj", "{856410BF-01D4-4191-AC87-F2ABA8BC364A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Passport.Domain", "src\Passport.Domain\Passport.Domain.csproj", "{A00C5A95-6B38-4615-93F7-3284E119AB9C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Passport.Domain", "src\Passport\Passport.Domain\Passport.Domain.csproj", "{A00C5A95-6B38-4615-93F7-3284E119AB9C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Passport.Infrastructure", "src\Passport.Infrastructure\Passport.Infrastructure.csproj", "{E2933ADF-659B-4C3B-B4BF-4D14E2F52C3B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Passport.Infrastructure", "src\Passport\Passport.Infrastructure\Passport.Infrastructure.csproj", "{E2933ADF-659B-4C3B-B4BF-4D14E2F52C3B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
