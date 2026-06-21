@@ -1,0 +1,13 @@
+# Prerequisites:
+#   docker network create language-cards-shared
+#   docker network create passport
+#   cp src/LanguageCardsBot/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation/.env.example \
+#      src/LanguageCardsBot/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation/.env
+#   (then fill in BOT_TOKEN)
+
+include:
+  - infra/docker-compose.infra.yml
+  - src/Cards/Cards.Presentation/docker-compose.yml
+  - src/Passport/Passport.Presentation/docker-compose.yml
+  - src/LanguageCardsBot/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation/docker-compose.yml
+  - src/ApiGateway/docker-compose.yml

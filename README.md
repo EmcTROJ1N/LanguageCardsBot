@@ -1,43 +1,42 @@
-# English Cards Bot - .NET 8 Implementation
+# LanguageCardsBot
 
-Telegram bot for spaced repetition learning with DDD architecture.
+Telegram-бот для изучения слов методом интервальных повторений. Микросервисная архитектура на .NET 8.
 
-## Architecture
+## Сервисы
 
-- **Domain**: Entities, Value Objects
-- **Application**: Use Cases, Interfaces, DTOs
-- **Infrastructure**: Repositories, External Services
-- **Presentation**: Worker Service, Telegram Bot Handlers
+| Сервис | Описание | Порт |
+|---|---|---|
+| `ApiGateway` | YARP reverse proxy | 5050 |
+| `Cards` | gRPC + REST, хранение карточек | 8080 / 8081 |
+| `Passport` | Аутентификация (Keycloak) | 5286 |
+| `LanguageCardsBot` | Telegram bot worker | — |
 
-## Prerequisites
+## Запуск
 
-- .NET 8 SDK
-- Docker and Docker Compose
-
-## Configuration
-
-1. Copy `.env.example` to `.env` in the Presentation project
-2. Set `BOT_TOKEN` with your Telegram bot token
-
-## Running with Docker
+### 1. Создать внешние сети (один раз)
 
 ```bash
-docker compose -f src/Cards/docker-compose.yml up -d
+docker network create language-cards-shared
+docker network create passport
+docker network create infra
 ```
 
-## Running locally
+### 2. Настроить переменные окружения для бота
 
 ```bash
-cd src/EnglishCardsBot.Presentation/EnglishCardsBot.Presentation
-dotnet run
+cp src/LanguageCardsBot/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation/.env.example \
+   src/LanguageCardsBot/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation/.env
 ```
 
-## Features
+Открыть `.env` и заполнить `BOT_TOKEN`.
 
-- Add words with automatic or manual translation
-- Spaced repetition algorithm
-- Random reminders
-- Daily statistics
-- Export/Import cards
-- Customizable reminder intervals
-- Show/hide translations option
+### 3. Запустить весь стек
+
+```bash
+docker compose up --build
+```
+
+## Требования
+
+- Docker + Docker Compose v2.20+
+- .NET 8 SDK (только для локальной разработки)

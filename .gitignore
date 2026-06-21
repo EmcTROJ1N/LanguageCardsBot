@@ -89,6 +89,11 @@ Migrations/
 !Migrations/*.cs
 
 ####################################
+# Local design docs (personal notes, not tracked)
+####################################
+docs/
+
+####################################
 # Test results
 ####################################
 TestResults/

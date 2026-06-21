@@ -1,0 +1,23 @@
+services:
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: infra_rabbitmq
+    restart: unless-stopped
+    ports:
+      - "${RABBITMQ_AMQP_PORT:-5672}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - infra
+
+networks:
+  infra:
+    name: infra
+    driver: bridge
+
+volumes:
+  rabbitmq-data:
