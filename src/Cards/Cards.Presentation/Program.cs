@@ -6,6 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 CardsMappingConfiguration.Register();
 
 builder.Services
+    .AddSettings(builder.Configuration)
+    .AddRabbitMqPublisher(builder.Configuration)
     .AddDbContext(builder.Configuration)
     .AddCardsInfrastructure()
     .AddCardsApplicationServices(builder.Configuration)

@@ -2,15 +2,21 @@ using System.Reflection;
 using Cards.Application.Abstractions.Repositories;
 using Cards.Application.Cards;
 using Cards.Application.Imports;
+using Cards.Application.Messaging;
 using Cards.Application.Stats;
 using Cards.Application.Translations;
 using Cards.Application.Users;
 using Cards.Infrastructure.Data;
+using Cards.Infrastructure.Messaging;
 using Cards.Infrastructure.Repositories;
+using Cards.Infrastructure.Services;
+using Cards.Infrastructure.Settings;
 using Cards.Presentation.Interceptors;
 using Cards.Presentation.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using RabbitMQ.Client;
 
 namespace Cards.Presentation;
 
@@ -35,6 +41,34 @@ public static class ServiceConfiguration
         return services;
     }
     
+    public static IServiceCollection AddMessaging(this IServiceCollection services)
+    {
+        return services.AddTransient<IMessageBus, RabbitMessageBus>();
+    }
+
+    public static IServiceCollection AddSettings(this IServiceCollection services, IConfiguration configuration)
+    {
+        services
+            .AddOptions<RabbitMqOptions>()
+            .Bind(configuration.GetSection(RabbitMqOptions.Section))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        return services;
+    }
+    
+    public static IServiceCollection AddRabbitMqPublisher(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<RabbitMqOptions>(
+            configuration.GetSection(RabbitMqOptions.Section)
+        );
+        services.AddSingleton<RabbitMqConnectionFactory>();
+        services.AddHostedService<RabbitMqInitializerService>();
+
+        // Transient — новый publisher на каждый запрос
+        //services.AddTransient<IEventPublisher, RabbitMqEventPublisher>();
+        return services;
+    }
     
     /// <summary>
     /// Registers gRPC services and interceptors.
@@ -53,6 +87,8 @@ public static class ServiceConfiguration
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ICardRepository, CardRepository>();
         services.AddScoped<IReviewRepository, ReviewRepository>();
+        services.AddHostedService<ReminderWorkerBackgroundService>();
+        services.AddTransient<IMessageBus, RabbitMessageBus>();
         return services;
     }
 

@@ -13,8 +13,12 @@ services:
       - "8081:8081"
     environment:
       Database__ConnectionString: ${DATABASE_CONNECTION_STRING}
+      RabbitMq__HostName: infra_rabbitmq
+      RabbitMq__UserName: ${RABBITMQ_USER:-guest}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD:-guest}
     networks:
       - shared-grpc
+      - infra
 
   mysql:
     image: mysql:8.4
@@ -41,6 +45,9 @@ services:
 networks:
   shared-grpc:
     name: language-cards-shared
+    external: true
+  infra:
+    name: infra
     external: true
 
 volumes:
