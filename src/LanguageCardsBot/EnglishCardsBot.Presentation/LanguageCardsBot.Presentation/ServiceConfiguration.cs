@@ -1,0 +1,117 @@
+using EnglishCardsBot.Presentation.Commands.Clear;
+using EnglishCardsBot.Presentation.Commands.Export;
+using EnglishCardsBot.Presentation.Commands.Import;
+using EnglishCardsBot.Presentation.Commands.List;
+using EnglishCardsBot.Presentation.Commands.ReminderSettings;
+using EnglishCardsBot.Presentation.Commands.Start;
+using EnglishCardsBot.Presentation.Commands.Stats;
+using EnglishCardsBot.Presentation.Commands.Train;
+using EnglishCardsBot.Presentation.Commands.UserId;
+using EnglishCardsBot.Presentation.Services;
+using EnglishCardsBot.Presentation.Workers;
+using LanguageCardsBot.Contracts.Cards.V3;
+using LanguageCardsBot.Contracts.Messaging.Settings;
+using Telegram.Bot;
+
+namespace EnglishCardsBot.Presentation;
+
+/// <summary>
+/// Registers LanguageCardsBot worker service dependencies.
+/// </summary>
+public static class ServiceConfiguration
+{
+    /// <summary>
+    /// Registers the Telegram bot client using the token resolved from environment or configuration.
+    /// Also registers <see cref="TelegramBotService"/>.
+    /// </summary>
+    public static IServiceCollection AddBotConfiguration(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var botToken = ResolveBotToken(configuration);
+
+        services.AddHttpClient("telegram_bot_client")
+            .AddTypedClient<ITelegramBotClient>((httpClient, _) =>
+                new TelegramBotClient(botToken, httpClient));
+
+        services.AddScoped<TelegramBotService>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers all Telegram command handlers.
+    /// </summary>
+    public static IServiceCollection AddCommandHandlers(this IServiceCollection services)
+    {
+        services.AddScoped<StartCommandHandler>();
+        services.AddScoped<TrainCommandHandle>();
+        services.AddScoped<StatsCommandHandler>();
+        services.AddScoped<ListCommandHandler>();
+        services.AddScoped<ReminderSettingsCommandHandler>();
+        services.AddScoped<ClearCommandHandler>();
+        services.AddScoped<ExportCommandHandler>();
+        services.AddScoped<ImportCommandHandler>();
+        services.AddScoped<UserIdCommandHandler>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers typed gRPC clients pointing at the Cards microservice.
+    /// </summary>
+    public static IServiceCollection AddGrpcClients(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var grpcAddress = configuration["Grpc:CardsServiceUrl"]
+            ?? throw new InvalidOperationException("Grpc:CardsServiceUrl is not set.");
+
+        var uri = new Uri(grpcAddress);
+
+        services.AddGrpcClient<UserService.UserServiceClient>(o => o.Address = uri);
+        services.AddGrpcClient<CardService.CardServiceClient>(o => o.Address = uri);
+        services.AddGrpcClient<StatsService.StatsServiceClient>(o => o.Address = uri);
+        services.AddGrpcClient<CardsImportService.CardsImportServiceClient>(o => o.Address = uri);
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers background workers: Telegram polling and reminder scheduler.
+    /// </summary>
+    public static IServiceCollection AddWorkers(this IServiceCollection services)
+    {
+        services.AddHostedService<Worker>();
+        services.AddHostedService<ReminderWorker>();
+
+        return services;
+    }
+
+    // TODO: AddMessagingConsumers — wire up MassTransit consumers for CardReminderEvent / DailySummaryEvent.
+    // Steps:
+    //   1. Implement CardReminderConsumer and DailySummaryConsumer in Consumers/
+    //   2. services.AddOptions<RabbitMqOptions>().Bind(...).ValidateDataAnnotations().ValidateOnStart();
+    //   3. services.AddMassTransit(x => {
+    //          x.AddConsumer<CardReminderConsumer>();
+    //          x.AddConsumer<DailySummaryConsumer>();
+    //          x.UsingRabbitMq((ctx, cfg) => {
+    //              cfg.Host(options.HostName, h => { h.Username(...); h.Password(...); });
+    //              cfg.ConfigureEndpoints(ctx);
+    //          });
+    //      });
+
+    private static string ResolveBotToken(IConfiguration configuration)
+    {
+        var token = Environment.GetEnvironmentVariable("BOT_TOKEN");
+
+        if (string.IsNullOrWhiteSpace(token))
+            token = configuration["Bot:Token"];
+        if (string.IsNullOrWhiteSpace(token))
+            token = configuration["Token"];
+        if (string.IsNullOrWhiteSpace(token))
+            throw new InvalidOperationException("BOT_TOKEN is not set.");
+
+        return token;
+    }
+}
