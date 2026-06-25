@@ -1,5 +1,5 @@
 using Cards.Infrastructure.Messaging;
-using Cards.Infrastructure.Settings;
+using LanguageCardsBot.Contracts.Messaging.Settings;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;

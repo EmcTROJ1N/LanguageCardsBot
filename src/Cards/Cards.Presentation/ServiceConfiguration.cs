@@ -10,7 +10,7 @@ using Cards.Infrastructure.Data;
 using Cards.Infrastructure.Messaging;
 using Cards.Infrastructure.Repositories;
 using Cards.Infrastructure.Services;
-using Cards.Infrastructure.Settings;
+using LanguageCardsBot.Contracts.Messaging.Settings;
 using Cards.Presentation.Interceptors;
 using Cards.Presentation.Services;
 using Microsoft.EntityFrameworkCore;

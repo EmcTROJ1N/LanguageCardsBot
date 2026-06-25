@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Cards.Application.Messaging;
 using Cards.Infrastructure.Messaging;
-using Cards.Infrastructure.Settings;
+using LanguageCardsBot.Contracts.Messaging.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;

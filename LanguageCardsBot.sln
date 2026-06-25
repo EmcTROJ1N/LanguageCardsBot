@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
@@ -45,6 +45,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Passport.Domain", "src\Passport\Passport.Domain\Passport.Domain.csproj", "{A00C5A95-6B38-4615-93F7-3284E119AB9C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Passport.Infrastructure", "src\Passport\Passport.Infrastructure\Passport.Infrastructure.csproj", "{E2933ADF-659B-4C3B-B4BF-4D14E2F52C3B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts.Messaging", "src\Contracts\Contracts.Messaging\Contracts.Messaging.csproj", "{EB173DAB-EA3F-4FD9-A15C-C6A9DB372526}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -200,6 +202,18 @@ Global
 		{E2933ADF-659B-4C3B-B4BF-4D14E2F52C3B}.Release|x64.Build.0 = Release|Any CPU
 		{E2933ADF-659B-4C3B-B4BF-4D14E2F52C3B}.Release|x86.ActiveCfg = Release|Any CPU
 		{E2933ADF-659B-4C3B-B4BF-4D14E2F52C3B}.Release|x86.Build.0 = Release|Any CPU
+		{EB173DAB-EA3F-4FD9-A15C-C6A9DB372526}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB173DAB-EA3F-4FD9-A15C-C6A9DB372526}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB173DAB-EA3F-4FD9-A15C-C6A9DB372526}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EB173DAB-EA3F-4FD9-A15C-C6A9DB372526}.Debug|x64.Build.0 = Debug|Any CPU
+		{EB173DAB-EA3F-4FD9-A15C-C6A9DB372526}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EB173DAB-EA3F-4FD9-A15C-C6A9DB372526}.Debug|x86.Build.0 = Debug|Any CPU
+		{EB173DAB-EA3F-4FD9-A15C-C6A9DB372526}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB173DAB-EA3F-4FD9-A15C-C6A9DB372526}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB173DAB-EA3F-4FD9-A15C-C6A9DB372526}.Release|x64.ActiveCfg = Release|Any CPU
+		{EB173DAB-EA3F-4FD9-A15C-C6A9DB372526}.Release|x64.Build.0 = Release|Any CPU
+		{EB173DAB-EA3F-4FD9-A15C-C6A9DB372526}.Release|x86.ActiveCfg = Release|Any CPU
+		{EB173DAB-EA3F-4FD9-A15C-C6A9DB372526}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -222,5 +236,6 @@ Global
 		{856410BF-01D4-4191-AC87-F2ABA8BC364A} = {7CA73363-9E9A-4A6E-9449-F0BBD14A4C08}
 		{A00C5A95-6B38-4615-93F7-3284E119AB9C} = {7CA73363-9E9A-4A6E-9449-F0BBD14A4C08}
 		{E2933ADF-659B-4C3B-B4BF-4D14E2F52C3B} = {7CA73363-9E9A-4A6E-9449-F0BBD14A4C08}
+		{EB173DAB-EA3F-4FD9-A15C-C6A9DB372526} = {8DA74031-7644-4DB2-9DEF-73E3578597BF}
 	EndGlobalSection
 EndGlobal

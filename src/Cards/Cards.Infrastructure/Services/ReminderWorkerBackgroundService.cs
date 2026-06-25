@@ -3,6 +3,7 @@ using Cards.Application.Messaging;
 using Cards.Application.Stats;
 using Cards.Application.Users;
 using Cards.Domain.Entities;
+using LanguageCardsBot.Contracts.Messaging.Events;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -81,12 +82,8 @@ public class ReminderWorkerBackgroundService(
         var card = await cardService.GetDueCardAsync(user.Id, cancellationToken);
         if (card != null)
         {
-            var text = user.HideTranslations
-                ? $"{card.Term} — ||{card.Translation}||"
-                : $"{card.Term} — {card.Translation}";
-
             await messageBus.PublishAsync(
-                new SendTelegramMessageEvent(user.ChatId, text, "MarkdownV2"),
+                new CardReminderEvent(user.ChatId, card.Id, card.Term, card.Translation, user.HideTranslations),
                 "reminder",
                 cancellationToken);
         }
@@ -110,24 +107,17 @@ public class ReminderWorkerBackgroundService(
 
         var stats = await statsService.GetTodayStatsAsync(user.Id, cancellationToken);
 
-        var message = $"🌙 *Итоги дня*\n\n" +
-                      $"Новых слов сегодня: *{stats.NewToday}*\n" +
-                      $"Повторений сегодня: *{stats.TotalReviewsToday}* " +
-                      $"(правильных: *{stats.CorrectReviewsToday}*)\n\n" +
-                      $"Всего карточек: *{stats.TotalCards}*\n" +
-                      $"Выучено: *{stats.LearnedCards}*";
-
-        if (!string.IsNullOrEmpty(stats.BestDay))
-            message += $"\n\nЛучший день: *{stats.BestDay}* — *{stats.BestCount}* повторений";
-
         await messageBus.PublishAsync(
-            new SendTelegramMessageEvent(user.ChatId, message, "MarkdownV2"),
+            new DailySummaryEvent(
+                user.ChatId,
+                stats.NewToday,
+                stats.TotalReviewsToday,
+                stats.CorrectReviewsToday,
+                stats.TotalCards,
+                stats.LearnedCards,
+                stats.BestDay,
+                stats.BestCount),
             "daily-summary",
             cancellationToken);
     }
 }
-
-/// <summary>
-/// Message published to the bot worker when a Telegram message needs to be sent.
-/// </summary>
-public sealed record SendTelegramMessageEvent(long ChatId, string Text, string ParseMode);
