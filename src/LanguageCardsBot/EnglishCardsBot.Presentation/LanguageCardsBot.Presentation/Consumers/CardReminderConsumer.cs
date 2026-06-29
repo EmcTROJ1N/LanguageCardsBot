@@ -1,3 +1,4 @@
+using EnglishCardsBot.Presentation.Services;
 using LanguageCardsBot.Contracts.Messaging.Events;
 using MassTransit;
 using Telegram.Bot;
@@ -13,9 +14,12 @@ public class CardReminderConsumer(
     {
         var e = context.Message;
 
+        var term = MarkdownV2Escaper.Escape(e.Term);
+        var translation = MarkdownV2Escaper.Escape(e.Translation);
+
         var text = e.HideTranslation
-            ? $"{e.Term} — ||{e.Translation}||"
-            : $"{e.Term} — {e.Translation}";
+            ? $"{term} — ||{translation}||"
+            : $"{term} — {translation}";
 
         await botClient.SendMessage(
             chatId: e.ChatId,

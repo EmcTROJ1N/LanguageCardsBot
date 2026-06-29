@@ -773,32 +773,7 @@ public class TelegramBotService(
         return (line, "", true);
     }
 
-    private string EscapeMarkdown(string text)
-    {
-        if (string.IsNullOrEmpty(text))
-            return "";
-
-        return text
-            .Replace("\\", "\\\\")
-            .Replace("_", "\\_")
-            .Replace("*", "\\*")
-            .Replace("[", "\\[")
-            .Replace("]", "\\]")
-            .Replace("(", "\\(")
-            .Replace(")", "\\)")
-            .Replace("~", "\\~")
-            .Replace("`", "\\`")
-            .Replace(">", "\\>")
-            .Replace("#", "\\#")
-            .Replace("+", "\\+")
-            .Replace("-", "\\-")
-            .Replace("=", "\\=")
-            .Replace("|", "\\|")
-            .Replace("{", "\\{")
-            .Replace("}", "\\}")
-            .Replace(".", "\\.")
-            .Replace("!", "\\!");
-    }
+    private static string EscapeMarkdown(string text) => MarkdownV2Escaper.Escape(text);
 
     internal Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
     {

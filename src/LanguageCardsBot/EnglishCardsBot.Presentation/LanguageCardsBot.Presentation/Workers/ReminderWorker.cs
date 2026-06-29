@@ -29,7 +29,10 @@ public class ReminderWorker(
                 var statsService = scope.ServiceProvider.GetRequiredService<StatsService.StatsServiceClient>();
                 var userService = scope.ServiceProvider.GetRequiredService<UserService.UserServiceClient>();
 
+                return;
+
                 var response = await userService.GetAllAsync(new GetAllUsersRequest(), cancellationToken: stoppingToken);
+                
 
                 foreach (var user in response.Users)
                 {
