@@ -21,17 +21,28 @@ public class RabbitMessageBus(RabbitMqConnectionFactory connectionFactory,
 
         await channel.ExchangeDeclareAsync(
             exchange: options.Value.ExchangeName,
-            type: ExchangeType.Topic,
+            type: ExchangeType.Fanout,
             durable: true,
             cancellationToken: ct
         );
 
-        var body = JsonSerializer.SerializeToUtf8Bytes(message);
-        var props = new BasicProperties { Persistent = true };
+        var envelope = new
+        {
+            messageId = Guid.NewGuid(),
+            messageType = new[] { $"urn:message:{typeof(T).Namespace}:{typeof(T).Name}" },
+            message
+        };
+
+        var body = JsonSerializer.SerializeToUtf8Bytes(envelope);
+        var props = new BasicProperties
+        {
+            Persistent = true,
+            ContentType = "application/vnd.masstransit+json"
+        };
 
         await channel.BasicPublishAsync(
             exchange: options.Value.ExchangeName,
-            routingKey: routingKey,
+            routingKey: string.Empty,
             mandatory: false,
             basicProperties: props,
             body: body,

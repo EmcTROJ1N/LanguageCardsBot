@@ -22,10 +22,6 @@
     <PackageReference Include="LanguageCardsBot.Contracts.Cards" Version="3.0.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Events\" />
-  </ItemGroup>
-
   <PropertyGroup>
     <LanguageCardsBotGrpcServices>Client</LanguageCardsBotGrpcServices>
   </PropertyGroup>

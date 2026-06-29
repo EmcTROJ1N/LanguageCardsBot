@@ -10,14 +10,19 @@ services:
       Bot__DailySummaryTime: ${BOT_DAILY_SUMMARY_TIME:-21:00:00}
       Database__ConnectionString: ${DATABASE_CONNECTION_STRING:-Data Source=data/bot.db}
       Grpc__CardsServiceUrl: ${GRPC_CARDS_SERVICE_URL:-http://cards-presentation:8080}
+      RabbitMq__HostName: ${RABBITMQ_HOST:-infra_rabbitmq}
     volumes:
       - language-cards-bot-data:/app/data
     networks:
       - shared-grpc
+      - infra
 
 networks:
   shared-grpc:
     name: language-cards-shared
+    external: true
+  infra:
+    name: infra
     external: true
 
 volumes:

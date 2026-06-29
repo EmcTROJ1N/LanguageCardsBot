@@ -7,10 +7,14 @@ using EnglishCardsBot.Presentation.Commands.Start;
 using EnglishCardsBot.Presentation.Commands.Stats;
 using EnglishCardsBot.Presentation.Commands.Train;
 using EnglishCardsBot.Presentation.Commands.UserId;
+using EnglishCardsBot.Presentation.Consumers;
 using EnglishCardsBot.Presentation.Services;
 using EnglishCardsBot.Presentation.Workers;
 using LanguageCardsBot.Contracts.Cards.V3;
+using LanguageCardsBot.Contracts.Messaging.Events;
 using LanguageCardsBot.Contracts.Messaging.Settings;
+using MassTransit;
+using Microsoft.Extensions.Options;
 using Telegram.Bot;
 
 namespace EnglishCardsBot.Presentation;
@@ -88,18 +92,42 @@ public static class ServiceConfiguration
         return services;
     }
 
-    // TODO: AddMessagingConsumers — wire up MassTransit consumers for CardReminderEvent / DailySummaryEvent.
-    // Steps:
-    //   1. Implement CardReminderConsumer and DailySummaryConsumer in Consumers/
-    //   2. services.AddOptions<RabbitMqOptions>().Bind(...).ValidateDataAnnotations().ValidateOnStart();
-    //   3. services.AddMassTransit(x => {
-    //          x.AddConsumer<CardReminderConsumer>();
-    //          x.AddConsumer<DailySummaryConsumer>();
-    //          x.UsingRabbitMq((ctx, cfg) => {
-    //              cfg.Host(options.HostName, h => { h.Username(...); h.Password(...); });
-    //              cfg.ConfigureEndpoints(ctx);
-    //          });
-    //      });
+    public static IServiceCollection AddSettings(this IServiceCollection services, IConfiguration configuration)
+    {
+        services
+            .AddOptions<RabbitMqOptions>()
+            .Bind(configuration.GetSection(RabbitMqOptions.Section))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        return services;
+    }
+    
+    public static IServiceCollection AddMassTransitWithRabbitMq(this IServiceCollection services)
+    {
+        services.AddMassTransit(x =>
+        {
+            x.AddConsumer<CardReminderConsumer>();
+
+            x.UsingRabbitMq((context, cfg) =>
+            {
+                var options = context.GetRequiredService<IOptions<RabbitMqOptions>>().Value;
+
+                cfg.Host(options.HostName, h =>
+                {
+                    h.Username(options.UserName);
+                    h.Password(options.Password);
+                });
+
+                cfg.Message<CardReminderEvent>(m =>
+                    m.SetEntityName(options.ExchangeName));
+
+                cfg.ConfigureEndpoints(context);
+            });
+        });
+
+        return services;
+    }
 
     private static string ResolveBotToken(IConfiguration configuration)
     {
