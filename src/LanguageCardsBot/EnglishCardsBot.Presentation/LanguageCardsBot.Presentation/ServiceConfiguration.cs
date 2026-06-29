@@ -9,7 +9,6 @@ using EnglishCardsBot.Presentation.Commands.Train;
 using EnglishCardsBot.Presentation.Commands.UserId;
 using EnglishCardsBot.Presentation.Consumers;
 using EnglishCardsBot.Presentation.Services;
-using EnglishCardsBot.Presentation.Workers;
 using LanguageCardsBot.Contracts.Cards.V3;
 using LanguageCardsBot.Contracts.Messaging.Events;
 using LanguageCardsBot.Contracts.Messaging.Settings;
@@ -87,8 +86,6 @@ public static class ServiceConfiguration
     public static IServiceCollection AddWorkers(this IServiceCollection services)
     {
         services.AddHostedService<Worker>();
-        services.AddHostedService<ReminderWorker>();
-
         return services;
     }
 
