@@ -84,8 +84,8 @@ public class ReminderWorkerBackgroundService(
         {
             await messageBus.PublishAsync(
                 new CardReminderEvent(user.ChatId, card.Id, card.Term, card.Translation, user.HideTranslations),
-                "reminder",
-                cancellationToken);
+                routingKey: "reminder",
+                ct: cancellationToken);
         }
 
         var nextReminder = nowUtc.AddMinutes(Math.Max(1, user.ReminderIntervalMinutes));
@@ -117,7 +117,7 @@ public class ReminderWorkerBackgroundService(
                 stats.LearnedCards,
                 stats.BestDay,
                 stats.BestCount),
-            "daily-summary",
-            cancellationToken);
+            routingKey: "daily-summary",
+            ct: cancellationToken);
     }
 }
