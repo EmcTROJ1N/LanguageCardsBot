@@ -14,4 +14,15 @@ public class UserEntity: IEntityWithId
     public DateTime? NextReminderAtUtc { get; set; }
 
     public bool HideTranslations { get; set; } = true;
+
+    /// <summary>
+    /// Computes and stores the next reminder time based on the user's configured interval.
+    /// </summary>
+    /// <param name="sentAtUtc">UTC timestamp of the just-sent reminder.</param>
+    /// <returns>The newly computed <see cref="NextReminderAtUtc"/> value.</returns>
+    public DateTime ScheduleNextReminder(DateTime sentAtUtc)
+    {
+        NextReminderAtUtc = sentAtUtc.AddMinutes(Math.Max(1, ReminderIntervalMinutes));
+        return NextReminderAtUtc.Value;
+    }
 }

@@ -1,4 +1,5 @@
 using Cards.Application.Abstractions.Repositories;
+using Cards.Application.Reminders;
 using Cards.Domain.Entities;
 
 namespace Cards.Application.Users;
@@ -6,7 +7,9 @@ namespace Cards.Application.Users;
 /// <summary>
 /// Implements user use cases shared by gRPC and REST transports.
 /// </summary>
-public sealed class UserApplicationService(IUserRepository userRepository) : IUserApplicationService
+public sealed class UserApplicationService(
+    IUserRepository userRepository,
+    ICardReminderOrchestrator reminderOrchestrator) : IUserApplicationService
 {
     /// <inheritdoc />
     public Task<UserEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -34,7 +37,9 @@ public sealed class UserApplicationService(IUserRepository userRepository) : IUs
             HideTranslations = command.HideTranslations
         };
 
-        return await userRepository.AddAsync(user, cancellationToken);
+        var created = await userRepository.AddAsync(user, cancellationToken);
+        reminderOrchestrator.RegisterUser(created);
+        return created;
     }
 
     /// <inheritdoc />
@@ -62,6 +67,7 @@ public sealed class UserApplicationService(IUserRepository userRepository) : IUs
             return false;
 
         await userRepository.DeleteAsync(id, cancellationToken);
+        reminderOrchestrator.UnregisterUser(id);
         return true;
     }
 

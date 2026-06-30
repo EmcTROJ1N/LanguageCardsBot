@@ -3,6 +3,7 @@ using Cards.Application.Abstractions.Repositories;
 using Cards.Application.Cards;
 using Cards.Application.Imports;
 using Cards.Application.Messaging;
+using Cards.Application.Reminders;
 using Cards.Application.Stats;
 using Cards.Application.Translations;
 using Cards.Application.Users;
@@ -80,14 +81,16 @@ public static class ServiceConfiguration
     }
 
     /// <summary>
-    /// Registers infrastructure repository implementations.
+    /// Registers infrastructure repository implementations and background services.
     /// </summary>
     public static IServiceCollection AddCardsInfrastructure(this IServiceCollection services)
     {
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ICardRepository, CardRepository>();
         services.AddScoped<IReviewRepository, ReviewRepository>();
-        services.AddHostedService<ReminderWorkerBackgroundService>();
+        services.AddSingleton<ICardReminderOrchestrator, CardReminderOrchestrator>();
+        services.AddHostedService<CardReminderStartupService>();
+        services.AddHostedService<DailySummaryBackgroundService>();
         services.AddTransient<IMessageBus, RabbitMessageBus>();
         return services;
     }
