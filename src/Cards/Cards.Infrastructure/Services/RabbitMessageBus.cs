@@ -8,31 +8,42 @@ using RabbitMQ.Client;
 
 namespace Cards.Infrastructure.Services;
 
+/// <summary>
+/// RabbitMQ implementation of <see cref="IMessageBus"/> that publishes messages with
+/// publisher confirms enabled. <see cref="PublishAsync{T}"/> throws if the broker does
+/// not confirm the message within 5 seconds.
+/// </summary>
 public class RabbitMessageBus(
     RabbitMqConnectionFactory connectionFactory,
     IOptions<RabbitMqOptions> options,
     ILogger<RabbitMessageBus> logger) : IMessageBus
 {
-    // Кэш: чтобы не объявлять одни и те же очереди при каждом вызове
     private readonly HashSet<int> _declaredDelayQueues = new();
 
+    /// <inheritdoc/>
     public async Task PublishAsync<T>(
         T message,
         TimeSpan? delay = null,
         string? routingKey = null,
         CancellationToken ct = default) where T : class
     {
+        using var confirmCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        confirmCts.CancelAfter(TimeSpan.FromSeconds(5));
+
+        var channelOptions = new CreateChannelOptions(
+            publisherConfirmationsEnabled: true,
+            publisherConfirmationTrackingEnabled: true);
+
         await using var channel = await connectionFactory.Connection
-            .CreateChannelAsync(cancellationToken: ct);
+            .CreateChannelAsync(channelOptions, confirmCts.Token);
 
         routingKey ??= typeof(T).Name;
 
-        // Основной fanout exchange — куда в итоге попадёт сообщение
         await channel.ExchangeDeclareAsync(
             exchange: options.Value.ExchangeName,
             type: ExchangeType.Fanout,
             durable: true,
-            cancellationToken: ct
+            cancellationToken: confirmCts.Token
         );
 
         BasicProperties props;
@@ -48,23 +59,19 @@ public class RabbitMessageBus(
         else
         {
             var ttlMs = (int)delay.Value.TotalMilliseconds;
-
-            // DLX exchange: direct, чтобы routing key работал
             var dlxExchange = $"{options.Value.ExchangeName}.delayed";
 
             await channel.ExchangeDeclareAsync(
                 exchange: dlxExchange,
                 type: ExchangeType.Direct,
                 durable: true,
-                cancellationToken: ct
+                cancellationToken: confirmCts.Token
             );
 
-            // Waiting queue на конкретный TTL — создаём один раз, потом берём из кэша
-            var waitingQueue = await EnsureDelayQueueAsync(channel, dlxExchange, ttlMs, ct);
+            var waitingQueue = await EnsureDelayQueueAsync(channel, dlxExchange, ttlMs, confirmCts.Token);
 
-            // Публикуем в waiting queue через default exchange
-            publishExchange   = string.Empty;  // default exchange
-            publishRoutingKey = waitingQueue;   // routing key = имя очереди
+            publishExchange   = string.Empty;
+            publishRoutingKey = waitingQueue;
             props = BuildProperties(ttlMs);
         }
 
@@ -83,7 +90,7 @@ public class RabbitMessageBus(
             mandatory:        false,
             basicProperties:  props,
             body:             body,
-            cancellationToken: ct
+            cancellationToken: confirmCts.Token
         );
 
         logger.LogInformation(
@@ -93,9 +100,9 @@ public class RabbitMessageBus(
         );
     }
 
-    // Объявляет waiting queue для заданного TTL и возвращает её имя.
-    // Называем очередь детерминированно: повторный вызов с тем же ttlMs
-    // просто убеждается, что очередь существует (declare idempotent).
+    /// <summary>
+    /// Declares the waiting queue for the given TTL (idempotent) and returns its name.
+    /// </summary>
     private async Task<string> EnsureDelayQueueAsync(
         IChannel channel,
         string dlxExchange,
@@ -121,9 +128,8 @@ public class RabbitMessageBus(
             cancellationToken: ct
         );
 
-        // Связываем DLX exchange с основным fanout exchange по routing key
         await channel.ExchangeBindAsync(
-            destination: options.Value.ExchangeName,  // fanout — финальный получатель
+            destination: options.Value.ExchangeName,
             source:      dlxExchange,
             routingKey:  options.Value.ExchangeName,
             cancellationToken: ct
