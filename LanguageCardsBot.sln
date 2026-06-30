@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
@@ -7,27 +7,27 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LanguageCardsBot", "LanguageCardsBot", "{10A47635-DFB6-28AC-6672-F416582627F9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LanguageCardsBot.Presentation", "src\LanguageCardsBot\EnglishCardsBot.Presentation\LanguageCardsBot.Presentation\LanguageCardsBot.Presentation.csproj", "{35C7DB1C-B25E-487F-B521-1BC716224B46}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LanguageCardsBot.Presentation", "src\LanguageCardsBot\EnglishCardsBot.Presentation\LanguageCardsBot.Presentation\LanguageCardsBot.Presentation.csproj", "{35C7DB1C-B25E-487F-B521-1BC716224B46}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Cards", "Cards", "{C4C27542-91B6-43F2-AB52-F086A8A3F5F9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cards.Presentation", "src\Cards\Cards.Presentation\Cards.Presentation.csproj", "{85C14A22-CFF3-4D6B-8D43-1F1A02F387FB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cards.Presentation", "src\Cards\Cards.Presentation\Cards.Presentation.csproj", "{85C14A22-CFF3-4D6B-8D43-1F1A02F387FB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Contracts", "Contracts", "{8DA74031-7644-4DB2-9DEF-73E3578597BF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts.Cards", "src\Contracts\Contracts.Cards\Contracts.Cards.csproj", "{FA073BF0-5F29-4CE6-9309-037450B6AF06}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contracts.Cards", "src\Contracts\Contracts.Cards\Contracts.Cards.csproj", "{FA073BF0-5F29-4CE6-9309-037450B6AF06}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cards.Domain", "src\Cards\Cards.Domain\Cards.Domain.csproj", "{408CE933-46B8-4C99-8031-665A47F352E4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cards.Domain", "src\Cards\Cards.Domain\Cards.Domain.csproj", "{408CE933-46B8-4C99-8031-665A47F352E4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cards.Application", "src\Cards\Cards.Application\Cards.Application.csproj", "{7F3F4960-6B55-4C4C-86C4-D1A9262AA5EC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cards.Application", "src\Cards\Cards.Application\Cards.Application.csproj", "{7F3F4960-6B55-4C4C-86C4-D1A9262AA5EC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cards.Infrastructure", "src\Cards\Cards.Infrastructure\Cards.Infrastructure.csproj", "{A77AF37E-3744-4F6C-A21C-20087B723F8C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cards.Infrastructure", "src\Cards\Cards.Infrastructure\Cards.Infrastructure.csproj", "{A77AF37E-3744-4F6C-A21C-20087B723F8C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts.Common", "src\Contracts\Contracts.Common\Contracts.Common.csproj", "{6E2B498E-B95F-418D-AD0B-B378B408BB98}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contracts.Common", "src\Contracts\Contracts.Common\Contracts.Common.csproj", "{6E2B498E-B95F-418D-AD0B-B378B408BB98}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ApiGateway", "ApiGateway", "{A7DBDDE5-013E-4353-A8FE-9D900B3D68EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiGateway", "src\ApiGateway\ApiGateway.csproj", "{AAF26210-5C74-49E8-87C3-3D413B08CC3C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiGateway", "src\ApiGateway\ApiGateway.csproj", "{AAF26210-5C74-49E8-87C3-3D413B08CC3C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{703EE2D8-052A-474A-B477-6F22C9E43C88}"
 	ProjectSection(SolutionItems) = preProject
@@ -46,7 +46,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Passport.Domain", "src\Pass
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Passport.Infrastructure", "src\Passport\Passport.Infrastructure\Passport.Infrastructure.csproj", "{E2933ADF-659B-4C3B-B4BF-4D14E2F52C3B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts.Messaging", "src\Contracts\Contracts.Messaging\Contracts.Messaging.csproj", "{EB173DAB-EA3F-4FD9-A15C-C6A9DB372526}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contracts.Messaging", "src\Contracts\Contracts.Messaging\Contracts.Messaging.csproj", "{EB173DAB-EA3F-4FD9-A15C-C6A9DB372526}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

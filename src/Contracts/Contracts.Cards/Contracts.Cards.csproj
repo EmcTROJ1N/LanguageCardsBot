@@ -1,29 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-
-        <IsPackable>true</IsPackable>
-        <IncludeBuildOutput>false</IncludeBuildOutput>
-        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-
-        <PackageId>Contracts.Cards</PackageId>
-        <Version>3.0.1</Version>
-        <Authors>EmcTROJ1N team</Authors>
-        <Description>Shared gRPC contracts</Description>
-        <NoDefaultExcludes>true</NoDefaultExcludes>
-        <RootNamespace>LanguageCardsBot.Contracts</RootNamespace>
-    </PropertyGroup>
-
-    <ItemGroup>
-        <None Include="Protos\**\*.proto" Pack="true" PackagePath="proto\" />
-        <None Include="buildTransitive\**\*" Pack="true" PackagePath="buildTransitive\" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Protos\" />
-    </ItemGroup>
-    
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>true</IsPackable>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageId>Contracts.Cards</PackageId>
+    <Version>3.0.1</Version>
+    <Authors>EmcTROJ1N team</Authors>
+    <Description>Shared gRPC contracts</Description>
+    <NoDefaultExcludes>true</NoDefaultExcludes>
+    <RootNamespace>LanguageCardsBot.Contracts</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="Protos\**\*.proto" Pack="true" PackagePath="proto\" />
+    <None Include="buildTransitive\**\*" Pack="true" PackagePath="buildTransitive\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Protos\" />
+  </ItemGroup>
 </Project>
