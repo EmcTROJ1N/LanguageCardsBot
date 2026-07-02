@@ -12,6 +12,8 @@
     <Description>Shared gRPC contracts</Description>
     <NoDefaultExcludes>true</NoDefaultExcludes>
     <RootNamespace>LanguageCardsBot.Contracts</RootNamespace>
+    <RepositoryUrl>https://github.com/EmcTROJ1N/LanguageCardsBot</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
   <ItemGroup>
     <None Include="Protos\**\*.proto" Pack="true" PackagePath="proto\" />

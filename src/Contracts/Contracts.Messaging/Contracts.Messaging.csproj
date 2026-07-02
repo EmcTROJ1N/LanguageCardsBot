@@ -11,6 +11,8 @@
     <Description>Shared RabbitMQ event contracts for LanguageCardsBot services</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RootNamespace>LanguageCardsBot.Contracts.Messaging</RootNamespace>
+    <RepositoryUrl>https://github.com/EmcTROJ1N/LanguageCardsBot</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Validators\" />

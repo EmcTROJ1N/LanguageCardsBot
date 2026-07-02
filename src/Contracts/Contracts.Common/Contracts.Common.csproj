@@ -11,5 +11,7 @@
     <Description>Shared gRPC error codes and typed exceptions for LanguageCardsBot services</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RootNamespace>LanguageCardsBot.Common</RootNamespace>
+    <RepositoryUrl>https://github.com/EmcTROJ1N/LanguageCardsBot</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 </Project>
