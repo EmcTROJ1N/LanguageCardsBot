@@ -5,6 +5,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Passport.Infrastructure.Authentication;
 
+/// <summary>
+/// Delegating handler that attaches a Keycloak admin service-account token to outgoing
+/// HTTP requests via the <c>client_credentials</c> grant.
+/// Tokens are cached in memory until 30 seconds before expiry to avoid redundant round-trips.
+/// </summary>
 public sealed class KeycloakAdminAuthHandler(
     IHttpClientFactory httpClientFactory,
     IConfiguration configuration,
@@ -17,6 +22,7 @@ public sealed class KeycloakAdminAuthHandler(
     private string TokenEndpoint =>
         $"{configuration["Keycloak:AuthServerUrl"]}/realms/{configuration["Keycloak:Realm"]}/protocol/openid-connect/token";
 
+    /// <inheritdoc />
     protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request, CancellationToken cancellationToken)
     {

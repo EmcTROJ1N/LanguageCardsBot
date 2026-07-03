@@ -6,6 +6,10 @@ using Passport.Application.Models;
 
 namespace Passport.Infrastructure.Repositories;
 
+/// <summary>
+/// Obtains Keycloak tokens for end-users via the public client using the
+/// Resource Owner Password grant (<c>SignInAsync</c>) and the Refresh Token grant (<c>RefreshTokenAsync</c>).
+/// </summary>
 public sealed class KeycloakTokenClient(
     IHttpClientFactory httpClientFactory,
     IConfiguration configuration) : IKeycloakTokenClient
@@ -16,6 +20,7 @@ public sealed class KeycloakTokenClient(
     private string ClientId => configuration["KeycloakPublicClient:ClientId"]
         ?? throw new InvalidOperationException("KeycloakPublicClient:ClientId is not configured.");
 
+    /// <inheritdoc />
     public async Task<AuthToken?> SignInAsync(string email, string password, CancellationToken cancellationToken = default)
     {
         var client = httpClientFactory.CreateClient("keycloak-token");
@@ -35,6 +40,7 @@ public sealed class KeycloakTokenClient(
         return token is null ? null : MapToken(token);
     }
 
+    /// <inheritdoc />
     public async Task<AuthToken?> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
         var client = httpClientFactory.CreateClient("keycloak-token");
