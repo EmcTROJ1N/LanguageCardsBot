@@ -1,6 +1,8 @@
 using LanguageCardsBot.Contracts.Cards.V3;
 using LanguageCardsBot.Contracts.Messaging.Events;
 using LanguageCardsBot.Contracts.Messaging.Settings;
+using LanguageCardsBot.Presentation.Abstractions;
+using LanguageCardsBot.Presentation.Callbacks;
 using LanguageCardsBot.Presentation.Commands.Clear;
 using LanguageCardsBot.Presentation.Commands.Export;
 using LanguageCardsBot.Presentation.Commands.Import;
@@ -11,6 +13,8 @@ using LanguageCardsBot.Presentation.Commands.Stats;
 using LanguageCardsBot.Presentation.Commands.Train;
 using LanguageCardsBot.Presentation.Commands.UserId;
 using LanguageCardsBot.Presentation.Consumers;
+using LanguageCardsBot.Presentation.Dispatchers;
+using LanguageCardsBot.Presentation.Handlers;
 using LanguageCardsBot.Presentation.Services;
 using MassTransit;
 using Microsoft.Extensions.Options;
@@ -24,8 +28,8 @@ namespace LanguageCardsBot.Presentation;
 public static class ServiceConfiguration
 {
     /// <summary>
-    /// Registers the Telegram bot client using the token resolved from environment or configuration.
-    /// Also registers <see cref="TelegramBotService"/>.
+    /// Registers the Telegram bot client, <see cref="TelegramBotService"/>, dispatchers,
+    /// and all command/callback handlers.
     /// </summary>
     public static IServiceCollection AddBotConfiguration(
         this IServiceCollection services,
@@ -38,24 +42,54 @@ public static class ServiceConfiguration
                 new TelegramBotClient(botToken, httpClient));
 
         services.AddScoped<TelegramBotService>();
+        services.AddScoped<IDocumentHandler, ImportCommandHandler>();
+        services.AddScoped<ICardInputHandler, CardInputHandler>();
+
+        services.AddScoped<ICallbackHandler, TrainingCallbackHandler>();
+        services.AddScoped<ICallbackHandler, CardsCallbackHandler>();
+        services.AddScoped<ICallbackDispatcher, CallbackDispatcher>();
 
         return services;
     }
 
     /// <summary>
-    /// Registers all Telegram command handlers.
+    /// Builds the <see cref="CommandRegistry"/> and registers all command handlers with their triggers.
+    /// Both slash commands and menu button texts are registered here — one place per command.
     /// </summary>
     public static IServiceCollection AddCommandHandlers(this IServiceCollection services)
     {
-        services.AddScoped<StartCommandHandler>();
-        services.AddScoped<TrainCommandHandle>();
-        services.AddScoped<StatsCommandHandler>();
-        services.AddScoped<ListCommandHandler>();
-        services.AddScoped<ReminderSettingsCommandHandler>();
-        services.AddScoped<ClearCommandHandler>();
-        services.AddScoped<ExportCommandHandler>();
-        services.AddScoped<ImportCommandHandler>();
-        services.AddScoped<UserIdCommandHandler>();
+        var registry = new CommandRegistry();
+        services.AddSingleton(registry);
+        services.AddScoped<ICommandDispatcher, CommandDispatcher>();
+
+        services
+            .AddCommand<StartCommandHandler, StartCommand>(
+                registry, ["/start"],
+                (chatId, _) => new StartCommand(chatId))
+            .AddCommand<TrainCommandHandle, TrainCommand>(
+                registry, ["/train", "🎯 Тренировка"],
+                (chatId, _) => new TrainCommand(chatId))
+            .AddCommand<StatsCommandHandler, StatCommand>(
+                registry, ["/stats", "📊 Статистика"],
+                (chatId, _) => new StatCommand(chatId))
+            .AddCommand<ListCommandHandler, ListCommand>(
+                registry, ["/list", "/cards", "📚 Мои карточки"],
+                (chatId, _) => new ListCommand(chatId))
+            .AddCommand<ReminderSettingsCommandHandler, ReminderSettingsCommand>(
+                registry, ["/reminder_settings", "⚙️ Настройки"],
+                (chatId, args) => new ReminderSettingsCommand(chatId, args))
+            .AddCommand<ClearCommandHandler, ClearCommand>(
+                registry, ["/clear"],
+                (chatId, _) => new ClearCommand(chatId))
+            .AddCommand<ExportCommandHandler, ExportCommand>(
+                registry, ["/export", "📤 Экспорт"],
+                (chatId, _) => new ExportCommand(chatId))
+            .AddCommand<ImportCommandHandler, ImportCommand>(
+                registry, ["/import", "📥 Импорт"],
+                (chatId, _) => new ImportCommand(chatId))
+            .AddCommand<UserIdCommandHandler, UserIdCommand>(
+                registry, ["/user_id", "/id"],
+                (chatId, _) => new UserIdCommand(chatId));
 
         return services;
     }
