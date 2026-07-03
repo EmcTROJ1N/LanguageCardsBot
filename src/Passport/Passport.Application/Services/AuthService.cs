@@ -1,22 +1,26 @@
 using Keycloak.AuthServices.Sdk.Admin;
 using Keycloak.AuthServices.Sdk.Admin.Models;
 using Keycloak.AuthServices.Sdk.Admin.Requests.Users;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Passport.Application.Abstractions.Clients;
 using Passport.Application.Abstractions.Services;
 using Passport.Application.Models;
+using Passport.Application.Options;
 using Passport.Domain.ValueObjects;
 
 namespace Passport.Application.Services;
 
+/// <summary>
+/// Implements authentication use cases by coordinating Keycloak admin and token clients.
+/// </summary>
 public sealed class AuthService(
     IKeycloakUserClient keycloakUserClient,
     IKeycloakTokenClient tokenClient,
-    IConfiguration configuration) : IAuthService
+    IOptions<KeycloakOptions> options) : IAuthService
 {
-    private string Realm { get; } = configuration["Keycloak:Realm"]
-        ?? throw new InvalidOperationException("Keycloak:Realm is not configured.");
+    private string Realm { get; } = options.Value.Realm;
 
+    /// <inheritdoc />
     public async Task<bool> RegisterAsync(RegisterUserCommand command, CancellationToken cancellationToken = default)
     {
         var email = Email.Create(command.Email);
@@ -52,6 +56,7 @@ public sealed class AuthService(
         return true;
     }
 
+    /// <inheritdoc />
     public Task<AuthToken?> LoginAsync(LoginUserCommand command, CancellationToken cancellationToken = default)
     {
         var email = Email.Create(command.Email);
@@ -59,12 +64,14 @@ public sealed class AuthService(
         return tokenClient.SignInAsync(email.Value, password, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task<AuthToken?> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
         var normalizedToken = NormalizeRequired(refreshToken, nameof(refreshToken));
         return tokenClient.RefreshTokenAsync(normalizedToken, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<AuthUser?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         try
