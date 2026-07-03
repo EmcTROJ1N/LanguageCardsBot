@@ -79,12 +79,12 @@ In Docker Compose these are overridden via environment variables:
 
 ## DI registration
 
-All service wiring lives in `ServiceConfiguration.cs` (extension methods on `IServiceCollection`):
+Each layer owns its extension method; `Program.cs` calls them in order:
 
-- `AddPassportInfrastructure` — registers `KeycloakAdminAuthHandler`, admin HTTP client (`AddKeycloakAdminHttpClient`), `IKeycloakTokenClient`.
-- `AddPassportApplicationServices` — registers `IAuthService` → `AuthService`.
-- `AddPassportAuthentication` — `AddKeycloakWebApiAuthentication` (JWT bearer).
-- `AddAuthorization` — `AddKeycloakAuthorization` + policy `AdminAndUser` (realm role `User` + resource role `Admin`).
+- `AddPassportInfrastructure` (`Passport.Infrastructure/DependencyInjection.cs`) — binds `KeycloakOptions`, registers `KeycloakAdminAuthHandler`, admin HTTP client (`AddKeycloakAdminHttpClient`), `IKeycloakTokenClient`.
+- `AddPassportApplicationServices` (`Passport.Application/DependencyInjection.cs`) — registers `IAuthService` → `AuthService`.
+- `AddPassportAuthentication` (`Presentation/ServiceConfiguration.cs`) — `AddKeycloakWebApiAuthentication` (JWT bearer).
+- `AddPassportAuthorization` (`Presentation/ServiceConfiguration.cs`) — `AddKeycloakAuthorization` + policy `AdminAndUser` (realm role `User` + resource role `Admin`).
 
 ## DDD layer rules
 
