@@ -1,36 +1,21 @@
 using Keycloak.AuthServices.Authentication;
 using Keycloak.AuthServices.Authorization;
-using Keycloak.AuthServices.Sdk;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi;
-using Passport.Application.Abstractions.Clients;
-using Passport.Application.Abstractions.Services;
-using Passport.Application.Services;
-using Passport.Infrastructure.Authentication;
-using Passport.Infrastructure.Repositories;
 
 namespace Passport.Presentation;
 
+/// <summary>
+/// Extension methods for registering Presentation-layer services.
+/// </summary>
 public static class ServiceConfiguration
 {
-    public static IServiceCollection AddPassportApplicationServices(this IServiceCollection services)
-    {
-        services.AddScoped<IAuthService, AuthService>();
-        return services;
-    }
-
-    public static IServiceCollection AddPassportInfrastructure(
-        this IServiceCollection services,
-        IConfiguration configuration)
-    {
-        services.AddSingleton<KeycloakAdminAuthHandler>();
-        services.AddKeycloakAdminHttpClient(configuration)
-            .AddHttpMessageHandler<KeycloakAdminAuthHandler>();
-        services.AddHttpClient("keycloak-token");
-        services.AddScoped<IKeycloakTokenClient, KeycloakTokenClient>();
-        return services;
-    }
-
+    /// <summary>
+    /// Registers Keycloak JWT bearer authentication for the web API.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <param name="configuration">Application configuration used to resolve Keycloak endpoints and realm.</param>
+    /// <returns>The same <paramref name="services"/> instance for chaining.</returns>
     public static IServiceCollection AddPassportAuthentication(
         this IServiceCollection services,
         IConfiguration configuration)
@@ -41,8 +26,14 @@ public static class ServiceConfiguration
         });
         return services;
     }
-    
-    public static IServiceCollection AddAuthorization(
+
+    /// <summary>
+    /// Registers Keycloak authorization and the built-in <c>AdminAndUser</c> policy.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <param name="configuration">Application configuration used to resolve Keycloak endpoints and realm.</param>
+    /// <returns>The same <paramref name="services"/> instance for chaining.</returns>
+    public static IServiceCollection AddPassportAuthorization(
         this IServiceCollection services,
         IConfiguration configuration)
     {
@@ -52,8 +43,8 @@ public static class ServiceConfiguration
                 options.AddPolicy("AdminAndUser", builder =>
                 {
                     builder
-                        .RequireRealmRoles("User") // Realm role is fetched from token
-                        .RequireResourceRoles("Admin"); // Resource/Client role is fetched from token
+                        .RequireRealmRoles("User")
+                        .RequireResourceRoles("Admin");
                 });
             })
             .AddKeycloakAuthorization(configuration);
@@ -61,6 +52,11 @@ public static class ServiceConfiguration
         return services;
     }
 
+    /// <summary>
+    /// Registers OpenAPI documentation and the Scalar UI for the Passport API.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <returns>The same <paramref name="services"/> instance for chaining.</returns>
     public static IServiceCollection AddPassportSwaggerDocumentation(this IServiceCollection services)
     {
         services.AddOpenApi(options =>

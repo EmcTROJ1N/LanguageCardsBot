@@ -1,9 +1,5 @@
-using Keycloak.AuthServices.Authentication;
-using Keycloak.AuthServices.Authorization;
-using Keycloak.AuthServices.Common;
-using Keycloak.AuthServices.Sdk;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Passport.Infrastructure.Authentication;
+using Passport.Application;
+using Passport.Infrastructure;
 using Passport.Presentation;
 using Scalar.AspNetCore;
 
@@ -13,7 +9,7 @@ builder.Services
     .AddPassportInfrastructure(builder.Configuration)
     .AddPassportApplicationServices()
     .AddPassportAuthentication(builder.Configuration)
-    .AddAuthorization(builder.Configuration);
+    .AddPassportAuthorization(builder.Configuration);
 
 builder.Services.AddControllers();
 builder.Services.AddPassportSwaggerDocumentation();
