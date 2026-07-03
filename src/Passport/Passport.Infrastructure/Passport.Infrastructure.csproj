@@ -7,4 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Passport.Application\Passport.Application.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Keycloak.AuthServices.Sdk" Version="3.0.0" />
+  </ItemGroup>
 </Project>
