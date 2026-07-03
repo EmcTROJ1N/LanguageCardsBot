@@ -1,17 +1,23 @@
 using LanguageCardsBot.Contracts.Cards.V3;
 using LanguageCardsBot.Presentation.Abstractions;
+using LanguageCardsBot.Presentation.Helpers;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace LanguageCardsBot.Presentation.Commands.Train;
 
-public class TrainCommandHandle(ITelegramBotClient botClient, CardService.CardServiceClient cardService): ICommandHandler<TrainCommand>
+/// <summary>Handles the /train command: shows the next due card for spaced-repetition review.</summary>
+public class TrainCommandHandle(
+    ITelegramBotClient botClient,
+    CardService.CardServiceClient cardService) : ICommandHandler<TrainCommand>
 {
+    /// <inheritdoc/>
     public async Task HandleAsync(TrainCommand command, User user, CancellationToken cancellationToken = default)
     {
-        var response = await cardService.GetDueCardAsync(new GetDueCardRequest { UserId = user.Id }, cancellationToken: cancellationToken);
-        
+        var response = await cardService.GetDueCardAsync(
+            new GetDueCardRequest { UserId = user.Id }, cancellationToken: cancellationToken);
+
         if (response.Card is null)
         {
             await botClient.SendMessage(
@@ -21,13 +27,11 @@ public class TrainCommandHandle(ITelegramBotClient botClient, CardService.CardSe
             return;
         }
 
-        var text = BuildTrainingMessage(response.Card, user.HideTranslations);
-        var keyboard = new InlineKeyboardMarkup([
-            [
-                InlineKeyboardButton.WithCallbackData("Знал 😎", $"know_{response.Card.Id}"),
-                InlineKeyboardButton.WithCallbackData("Не знал 😕", $"dontknow_{response.Card.Id}")
-            ]
-        ]);
+        var text = TrainingMessageBuilder.Build(response.Card, user.HideTranslations);
+        var keyboard = new InlineKeyboardMarkup([[
+            InlineKeyboardButton.WithCallbackData("Знал 😎", $"know_{response.Card.Id}"),
+            InlineKeyboardButton.WithCallbackData("Не знал 😕", $"dontknow_{response.Card.Id}")
+        ]]);
 
         await botClient.SendMessage(
             chatId: command.ChatId,
@@ -35,21 +39,5 @@ public class TrainCommandHandle(ITelegramBotClient botClient, CardService.CardSe
             parseMode: ParseMode.MarkdownV2,
             replyMarkup: keyboard,
             cancellationToken: cancellationToken);
-    }
-    
-    private string BuildTrainingMessage(Card card, bool hideTranslation)
-    {
-        var translation = hideTranslation ? $"||{card.Translation}||" : card.Translation;
-        var example = string.IsNullOrEmpty(card.Example)
-            ? ""
-            : hideTranslation ? $"||{card.Example}||" : card.Example;
-
-        var text = $"💡 *Слово*: {card.Term}\nПеревод: {translation}";
-        if (!string.IsNullOrEmpty(example))
-        {
-            text += $"\nПример: {example}";
-        }
-
-        return text;
     }
 }
