@@ -34,6 +34,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		docker-compose.yml = docker-compose.yml
 		infra\docker-compose.infra.yml = infra\docker-compose.infra.yml
 		README.md = README.md
+		infra\exporters\cards.my.cnf.example = infra\exporters\cards.my.cnf.example
+		infra\exporters\passport.my.cnf.example = infra\exporters\passport.my.cnf.example
+		infra\rabbitmq\enabled_plugins = infra\rabbitmq\enabled_plugins
+		infra\.env.example = infra\.env.example
+		infra\prometheus\prometheus.yml = infra\prometheus\prometheus.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Passport", "Passport", "{7CA73363-9E9A-4A6E-9449-F0BBD14A4C08}"

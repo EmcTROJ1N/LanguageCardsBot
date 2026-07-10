@@ -82,6 +82,10 @@ secrets.json
 docker-compose.override.yml
 docker-compose.env
 
+# MySQL exporter config (contains credentials)
+*.my.cnf
+!*.my.cnf.example
+
 ####################################
 # Entity Framework
 ####################################

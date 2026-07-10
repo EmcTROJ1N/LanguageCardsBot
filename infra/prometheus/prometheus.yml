@@ -1,0 +1,24 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: rabbitmq
+    static_configs:
+      - targets: ['rabbitmq:15692']
+
+  - job_name: mysql_cards
+    static_configs:
+      - targets: ['mysql-exporter-cards:9104']
+
+  - job_name: mysql_passport
+    static_configs:
+      - targets: ['mysql-exporter-passport:9104']
+
+  - job_name: node
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  - job_name: keycloak
+    static_configs:
+      - targets: ['passport_keycloak:9000']
+    metrics_path: /metrics

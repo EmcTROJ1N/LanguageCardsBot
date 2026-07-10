@@ -1,0 +1,5 @@
+[client]
+user=
+password=
+host=passport_mysql
+port=3306
