@@ -51,4 +51,9 @@ public interface ICardRepository
     /// Deletes all cards owned by a user and returns the number of deleted rows.
     /// </summary>
     Task<int> DeleteAllByUserIdAsync(int userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Counts cards that are currently due for review across all users.
+    /// </summary>
+    Task<int> CountDueAsync(CancellationToken cancellationToken = default);
 }

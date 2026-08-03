@@ -1,3 +1,4 @@
+using Cards.Application.Abstractions.Metrics;
 using Cards.Application.Abstractions.Repositories;
 using Cards.Domain.Entities;
 using Cards.Domain.ValueObjects;
@@ -9,7 +10,8 @@ namespace Cards.Application.Cards;
 /// </summary>
 public sealed class CardApplicationService(
     ICardRepository cardRepository,
-    IReviewRepository reviewRepository) : ICardApplicationService
+    IReviewRepository reviewRepository,
+    ICardMetrics cardMetrics) : ICardApplicationService
 {
     /// <inheritdoc />
     public Task<CardEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -65,7 +67,9 @@ public sealed class CardApplicationService(
             Learned = false
         };
 
-        return await cardRepository.AddAsync(card, cancellationToken);
+        var added = await cardRepository.AddAsync(card, cancellationToken);
+        cardMetrics.IncrementCardsCreatedTotal();
+        return added;
     }
 
     /// <inheritdoc />
@@ -105,8 +109,12 @@ public sealed class CardApplicationService(
         if (card is null)
             return false;
 
+        var wasLearned = card.Learned;
         var review = card.RecordReview(isCorrect, DateTime.UtcNow);
         await reviewRepository.AddAsync(review, cancellationToken);
+
+        if (!wasLearned && card.Learned)
+            cardMetrics.RecordCardTimeToLearn(card.CreatedAt, review.ReviewedAt);
 
         return true;
     }

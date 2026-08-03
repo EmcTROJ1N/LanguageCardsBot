@@ -1,4 +1,5 @@
 using System.Reflection;
+using Cards.Application.Abstractions.Metrics;
 using Cards.Application.Abstractions.Repositories;
 using Cards.Application.Cards;
 using Cards.Application.Imports;
@@ -9,6 +10,7 @@ using Cards.Application.Translations;
 using Cards.Application.Users;
 using Cards.Infrastructure.Data;
 using Cards.Infrastructure.Messaging;
+using Cards.Infrastructure.Metrics;
 using Cards.Infrastructure.Repositories;
 using Cards.Infrastructure.Services;
 using LanguageCardsBot.Contracts.Messaging.Settings;
@@ -17,6 +19,9 @@ using Cards.Presentation.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using RabbitMQ.Client;
 
 namespace Cards.Presentation;
@@ -92,6 +97,8 @@ public static class ServiceConfiguration
         services.AddHostedService<CardReminderStartupService>();
         services.AddHostedService<DailySummaryBackgroundService>();
         services.AddTransient<IMessageBus, RabbitMessageBus>();
+        services.AddSingleton<ICardMetrics, CardMetrics>();
+        services.AddHostedService<DueBacklogMetricsService>();
         return services;
     }
 
@@ -132,6 +139,32 @@ public static class ServiceConfiguration
             if (File.Exists(xmlFilePath))
                 options.IncludeXmlComments(xmlFilePath, includeControllerXmlComments: true);
         });
+
+        return services;
+    }
+
+    public static IServiceCollection AddOpenTelemetryPrometheus(this IServiceCollection services, string environmentName)
+    {
+        var serviceName = "cards";
+        // TODO: make a better decision
+        var serviceVersion = "1.0.0";
+
+
+        services.AddOpenTelemetry()
+            .ConfigureResource(r => r
+                .AddService(serviceName: serviceName, serviceVersion: serviceVersion)
+                .AddAttributes(new Dictionary<string, object>
+                {
+                    ["deployment.environment"] = environmentName
+                }))
+            .WithMetrics(metrics =>
+            {
+                metrics
+                    .AddAspNetCoreInstrumentation() // покрывает и gRPC-сервер
+                    .AddRuntimeInstrumentation()
+                    .AddMeter("LanguageCardsBot.Cards")
+                    .AddPrometheusExporter();
+            });
 
         return services;
     }

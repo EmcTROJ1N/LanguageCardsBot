@@ -11,15 +11,16 @@ builder.Services
     .AddDbContext(builder.Configuration)
     .AddCardsInfrastructure()
     .AddCardsApplicationServices(builder.Configuration)
-    .AddGrpcServices();
-
-builder.Services.AddControllers();
-builder.Services.AddSwaggerDocumentation();
+    .AddGrpcServices()
+    .AddOpenTelemetryPrometheus(builder.Environment.EnvironmentName)
+    .AddSwaggerDocumentation()
+    .AddControllers();
 
 var app = builder.Build();
 
 app.UseSwaggerDocumentation();
 app.MapGrpcServices();
 app.MapControllers();
+app.MapPrometheusScrapingEndpoint();
 
 app.Run();

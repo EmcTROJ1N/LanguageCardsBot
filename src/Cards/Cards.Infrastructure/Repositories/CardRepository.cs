@@ -61,4 +61,14 @@ public class CardRepository(CardsMysqlDbContext dbContext): AbstractCrudReposito
             .Where(x => x.UserId == userId)
             .ExecuteDeleteAsync(cancellationToken);
     }
+
+    /// <inheritdoc />
+    public Task<int> CountDueAsync(CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.UtcNow;
+
+        return dbContext.Set<CardEntity>()
+            .Where(x => !x.Learned && (x.NextReviewAt == null || x.NextReviewAt <= now))
+            .CountAsync(cancellationToken);
+    }
 }
