@@ -5,7 +5,10 @@ services:
       dockerfile: src/LanguageCardsBot/LanguageCardsBot.Presentation/LanguageCardsBot.Presentation/Dockerfile
     container_name: language_cards_bot
     restart: unless-stopped
+    ports:
+      - "8090:8090"
     environment:
+      ASPNETCORE_URLS: http://+:8090
       BOT_TOKEN: ${BOT_TOKEN}
       Bot__DailySummaryTime: ${BOT_DAILY_SUMMARY_TIME:-21:00:00}
       Database__ConnectionString: ${DATABASE_CONNECTION_STRING:-Data Source=data/bot.db}

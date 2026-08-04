@@ -98,6 +98,7 @@ public static class ServiceConfiguration
         services.AddHostedService<DailySummaryBackgroundService>();
         services.AddTransient<IMessageBus, RabbitMessageBus>();
         services.AddSingleton<ICardMetrics, CardMetrics>();
+        services.AddSingleton<IMessagingMetrics, MessagingMetrics>();
         services.AddHostedService<CardsGaugeMetricsService>();
         return services;
     }
@@ -163,6 +164,7 @@ public static class ServiceConfiguration
                     .AddAspNetCoreInstrumentation() // покрывает и gRPC-сервер
                     .AddRuntimeInstrumentation()
                     .AddMeter("LanguageCardsBot.Cards")
+                    .AddMeter("LanguageCardsBot.Messaging")
                     .AddPrometheusExporter();
             });
 

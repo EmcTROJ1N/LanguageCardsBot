@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using System.Text.Json;
+using Cards.Application.Abstractions.Metrics;
 using Cards.Application.Messaging;
 using Cards.Infrastructure.Messaging;
 using LanguageCardsBot.Contracts.Messaging.Settings;
@@ -16,7 +18,8 @@ namespace Cards.Infrastructure.Services;
 public class RabbitMessageBus(
     RabbitMqConnectionFactory connectionFactory,
     IOptions<RabbitMqOptions> options,
-    ILogger<RabbitMessageBus> logger) : IMessageBus
+    ILogger<RabbitMessageBus> logger,
+    IMessagingMetrics metrics) : IMessageBus
 {
     private readonly HashSet<int> _declaredDelayQueues = new();
 
@@ -27,77 +30,94 @@ public class RabbitMessageBus(
         string? routingKey = null,
         CancellationToken ct = default) where T : class
     {
+        var effectiveRoutingKey = routingKey ?? typeof(T).Name;
+        var stopwatch = Stopwatch.StartNew();
+        var outcome = "failed";
+
         using var confirmCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
         confirmCts.CancelAfter(TimeSpan.FromSeconds(5));
 
-        var channelOptions = new CreateChannelOptions(
-            publisherConfirmationsEnabled: true,
-            publisherConfirmationTrackingEnabled: true);
-
-        await using var channel = await connectionFactory.Connection
-            .CreateChannelAsync(channelOptions, confirmCts.Token);
-
-        routingKey ??= typeof(T).Name;
-
-        await channel.ExchangeDeclareAsync(
-            exchange: options.Value.ExchangeName,
-            type: ExchangeType.Fanout,
-            durable: true,
-            cancellationToken: confirmCts.Token
-        );
-
-        BasicProperties props;
-        string publishExchange;
-        string publishRoutingKey;
-
-        if (delay is null or { TotalMilliseconds: <= 0 })
+        try
         {
-            publishExchange   = options.Value.ExchangeName;
-            publishRoutingKey = string.Empty;
-            props = BuildProperties();
-        }
-        else
-        {
-            var ttlMs = (int)delay.Value.TotalMilliseconds;
-            var dlxExchange = $"{options.Value.ExchangeName}.delayed";
+            var channelOptions = new CreateChannelOptions(
+                publisherConfirmationsEnabled: true,
+                publisherConfirmationTrackingEnabled: true);
+
+            await using var channel = await connectionFactory.Connection
+                .CreateChannelAsync(channelOptions, confirmCts.Token);
 
             await channel.ExchangeDeclareAsync(
-                exchange: dlxExchange,
-                type: ExchangeType.Direct,
+                exchange: options.Value.ExchangeName,
+                type: ExchangeType.Fanout,
                 durable: true,
                 cancellationToken: confirmCts.Token
             );
 
-            var waitingQueue = await EnsureDelayQueueAsync(channel, dlxExchange, ttlMs, confirmCts.Token);
+            BasicProperties props;
+            string publishExchange;
+            string publishRoutingKey;
 
-            publishExchange   = string.Empty;
-            publishRoutingKey = waitingQueue;
-            props = BuildProperties(ttlMs);
+            if (delay is null or { TotalMilliseconds: <= 0 })
+            {
+                publishExchange   = options.Value.ExchangeName;
+                publishRoutingKey = string.Empty;
+                props = BuildProperties();
+            }
+            else
+            {
+                var ttlMs = (int)delay.Value.TotalMilliseconds;
+                var dlxExchange = $"{options.Value.ExchangeName}.delayed";
+
+                await channel.ExchangeDeclareAsync(
+                    exchange: dlxExchange,
+                    type: ExchangeType.Direct,
+                    durable: true,
+                    cancellationToken: confirmCts.Token
+                );
+
+                var waitingQueue = await EnsureDelayQueueAsync(channel, dlxExchange, ttlMs, confirmCts.Token);
+
+                publishExchange   = string.Empty;
+                publishRoutingKey = waitingQueue;
+                props = BuildProperties(ttlMs);
+            }
+
+            var envelope = new
+            {
+                messageId   = Guid.NewGuid(),
+                messageType = new[] { $"urn:message:{typeof(T).Namespace}:{typeof(T).Name}" },
+                message
+            };
+
+            var body = JsonSerializer.SerializeToUtf8Bytes(envelope);
+
+            await channel.BasicPublishAsync(
+                exchange:         publishExchange,
+                routingKey:       publishRoutingKey,
+                mandatory:        false,
+                basicProperties:  props,
+                body:             body,
+                cancellationToken: confirmCts.Token
+            );
+
+            logger.LogInformation(
+                "Published {EventType}{Delay}",
+                typeof(T).Name,
+                delay.HasValue ? $" with delay {delay.Value}" : " immediately"
+            );
+
+            outcome = "ok";
         }
-
-        var envelope = new
+        catch (OperationCanceledException) when (confirmCts.IsCancellationRequested && !ct.IsCancellationRequested)
         {
-            messageId   = Guid.NewGuid(),
-            messageType = new[] { $"urn:message:{typeof(T).Namespace}:{typeof(T).Name}" },
-            message
-        };
-
-        var body = JsonSerializer.SerializeToUtf8Bytes(envelope);
-
-        await channel.BasicPublishAsync(
-            exchange:         publishExchange,
-            routingKey:       publishRoutingKey,
-            mandatory:        false,
-            basicProperties:  props,
-            body:             body,
-            cancellationToken: confirmCts.Token
-        );
-
-        logger.LogInformation(
-            "Published {EventType}{Delay}",
-            typeof(T).Name,
-            delay.HasValue ? $" with delay {delay.Value}" : " immediately"
-        );
+            outcome = "timeout";
+            throw;
+        }
+        finally
+        {
+            stopwatch.Stop();
+            metrics.RecordPublish(effectiveRoutingKey, outcome, stopwatch.Elapsed.TotalSeconds);
+        }
     }
 
     /// <summary>

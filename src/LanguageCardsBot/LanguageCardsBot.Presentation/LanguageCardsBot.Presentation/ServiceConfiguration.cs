@@ -18,6 +18,8 @@ using LanguageCardsBot.Presentation.Handlers;
 using LanguageCardsBot.Presentation.Services;
 using MassTransit;
 using Microsoft.Extensions.Options;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using Telegram.Bot;
 
 namespace LanguageCardsBot.Presentation;
@@ -156,6 +158,32 @@ public static class ServiceConfiguration
                 cfg.ConfigureEndpoints(context);
             });
         });
+
+        return services;
+    }
+
+    public static IServiceCollection AddOpenTelemetryPrometheus(
+        this IServiceCollection services,
+        string environmentName)
+    {
+        var serviceName = "language-cards-bot";
+        var serviceVersion = "1.0.0";
+
+        services.AddOpenTelemetry()
+            .ConfigureResource(r => r
+                .AddService(serviceName: serviceName, serviceVersion: serviceVersion)
+                .AddAttributes(new Dictionary<string, object>
+                {
+                    ["deployment.environment"] = environmentName
+                }))
+            .WithMetrics(metrics =>
+            {
+                metrics
+                    .AddAspNetCoreInstrumentation()
+                    .AddRuntimeInstrumentation()
+                    .AddMeter("MassTransit")
+                    .AddPrometheusExporter();
+            });
 
         return services;
     }
