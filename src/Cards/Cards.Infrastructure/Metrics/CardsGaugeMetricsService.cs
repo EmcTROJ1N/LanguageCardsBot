@@ -7,14 +7,15 @@ using Microsoft.Extensions.Logging;
 namespace Cards.Infrastructure.Metrics;
 
 /// <summary>
-/// Periodically polls the count of due-for-review cards and publishes it as a gauge metric.
+/// Periodically polls DB-backed gauge metrics: due-review backlog and active cards by level.
 /// </summary>
-public sealed class DueBacklogMetricsService(
+public sealed class CardsGaugeMetricsService(
     IServiceScopeFactory scopeFactory,
     ICardMetrics cardMetrics,
-    ILogger<DueBacklogMetricsService> logger) : BackgroundService
+    ILogger<CardsGaugeMetricsService> logger) : BackgroundService
 {
     private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(30);
+    private const int MaxLevel = 10;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -25,8 +26,13 @@ public sealed class DueBacklogMetricsService(
             {
                 await using var scope = scopeFactory.CreateAsyncScope();
                 var cardRepository = scope.ServiceProvider.GetRequiredService<ICardRepository>();
-                var count = await cardRepository.CountDueAsync(stoppingToken);
-                cardMetrics.RecordCardDueBacklog(count);
+
+                var dueCount = await cardRepository.CountDueAsync(stoppingToken);
+                cardMetrics.RecordCardDueBacklog(dueCount);
+
+                var byLevel = await cardRepository.CountActiveByLevelAsync(stoppingToken);
+                for (var level = 1; level <= MaxLevel; level++)
+                    cardMetrics.RecordCardsActive(level, byLevel.TryGetValue(level, out var count) ? count : 0);
             }
             catch (OperationCanceledException)
             {
@@ -34,7 +40,7 @@ public sealed class DueBacklogMetricsService(
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Failed to record due-backlog metric");
+                logger.LogWarning(ex, "Failed to poll gauge metrics");
             }
         }
         while (await timer.WaitForNextTickAsync(stoppingToken));

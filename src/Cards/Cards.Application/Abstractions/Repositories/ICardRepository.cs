@@ -56,4 +56,9 @@ public interface ICardRepository
     /// Counts cards that are currently due for review across all users.
     /// </summary>
     Task<int> CountDueAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Counts non-learned cards grouped by Level across all users.
+    /// </summary>
+    Task<IReadOnlyDictionary<int, int>> CountActiveByLevelAsync(CancellationToken cancellationToken = default);
 }

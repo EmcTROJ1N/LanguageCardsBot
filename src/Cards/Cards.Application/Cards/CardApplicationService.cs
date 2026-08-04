@@ -110,11 +110,23 @@ public sealed class CardApplicationService(
             return false;
 
         var wasLearned = card.Learned;
+        var preLevel = card.Level;
         var review = card.RecordReview(isCorrect, DateTime.UtcNow);
         await reviewRepository.AddAsync(review, cancellationToken);
 
+        cardMetrics.IncrementCardsReviewsTotal(isCorrect, preLevel);
+
         if (!wasLearned && card.Learned)
+        {
+            cardMetrics.IncrementCardsLearnedTotal();
             cardMetrics.RecordCardTimeToLearn(card.CreatedAt, review.ReviewedAt);
+        }
+
+        if (!isCorrect && preLevel > 1)
+        {
+            cardMetrics.IncrementCardsLevelResetTotal();
+            cardMetrics.RecordCardReviewStreak(preLevel - 1);
+        }
 
         return true;
     }
@@ -127,6 +139,7 @@ public sealed class CardApplicationService(
             return false;
 
         await cardRepository.DeleteAsync(id, cancellationToken);
+        cardMetrics.IncrementCardsDeletedTotal(1, "single");
         return true;
     }
 
@@ -134,6 +147,8 @@ public sealed class CardApplicationService(
     public async Task<bool> DeleteByUserIdAsync(int userId, CancellationToken cancellationToken = default)
     {
         var deleted = await cardRepository.DeleteAllByUserIdAsync(userId, cancellationToken);
+        if (deleted > 0)
+            cardMetrics.IncrementCardsDeletedTotal(deleted, "bulk_user");
         return deleted > 0;
     }
 }

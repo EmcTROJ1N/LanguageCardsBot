@@ -71,4 +71,17 @@ public class CardRepository(CardsMysqlDbContext dbContext): AbstractCrudReposito
             .Where(x => !x.Learned && (x.NextReviewAt == null || x.NextReviewAt <= now))
             .CountAsync(cancellationToken);
     }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyDictionary<int, int>> CountActiveByLevelAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var groups = await dbContext.Set<CardEntity>()
+            .Where(x => !x.Learned)
+            .GroupBy(x => x.Level)
+            .Select(g => new { Level = g.Key, Count = g.Count() })
+            .ToListAsync(cancellationToken);
+
+        return groups.ToDictionary(g => g.Level, g => g.Count);
+    }
 }

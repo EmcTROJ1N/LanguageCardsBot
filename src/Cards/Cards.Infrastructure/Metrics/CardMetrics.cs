@@ -8,6 +8,12 @@ public class CardMetrics : ICardMetrics
     private readonly Counter<long> _cardsCreatedTotal;
     private readonly Gauge<long> _cardsDueBacklog;
     private readonly Histogram<double> _cardsTimeToLearnDays;
+    private readonly Counter<long> _cardsLearnedTotal;
+    private readonly Counter<long> _cardsDeletedTotal;
+    private readonly Gauge<long> _cardsActive;
+    private readonly Counter<long> _cardsReviewsTotal;
+    private readonly Counter<long> _cardsLevelResetTotal;
+    private readonly Histogram<long> _cardsReviewStreak;
 
     public CardMetrics(IMeterFactory meterFactory)
     {
@@ -27,6 +33,36 @@ public class CardMetrics : ICardMetrics
             name: "cards.time_to_learn.days",
             unit: "day",
             description: "Время от CreatedAt до достижения Level 10, в днях");
+
+        _cardsLearnedTotal = meter.CreateCounter<long>(
+            name: "cards.learned.total",
+            unit: "cards",
+            description: "Количество карточек, которые достигли Level 10");
+
+        _cardsDeletedTotal = meter.CreateCounter<long>(
+            name: "cards.deleted.total",
+            unit: "cards",
+            description: "Количество удалённых карточек");
+
+        _cardsActive = meter.CreateGauge<long>(
+            name: "cards.active",
+            unit: "card",
+            description: "Количество активных (невыученных) карточек в разбивке по уровню");
+
+        _cardsReviewsTotal = meter.CreateCounter<long>(
+            name: "cards.reviews.total",
+            unit: "reviews",
+            description: "Количество проведённых повторов карточек");
+
+        _cardsLevelResetTotal = meter.CreateCounter<long>(
+            name: "cards.level_reset.total",
+            unit: "resets",
+            description: "Количество откатов уровня карточки к 1 после неверного ответа");
+
+        _cardsReviewStreak = meter.CreateHistogram<long>(
+            name: "cards.review_streak",
+            unit: "reviews",
+            description: "Длина завершённой серии корректных повторов до первой ошибки");
     }
 
     public void IncrementCardsCreatedTotal() =>
@@ -37,4 +73,32 @@ public class CardMetrics : ICardMetrics
 
     public void RecordCardTimeToLearn(DateTime createdAt, DateTime reachedLevel10At) =>
         _cardsTimeToLearnDays.Record((reachedLevel10At - createdAt).TotalDays);
+
+    public void IncrementCardsLearnedTotal() =>
+        _cardsLearnedTotal.Add(1);
+
+    public void IncrementCardsDeletedTotal(int count, string scope) =>
+        _cardsDeletedTotal.Add(count, new KeyValuePair<string, object?>("scope", scope));
+
+    public void RecordCardsActive(int level, int count) =>
+        _cardsActive.Record(count, new KeyValuePair<string, object?>("level", level));
+
+    public void IncrementCardsReviewsTotal(bool isCorrect, int levelBeforeReview) =>
+        _cardsReviewsTotal.Add(
+            1,
+            new KeyValuePair<string, object?>("result", isCorrect ? "correct" : "incorrect"),
+            new KeyValuePair<string, object?>("level_bucket", LevelBucket(levelBeforeReview)));
+
+    public void IncrementCardsLevelResetTotal() =>
+        _cardsLevelResetTotal.Add(1);
+
+    public void RecordCardReviewStreak(int streakLength) =>
+        _cardsReviewStreak.Record(streakLength);
+
+    private static string LevelBucket(int level) => level switch
+    {
+        <= 3 => "1-3",
+        <= 6 => "4-6",
+        _ => "7-10"
+    };
 }

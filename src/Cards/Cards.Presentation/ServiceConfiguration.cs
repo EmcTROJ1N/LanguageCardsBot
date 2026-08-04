@@ -98,7 +98,7 @@ public static class ServiceConfiguration
         services.AddHostedService<DailySummaryBackgroundService>();
         services.AddTransient<IMessageBus, RabbitMessageBus>();
         services.AddSingleton<ICardMetrics, CardMetrics>();
-        services.AddHostedService<DueBacklogMetricsService>();
+        services.AddHostedService<CardsGaugeMetricsService>();
         return services;
     }
 
