@@ -1,3 +1,4 @@
+using System.Reflection;
 using LanguageCardsBot.Contracts.Cards.V3;
 using LanguageCardsBot.Contracts.Messaging.Events;
 using LanguageCardsBot.Contracts.Messaging.Settings;
@@ -167,7 +168,9 @@ public static class ServiceConfiguration
         string environmentName)
     {
         var serviceName = "language-cards-bot";
-        var serviceVersion = "1.0.0";
+        var serviceVersion = Assembly.GetEntryAssembly()
+            ?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+            ?? "unknown";
 
         services.AddOpenTelemetry()
             .ConfigureResource(r => r

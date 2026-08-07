@@ -147,8 +147,9 @@ public static class ServiceConfiguration
     public static IServiceCollection AddOpenTelemetryPrometheus(this IServiceCollection services, string environmentName)
     {
         var serviceName = "cards";
-        // TODO: make a better decision
-        var serviceVersion = "1.0.0";
+        var serviceVersion = Assembly.GetEntryAssembly()
+            ?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+            ?? "unknown";
 
 
         services.AddOpenTelemetry()
