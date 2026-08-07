@@ -13,10 +13,9 @@ public class ExportCommandHandler(ITelegramBotClient botClient,
 {
     public async Task HandleAsync(ExportCommand command, User user, CancellationToken cancellationToken = default)
     {
-        var cards = (await cardService.GetByUserIdAsync(new GetCardsByUserIdRequest
-        {
-            UserId =  user.Id
-        }, cancellationToken: cancellationToken)).Cards.ToList();
+        var cards = (await cardService.GetByUserIdAsync(
+            new GetCardsByUserIdRequest { UserId = user.Id },
+            cancellationToken: cancellationToken)).Cards.ToList();
 
         if (!cards.Any())
         {

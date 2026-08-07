@@ -9,10 +9,9 @@ public class StatsCommandHandler(ITelegramBotClient botClient, StatsService.Stat
 {
     public async Task HandleAsync(StatCommand command, User user, CancellationToken cancellationToken = default)
     {
-        var response = await statsService.GetTodayStatsAsync(new GetTodayStatsRequest
-        {
-           UserId =  user.Id
-        }, cancellationToken: cancellationToken);
+        var response = await statsService.GetTodayStatsAsync(
+            new GetTodayStatsRequest { UserId = user.Id },
+            cancellationToken: cancellationToken);
 
         var msg = $"📊 *Статистика*\n\n" +
                   $"Сегодня добавлено новых слов: *{response.Stats.NewToday}*\n" +

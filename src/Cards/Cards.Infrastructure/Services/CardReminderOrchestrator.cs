@@ -105,7 +105,8 @@ public sealed class CardReminderOrchestrator(
 
                 logger.LogDebug(
                     "Scheduled next reminder for user {UserId} at {NextTime}",
-                    userId, nextTime);
+                    userId,
+                    nextTime);
             }
             catch (OperationCanceledException)
             {

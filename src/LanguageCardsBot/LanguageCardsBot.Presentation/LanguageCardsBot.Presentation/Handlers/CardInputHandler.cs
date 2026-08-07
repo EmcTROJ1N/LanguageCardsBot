@@ -65,7 +65,7 @@ public class CardInputHandler(
     private static (string Term, string Translation, bool UseAuto) ParseWordWithTranslation(string line)
     {
         line = line.Trim();
-        if (string.IsNullOrEmpty(line)) return ("", "", true);
+        if (string.IsNullOrEmpty(line)) return (string.Empty, string.Empty, true);
 
         if (line.Contains(" | "))
         {
@@ -117,6 +117,6 @@ public class CardInputHandler(
             }
         }
 
-        return (line, "", true);
+        return (line, string.Empty, true);
     }
 }

@@ -13,7 +13,7 @@ public static class TrainingMessageBuilder
     {
         var translation = hideTranslation ? $"||{card.Translation}||" : card.Translation;
         var example = string.IsNullOrEmpty(card.Example)
-            ? ""
+            ? string.Empty
             : hideTranslation ? $"||{card.Example}||" : card.Example;
 
         var text = $"💡 *Слово*: {card.Term}\nПеревод: {translation}";

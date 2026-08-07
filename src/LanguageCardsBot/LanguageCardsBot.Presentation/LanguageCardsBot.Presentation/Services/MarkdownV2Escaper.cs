@@ -5,7 +5,7 @@ internal static class MarkdownV2Escaper
     internal static string Escape(string text)
     {
         if (string.IsNullOrEmpty(text))
-            return "";
+            return string.Empty;
 
         return text
             .Replace("\\", "\\\\")

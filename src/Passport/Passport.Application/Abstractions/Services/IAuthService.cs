@@ -38,5 +38,4 @@ public interface IAuthService
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>User profile, or <c>null</c> when the user does not exist.</returns>
     Task<AuthUser?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken = default);
-
 }

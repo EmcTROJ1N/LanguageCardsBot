@@ -1,4 +1,3 @@
-
 namespace LanguageCardsBot.Contracts.Messaging.Settings;
 
 using System.ComponentModel.DataAnnotations;

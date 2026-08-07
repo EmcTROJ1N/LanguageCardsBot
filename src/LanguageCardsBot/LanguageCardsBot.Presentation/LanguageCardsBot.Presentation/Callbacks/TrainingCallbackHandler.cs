@@ -21,7 +21,7 @@ public class TrainingCallbackHandler(
     /// <inheritdoc/>
     public async Task HandleAsync(CallbackQuery callbackQuery, LanguageCardsBot.Contracts.Cards.V3.User user, CancellationToken ct)
     {
-        var data = callbackQuery.Data ?? "";
+        var data = callbackQuery.Data ?? string.Empty;
         var chatId = callbackQuery.Message!.Chat.Id;
         var messageId = callbackQuery.Message.MessageId;
 
@@ -59,8 +59,11 @@ public class TrainingCallbackHandler(
                 InlineKeyboardButton.WithCallbackData("Не знал 😕", $"dontknow_{dueResponse.Card.Id}")
             ]]);
             await botClient.SendMessage(
-                chatId: chatId, text: text,
-                parseMode: ParseMode.MarkdownV2, replyMarkup: keyboard, cancellationToken: ct);
+                chatId: chatId,
+                text: text,
+                parseMode: ParseMode.MarkdownV2,
+                replyMarkup: keyboard,
+                cancellationToken: ct);
         }
         else
         {

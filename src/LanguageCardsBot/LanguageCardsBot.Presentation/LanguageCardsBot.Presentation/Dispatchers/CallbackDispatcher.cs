@@ -9,7 +9,7 @@ public class CallbackDispatcher(IEnumerable<ICallbackHandler> handlers) : ICallb
     /// <inheritdoc/>
     public async Task<bool> TryDispatchAsync(CallbackQuery callbackQuery, global::LanguageCardsBot.Contracts.Cards.V3.User user, CancellationToken ct)
     {
-        var data = callbackQuery.Data ?? "";
+        var data = callbackQuery.Data ?? string.Empty;
         var handler = handlers.FirstOrDefault(h => h.CanHandle(data));
         if (handler is null) return false;
         await handler.HandleAsync(callbackQuery, user, ct);

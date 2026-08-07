@@ -77,8 +77,11 @@ public class ImportCommandHandler(
             await botClient.DownloadFile(file.FilePath, ms, ct);
             ms.Position = 0;
 
-            using var sr = new StreamReader(ms, System.Text.Encoding.UTF8,
-                detectEncodingFromByteOrderMarks: true, leaveOpen: true);
+            using var sr = new StreamReader(
+                ms,
+                System.Text.Encoding.UTF8,
+                detectEncodingFromByteOrderMarks: true,
+                leaveOpen: true);
             var json = await sr.ReadToEndAsync(ct);
 
             if (string.IsNullOrWhiteSpace(json))

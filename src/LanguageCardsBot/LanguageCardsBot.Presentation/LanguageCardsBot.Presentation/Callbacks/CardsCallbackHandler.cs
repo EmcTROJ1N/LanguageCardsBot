@@ -21,7 +21,7 @@ public class CardsCallbackHandler(
     /// <inheritdoc/>
     public async Task HandleAsync(CallbackQuery callbackQuery, global::LanguageCardsBot.Contracts.Cards.V3.User user, CancellationToken ct)
     {
-        var data = callbackQuery.Data ?? "";
+        var data = callbackQuery.Data ?? string.Empty;
         var chatId = callbackQuery.Message!.Chat.Id;
         var messageId = callbackQuery.Message.MessageId;
 
@@ -39,8 +39,11 @@ public class CardsCallbackHandler(
         if (action == "close")
         {
             await botClient.EditMessageText(
-                chatId: chatId, messageId: messageId,
-                text: "Список карточек закрыт.", replyMarkup: null, cancellationToken: ct);
+                chatId: chatId,
+                messageId: messageId,
+                text: "Список карточек закрыт.",
+                replyMarkup: null,
+                cancellationToken: ct);
             return;
         }
 
@@ -48,8 +51,11 @@ public class CardsCallbackHandler(
         {
             var (text, keyboard) = BuildCardsListPage(cards, page);
             await botClient.EditMessageText(
-                chatId: chatId, messageId: messageId,
-                text: text, replyMarkup: keyboard, cancellationToken: ct);
+                chatId: chatId,
+                messageId: messageId,
+                text: text,
+                replyMarkup: keyboard,
+                cancellationToken: ct);
             return;
         }
 
@@ -111,15 +117,21 @@ public class CardsCallbackHandler(
             if (!freshCards.Any())
             {
                 await botClient.EditMessageText(
-                    chatId: chatId, messageId: messageId,
-                    text: "У вас пока нет карточек.", replyMarkup: null, cancellationToken: ct);
+                    chatId: chatId,
+                    messageId: messageId,
+                    text: "У вас пока нет карточек.",
+                    replyMarkup: null,
+                    cancellationToken: ct);
                 return;
             }
 
             var (text, keyboard) = BuildCardsListPage(freshCards, pageFromDel);
             await botClient.EditMessageText(
-                chatId: chatId, messageId: messageId,
-                text: text, replyMarkup: keyboard, cancellationToken: ct);
+                chatId: chatId,
+                messageId: messageId,
+                text: text,
+                replyMarkup: keyboard,
+                cancellationToken: ct);
         }
     }
 
@@ -168,7 +180,7 @@ public class CardsCallbackHandler(
 
     private static string BuildCardButtonLabel(string? term, string? translation)
     {
-        var label = $"{(term ?? "").Trim()} — {(translation ?? "").Trim()}";
+        var label = $"{(term ?? string.Empty).Trim()} — {(translation ?? string.Empty).Trim()}";
         const int maxLen = 55;
         return label.Length > maxLen ? label[.. (maxLen - 1)] + "…" : label;
     }

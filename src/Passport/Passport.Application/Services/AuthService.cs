@@ -35,23 +35,26 @@ public sealed class AuthService(
         if (existing.Any())
             return false;
 
-        await keycloakUserClient.CreateUserAsync(Realm, new UserRepresentation
-        {
-            Username = email.Value,
-            Email = email.Value,
-            FirstName = firstName,
-            LastName = lastName,
-            Enabled = true,
-            Credentials =
-            [
-                new CredentialRepresentation
-                {
-                    Type = "password",
-                    Value = password,
-                    Temporary = false
-                }
-            ]
-        }, cancellationToken);
+        await keycloakUserClient.CreateUserAsync(
+            Realm,
+            new UserRepresentation
+            {
+                Username = email.Value,
+                Email = email.Value,
+                FirstName = firstName,
+                LastName = lastName,
+                Enabled = true,
+                Credentials =
+                [
+                    new CredentialRepresentation
+                    {
+                        Type = "password",
+                        Value = password,
+                        Temporary = false
+                    }
+                ]
+            },
+            cancellationToken);
 
         return true;
     }
@@ -76,7 +79,9 @@ public sealed class AuthService(
     {
         try
         {
-            var user = await keycloakUserClient.GetUserAsync(Realm, userId.ToString(),
+            var user = await keycloakUserClient.GetUserAsync(
+                Realm,
+                userId.ToString(),
                 cancellationToken: cancellationToken);
             return MapUser(user);
         }

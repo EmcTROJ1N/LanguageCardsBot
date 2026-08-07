@@ -67,32 +67,40 @@ public static class ServiceConfiguration
 
         services
             .AddCommand<StartCommandHandler, StartCommand>(
-                registry, ["/start"],
+                registry,
+                ["/start"],
                 (chatId, _) => new StartCommand(chatId))
             .AddCommand<TrainCommandHandle, TrainCommand>(
-                registry, ["/train", "🎯 Тренировка"],
+                registry,
+                ["/train", "🎯 Тренировка"],
                 (chatId, _) => new TrainCommand(chatId))
             .AddCommand<StatsCommandHandler, StatCommand>(
-                registry, ["/stats", "📊 Статистика"],
+                registry,
+                ["/stats", "📊 Статистика"],
                 (chatId, _) => new StatCommand(chatId))
             .AddCommand<ListCommandHandler, ListCommand>(
                 registry,
                 ["/list", "/cards", "📚 Мои карточки"],
                 (chatId, _) => new ListCommand(chatId))
             .AddCommand<ReminderSettingsCommandHandler, ReminderSettingsCommand>(
-                registry, ["/reminder_settings", "⚙️ Настройки"],
+                registry,
+                ["/reminder_settings", "⚙️ Настройки"],
                 (chatId, args) => new ReminderSettingsCommand(chatId, args))
             .AddCommand<ClearCommandHandler, ClearCommand>(
-                registry, ["/clear"],
+                registry,
+                ["/clear"],
                 (chatId, _) => new ClearCommand(chatId))
             .AddCommand<ExportCommandHandler, ExportCommand>(
-                registry, ["/export", "📤 Экспорт"],
+                registry,
+                ["/export", "📤 Экспорт"],
                 (chatId, _) => new ExportCommand(chatId))
             .AddCommand<ImportCommandHandler, ImportCommand>(
-                registry, ["/import", "📥 Импорт"],
+                registry,
+                ["/import", "📥 Импорт"],
                 (chatId, _) => new ImportCommand(chatId))
             .AddCommand<UserIdCommandHandler, UserIdCommand>(
-                registry, ["/user_id", "/id"],
+                registry,
+                ["/user_id", "/id"],
                 (chatId, _) => new UserIdCommand(chatId));
 
         return services;

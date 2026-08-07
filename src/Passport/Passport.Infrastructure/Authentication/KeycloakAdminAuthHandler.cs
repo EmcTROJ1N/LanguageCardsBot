@@ -45,13 +45,15 @@ public sealed class KeycloakAdminAuthHandler(
                 return _cachedToken;
 
             var client = httpClientFactory.CreateClient("keycloak-token");
-            var response = await client.PostAsync(TokenEndpoint, new FormUrlEncodedContent(
-                new Dictionary<string, string>
+            var response = await client.PostAsync(
+                TokenEndpoint,
+                new FormUrlEncodedContent(new Dictionary<string, string>
                 {
                     ["grant_type"] = "client_credentials",
-                    ["client_id"] = configuration["Keycloak:Resource"] ?? "",
-                    ["client_secret"] = configuration["Keycloak:Credentials:Secret"] ?? ""
-                }), cancellationToken);
+                    ["client_id"] = configuration["Keycloak:Resource"] ?? string.Empty,
+                    ["client_secret"] = configuration["Keycloak:Credentials:Secret"] ?? string.Empty
+                }),
+                cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {

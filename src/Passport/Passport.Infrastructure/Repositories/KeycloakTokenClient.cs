@@ -24,14 +24,16 @@ public sealed class KeycloakTokenClient(
     public async Task<AuthToken?> SignInAsync(string email, string password, CancellationToken cancellationToken = default)
     {
         var client = httpClientFactory.CreateClient("keycloak-token");
-        var response = await client.PostAsync(TokenEndpoint, new FormUrlEncodedContent(
-            new Dictionary<string, string>
+        var response = await client.PostAsync(
+            TokenEndpoint,
+            new FormUrlEncodedContent(new Dictionary<string, string>
             {
                 ["grant_type"] = "password",
                 ["client_id"] = ClientId,
                 ["username"] = email,
                 ["password"] = password
-            }), cancellationToken);
+            }),
+            cancellationToken);
 
         if (!response.IsSuccessStatusCode)
             return null;
@@ -44,13 +46,15 @@ public sealed class KeycloakTokenClient(
     public async Task<AuthToken?> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
         var client = httpClientFactory.CreateClient("keycloak-token");
-        var response = await client.PostAsync(TokenEndpoint, new FormUrlEncodedContent(
-            new Dictionary<string, string>
+        var response = await client.PostAsync(
+            TokenEndpoint,
+            new FormUrlEncodedContent(new Dictionary<string, string>
             {
                 ["grant_type"] = "refresh_token",
                 ["client_id"] = ClientId,
                 ["refresh_token"] = refreshToken
-            }), cancellationToken);
+            }),
+            cancellationToken);
 
         if (!response.IsSuccessStatusCode)
             return null;

@@ -68,6 +68,15 @@ dotnet_diagnostic.SA1028.severity = none
 # SA1118: parameter should not span multiple lines — блокирует multi-line лямбды/expressions
 dotnet_diagnostic.SA1118.severity = none
 
+# SA1204: static elements should appear before instance elements — жёсткий порядок членов
+dotnet_diagnostic.SA1204.severity = none
+
+# SA1008: opening parenthesis spacing — вкусовщина
+dotnet_diagnostic.SA1008.severity = none
+
+# SA1024: colons should be spaced correctly — вкусовщина
+dotnet_diagnostic.SA1024.severity = none
+
 # --- Escalate до error: важные инварианты ---
 
 # SA1122: использовать string.Empty вместо ""  — единая конвенция по всему коду

@@ -53,6 +53,5 @@ public class ReminderSettingsCommandHandler(UserService.UserServiceClient userSe
             text: settingsText,
             parseMode: ParseMode.MarkdownV2,
             cancellationToken: cancellationToken);
-
     }
 }

@@ -1,4 +1,3 @@
-
 using LanguageCardsBot.Contracts.Cards.V3;
 
 namespace LanguageCardsBot.Presentation.Abstractions;

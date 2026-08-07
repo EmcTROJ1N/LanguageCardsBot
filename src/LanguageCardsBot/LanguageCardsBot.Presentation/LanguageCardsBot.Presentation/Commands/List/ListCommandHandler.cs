@@ -104,8 +104,8 @@ public class ListCommandHandler(ITelegramBotClient botClient,
     
     private static string BuildCardButtonLabel(string? term, string? translation)
     {
-        var t = (term ?? "").Trim();
-        var tr = (translation ?? "").Trim();
+        var t = (term ?? string.Empty).Trim();
+        var tr = (translation ?? string.Empty).Trim();
 
         var label = $"{t} — {tr}";
         const int maxLen = 55;
@@ -114,5 +114,4 @@ public class ListCommandHandler(ITelegramBotClient botClient,
 
         return label;
     }
-
 }
