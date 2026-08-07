@@ -7,20 +7,28 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Cards.Infrastructure.Common.Abstractions;
 
+/// <summary>
+/// Base EF Core repository providing generic CRUD operations for entities implementing <see cref="IEntityWithId"/>.
+/// EF exceptions are mapped to transport-neutral gRPC exceptions.
+/// </summary>
+/// <typeparam name="T">Entity type owned by the repository.</typeparam>
 public abstract class AbstractCrudRepository<T>(CardsMysqlDbContext dbContext): ICrudRepository<T> where T : class, IEntityWithId
 {
+    /// <inheritdoc />
     public async Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         return await dbContext.Set<T>()
             .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await dbContext.Set<T>()
             .ToListAsync(cancellationToken: cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<T> AddAsync(T entity, CancellationToken cancellationToken = default)
     {
         try
@@ -39,6 +47,7 @@ public abstract class AbstractCrudRepository<T>(CardsMysqlDbContext dbContext): 
         }
     }
 
+    /// <inheritdoc />
     public async Task<T> UpdateAsync(T entity, CancellationToken cancellationToken = default)
     {
         try
@@ -63,6 +72,7 @@ public abstract class AbstractCrudRepository<T>(CardsMysqlDbContext dbContext): 
         }
     }
 
+    /// <inheritdoc />
     public async Task DeleteAsync(long id, CancellationToken cancellationToken = default)
     {
         try

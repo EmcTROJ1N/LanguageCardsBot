@@ -20,6 +20,7 @@ public class DailySummaryBackgroundService(
 {
     private DateOnly? _lastSentDate;
 
+    /// <inheritdoc />
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)

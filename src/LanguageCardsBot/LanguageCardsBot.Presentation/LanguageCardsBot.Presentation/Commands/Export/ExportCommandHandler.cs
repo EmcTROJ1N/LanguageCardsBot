@@ -6,11 +6,15 @@ using Telegram.Bot;
 
 namespace LanguageCardsBot.Presentation.Commands.Export;
 
+/// <summary>
+/// Handles the /export command: serialises the user's cards to JSON and sends the file back via Telegram.
+/// </summary>
 public class ExportCommandHandler(ITelegramBotClient botClient,
     IConfiguration configuration,
     IHttpClientFactory httpClientFactory,
     CardService.CardServiceClient cardService): ICommandHandler<ExportCommand>
 {
+    /// <inheritdoc />
     public async Task HandleAsync(ExportCommand command, User user, CancellationToken cancellationToken = default)
     {
         var cards = (await cardService.GetByUserIdAsync(

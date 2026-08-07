@@ -37,16 +37,16 @@ public static class ServiceConfiguration
     public static IServiceCollection AddDbContext(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = GetConnectionString(configuration);
-        
+
         services.AddDbContext<CardsMysqlDbContext>(options =>
             options.UseMySql(
                 connectionString,
                 new MySqlServerVersion(new Version(8, 0, 34))
             )
-        );    
+        );
         return services;
     }
-    
+
     /// <summary>
     /// Registers the RabbitMQ-backed <see cref="IMessageBus"/> implementation.
     /// </summary>
@@ -68,7 +68,7 @@ public static class ServiceConfiguration
 
         return services;
     }
-    
+
     /// <summary>
     /// Registers RabbitMQ publisher infrastructure: options, connection factory, and the topology initializer.
     /// </summary>
@@ -84,7 +84,7 @@ public static class ServiceConfiguration
         //services.AddTransient<IEventPublisher, RabbitMqEventPublisher>();
         return services;
     }
-    
+
     /// <summary>
     /// Registers gRPC services and interceptors.
     /// </summary>
@@ -164,7 +164,6 @@ public static class ServiceConfiguration
             ?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
             ?? "unknown";
 
-
         services.AddOpenTelemetry()
             .ConfigureResource(r => r
                 .AddService(serviceName: serviceName, serviceVersion: serviceVersion)
@@ -212,7 +211,7 @@ public static class ServiceConfiguration
 
         return app;
     }
-    
+
     /// <summary>
     /// Resolves the cards database connection string from configuration or environment variables.
     /// </summary>

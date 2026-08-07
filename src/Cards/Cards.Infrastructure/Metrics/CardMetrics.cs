@@ -3,6 +3,10 @@ using Cards.Application.Abstractions.Metrics;
 
 namespace Cards.Infrastructure.Metrics;
 
+/// <summary>
+/// Default <see cref="ICardMetrics"/> implementation backed by <see cref="System.Diagnostics.Metrics"/>
+/// under the meter <c>LanguageCardsBot.Cards</c>.
+/// </summary>
 public class CardMetrics : ICardMetrics
 {
     private readonly Counter<long> _cardsCreatedTotal;
@@ -15,6 +19,7 @@ public class CardMetrics : ICardMetrics
     private readonly Counter<long> _cardsLevelResetTotal;
     private readonly Histogram<long> _cardsReviewStreak;
 
+    /// <summary>Creates the meter and registers all card instruments.</summary>
     public CardMetrics(IMeterFactory meterFactory)
     {
         var meter = meterFactory.Create("LanguageCardsBot.Cards", "1.0.0");
@@ -65,33 +70,42 @@ public class CardMetrics : ICardMetrics
             description: "Длина завершённой серии корректных повторов до первой ошибки");
     }
 
+    /// <inheritdoc />
     public void IncrementCardsCreatedTotal() =>
         _cardsCreatedTotal.Add(1);
 
+    /// <inheritdoc />
     public void RecordCardDueBacklog(int cardsDueBacklogCount) =>
         _cardsDueBacklog.Record(cardsDueBacklogCount);
 
+    /// <inheritdoc />
     public void RecordCardTimeToLearn(DateTime createdAt, DateTime reachedLevel10At) =>
         _cardsTimeToLearnDays.Record((reachedLevel10At - createdAt).TotalDays);
 
+    /// <inheritdoc />
     public void IncrementCardsLearnedTotal() =>
         _cardsLearnedTotal.Add(1);
 
+    /// <inheritdoc />
     public void IncrementCardsDeletedTotal(int count, string scope) =>
         _cardsDeletedTotal.Add(count, new KeyValuePair<string, object?>("scope", scope));
 
+    /// <inheritdoc />
     public void RecordCardsActive(int level, int count) =>
         _cardsActive.Record(count, new KeyValuePair<string, object?>("level", level));
 
+    /// <inheritdoc />
     public void IncrementCardsReviewsTotal(bool isCorrect, int levelBeforeReview) =>
         _cardsReviewsTotal.Add(
             1,
             new KeyValuePair<string, object?>("result", isCorrect ? "correct" : "incorrect"),
             new KeyValuePair<string, object?>("level_bucket", LevelBucket(levelBeforeReview)));
 
+    /// <inheritdoc />
     public void IncrementCardsLevelResetTotal() =>
         _cardsLevelResetTotal.Add(1);
 
+    /// <inheritdoc />
     public void RecordCardReviewStreak(int streakLength) =>
         _cardsReviewStreak.Record(streakLength);
 

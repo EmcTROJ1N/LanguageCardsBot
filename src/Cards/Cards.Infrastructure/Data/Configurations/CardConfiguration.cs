@@ -4,8 +4,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Cards.Infrastructure.Data.Configurations;
 
+/// <summary>
+/// EF Core entity type configuration for <see cref="CardEntity"/>.
+/// </summary>
 public class CardConfiguration: IEntityTypeConfiguration<CardEntity>
 {
+    /// <inheritdoc />
     public void Configure(EntityTypeBuilder<CardEntity> builder)
     {
         builder.ToTable("cards");

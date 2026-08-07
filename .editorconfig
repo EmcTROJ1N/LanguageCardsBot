@@ -77,6 +77,15 @@ dotnet_diagnostic.SA1008.severity = none
 # SA1024: colons should be spaced correctly — вкусовщина
 dotnet_diagnostic.SA1024.severity = none
 
+# SA1514: element documentation header should be preceded by blank line — косметика
+dotnet_diagnostic.SA1514.severity = none
+
+# SA1009: closing parenthesis spacing — вкусовщина
+dotnet_diagnostic.SA1009.severity = none
+
+# SA1111: closing parenthesis on line of last parameter — вкусовщина, мешает multi-line стилю
+dotnet_diagnostic.SA1111.severity = none
+
 # --- Escalate до error: важные инварианты ---
 
 # SA1122: использовать string.Empty вместо ""  — единая конвенция по всему коду

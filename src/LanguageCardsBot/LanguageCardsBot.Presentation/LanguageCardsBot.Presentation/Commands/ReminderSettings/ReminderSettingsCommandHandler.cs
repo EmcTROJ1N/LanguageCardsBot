@@ -5,8 +5,13 @@ using Telegram.Bot.Types.Enums;
 
 namespace LanguageCardsBot.Presentation.Commands.ReminderSettings;
 
+/// <summary>
+/// Handles the /reminder_settings command: updates reminder interval or translation-visibility settings,
+/// or shows the current values when no argument is provided.
+/// </summary>
 public class ReminderSettingsCommandHandler(UserService.UserServiceClient userService, ITelegramBotClient botClient): ICommandHandler<ReminderSettingsCommand>
 {
+    /// <inheritdoc />
     public async Task HandleAsync(ReminderSettingsCommand command, User user, CancellationToken cancellationToken = default)
     {
         if (command.HideTranslations.HasValue)

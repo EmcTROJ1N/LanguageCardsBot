@@ -4,8 +4,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Cards.Infrastructure.Data.Configurations;
 
+/// <summary>
+/// EF Core entity type configuration for <see cref="ReviewEntity"/>.
+/// </summary>
 public class ReviewConfiguration : IEntityTypeConfiguration<ReviewEntity>
 {
+    /// <inheritdoc />
     public void Configure(EntityTypeBuilder<ReviewEntity> builder)
     {
         builder.ToTable("reviews");

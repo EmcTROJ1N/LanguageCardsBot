@@ -4,8 +4,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Cards.Infrastructure.Data.Configurations;
 
+/// <summary>
+/// EF Core entity type configuration for <see cref="UserEntity"/>.
+/// </summary>
 public class UserConfiguration: IEntityTypeConfiguration<UserEntity>
 {
+    /// <inheritdoc />
     public void Configure(EntityTypeBuilder<UserEntity> builder)
     {
         builder.ToTable("users");

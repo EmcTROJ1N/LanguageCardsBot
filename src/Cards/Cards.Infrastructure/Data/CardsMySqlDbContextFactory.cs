@@ -4,9 +4,14 @@ using Microsoft.Extensions.Configuration;
 
 namespace Cards.Infrastructure.Data;
 
-public sealed class CardsMysqlDbContextFactory 
+/// <summary>
+/// EF Core design-time factory used by the <c>dotnet ef</c> CLI (migrations, database update) to build
+/// a <see cref="CardsMysqlDbContext"/> from local appsettings JSON files.
+/// </summary>
+public sealed class CardsMysqlDbContextFactory
     : IDesignTimeDbContextFactory<CardsMysqlDbContext>
 {
+    /// <inheritdoc />
     public CardsMysqlDbContext CreateDbContext(string[] args)
     {
         var basePath = Directory.GetCurrentDirectory();

@@ -5,10 +5,12 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace LanguageCardsBot.Presentation.Commands.List;
 
+/// <summary>
+/// Handles the /list (and /cards) command: renders the user's cards as a paginated inline keyboard.
+/// </summary>
 public class ListCommandHandler(ITelegramBotClient botClient,
     CardService.CardServiceClient cardRepository): ICommandHandler<ListCommand>
 {
-
     // =========================
     // Cards list (InlineKeyboard)
     // =========================
@@ -21,6 +23,7 @@ public class ListCommandHandler(ITelegramBotClient botClient,
     // cards:close
     private const string CardsCbPrefix = "cards";
 
+    /// <inheritdoc />
     public async Task HandleAsync(ListCommand command, User user, CancellationToken cancellationToken = default)
     {
         var cards = (await cardRepository.GetByUserIdAsync(new GetCardsByUserIdRequest() { UserId = user.Id },

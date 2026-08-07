@@ -17,6 +17,7 @@ public sealed class CardsGaugeMetricsService(
     private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(30);
     private const int MaxLevel = 10;
 
+    /// <inheritdoc />
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using var timer = new PeriodicTimer(PollInterval);

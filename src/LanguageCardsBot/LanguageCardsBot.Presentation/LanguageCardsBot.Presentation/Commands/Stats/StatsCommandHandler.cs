@@ -5,8 +5,12 @@ using Telegram.Bot.Types.Enums;
 
 namespace LanguageCardsBot.Presentation.Commands.Stats;
 
+/// <summary>
+/// Handles the /stats command: fetches today's review statistics for the user and formats them as a Markdown reply.
+/// </summary>
 public class StatsCommandHandler(ITelegramBotClient botClient, StatsService.StatsServiceClient statsService): ICommandHandler<StatCommand>
 {
+    /// <inheritdoc />
     public async Task HandleAsync(StatCommand command, User user, CancellationToken cancellationToken = default)
     {
         var response = await statsService.GetTodayStatsAsync(
