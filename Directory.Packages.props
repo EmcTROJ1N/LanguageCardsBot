@@ -26,6 +26,8 @@
     <!-- AspNetCore -->
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.8" />
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
+    <!-- Pinned to patched version, CVE-2026-49451 (transitive from Microsoft.AspNetCore.OpenApi) -->
+    <PackageVersion Include="Microsoft.OpenApi" Version="2.7.5" />
     <!-- Entity Framework Core -->
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.17" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.17" />
