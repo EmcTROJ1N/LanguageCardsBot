@@ -1,0 +1,112 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+
+[*.{cs,csproj,props,targets}]
+indent_size = 4
+
+[*.{json,yml,yaml,md}]
+indent_size = 2
+
+# ---------------------------------------------------------------
+# StyleCop rule severities
+# ---------------------------------------------------------------
+[*.cs]
+
+# --- Отключено: шум/устаревшие/конфликтующие практики ---
+
+# SA1101: `this.`-префикс на локальных вызовах — старый стиль
+dotnet_diagnostic.SA1101.severity = none
+
+# SA1200: using-и внутри namespace — конфликтует с общим C# стилем и file-scoped namespaces
+dotnet_diagnostic.SA1200.severity = none
+
+# SA1309: поля не должны начинаться с _ — конфликтует с общепринятым `_field`
+dotnet_diagnostic.SA1309.severity = none
+
+# SA1313: параметры record должны быть с маленькой буквы — records именно так и работают
+dotnet_diagnostic.SA1313.severity = none
+
+# SA1512: комментарий не должен быть за пустой строкой — вкусовщина
+dotnet_diagnostic.SA1512.severity = none
+
+# SA1515: однострочный комментарий должен предваряться пустой строкой — вкусовщина
+dotnet_diagnostic.SA1515.severity = none
+
+# SA1633: file must have a copyright header — не используем per-file копирайты
+dotnet_diagnostic.SA1633.severity = none
+
+# SA1636/SA1637/SA1638/SA1640/SA1641: детали file header — тоже не нужны
+dotnet_diagnostic.SA1636.severity = none
+dotnet_diagnostic.SA1637.severity = none
+dotnet_diagnostic.SA1638.severity = none
+dotnet_diagnostic.SA1640.severity = none
+dotnet_diagnostic.SA1641.severity = none
+
+# --- Отключено дополнительно (по решению пользователя) ---
+
+# SA1503: пропущенные `{}` вокруг однострочника — выключено (стилистический выбор)
+dotnet_diagnostic.SA1503.severity = none
+
+# SA1516: пустая строка между элементами — выключено, предпочитаем компактный стиль
+dotnet_diagnostic.SA1516.severity = none
+
+# SA1513: closing brace should be followed by blank line — выключено, компактный стиль
+dotnet_diagnostic.SA1513.severity = none
+
+# SA1202: elements should be ordered by access — жёсткий порядок членов, слишком узко
+dotnet_diagnostic.SA1202.severity = none
+
+# SA1028: code should not contain trailing whitespace — покрыто trim_trailing_whitespace выше
+dotnet_diagnostic.SA1028.severity = none
+
+# SA1118: parameter should not span multiple lines — блокирует multi-line лямбды/expressions
+dotnet_diagnostic.SA1118.severity = none
+
+# --- Escalate до error: важные инварианты ---
+
+# SA1122: использовать string.Empty вместо ""  — единая конвенция по всему коду
+dotnet_diagnostic.SA1122.severity = warning
+
+# SA1611: все параметры должны быть документированы
+dotnet_diagnostic.SA1611.severity = warning
+
+# SA1615: return value должен быть документирован
+dotnet_diagnostic.SA1615.severity = warning
+
+# SA1600: public/internal элементы должны быть документированы (CLAUDE.md требует).
+# ⚠ Пока warning — в коде 112 нарушений, escalate до error после cleanup.
+dotnet_diagnostic.SA1600.severity = warning
+
+# SA1601: partial-элементы документированы
+dotnet_diagnostic.SA1601.severity = warning
+
+# SA1602: элементы enum документированы
+dotnet_diagnostic.SA1602.severity = warning
+
+# SA1649: имя файла совпадает с типом
+dotnet_diagnostic.SA1649.severity = error
+
+# SA1400: модификатор доступа должен быть указан явно (нет неявного private)
+dotnet_diagnostic.SA1400.severity = error
+
+# SA0001: XML documentation output — отключено, иначе куча warning-ов на sample-кода
+dotnet_diagnostic.SA0001.severity = none
+
+# --- Ослабить до suggestion: важно, но не критично ---
+
+# SA1413: trailing comma в multi-line initializer — nice to have, не блокер
+dotnet_diagnostic.SA1413.severity = suggestion
+
+# --- Исключения для генерируемого/скаффолженного кода ---
+
+[**/Migrations/*.cs]
+generated_code = true
+
+[**/obj/**/*.cs]
+generated_code = true

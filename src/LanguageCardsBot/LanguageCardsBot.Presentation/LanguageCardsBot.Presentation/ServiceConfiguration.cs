@@ -76,7 +76,8 @@ public static class ServiceConfiguration
                 registry, ["/stats", "📊 Статистика"],
                 (chatId, _) => new StatCommand(chatId))
             .AddCommand<ListCommandHandler, ListCommand>(
-                registry, ["/list", "/cards", "📚 Мои карточки"],
+                registry,
+                ["/list", "/cards", "📚 Мои карточки"],
                 (chatId, _) => new ListCommand(chatId))
             .AddCommand<ReminderSettingsCommandHandler, ReminderSettingsCommand>(
                 registry, ["/reminder_settings", "⚙️ Настройки"],
@@ -136,7 +137,7 @@ public static class ServiceConfiguration
 
         return services;
     }
-    
+
     public static IServiceCollection AddMassTransitWithRabbitMq(this IServiceCollection services)
     {
         services.AddMassTransit(x =>

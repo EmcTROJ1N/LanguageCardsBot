@@ -170,6 +170,6 @@ public class CardsCallbackHandler(
     {
         var label = $"{(term ?? "").Trim()} — {(translation ?? "").Trim()}";
         const int maxLen = 55;
-        return label.Length > maxLen ? label[..(maxLen - 1)] + "…" : label;
+        return label.Length > maxLen ? label[.. (maxLen - 1)] + "…" : label;
     }
 }
