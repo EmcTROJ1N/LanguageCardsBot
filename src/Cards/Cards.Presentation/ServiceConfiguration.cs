@@ -47,11 +47,17 @@ public static class ServiceConfiguration
         return services;
     }
     
+    /// <summary>
+    /// Registers the RabbitMQ-backed <see cref="IMessageBus"/> implementation.
+    /// </summary>
     public static IServiceCollection AddMessaging(this IServiceCollection services)
     {
         return services.AddTransient<IMessageBus, RabbitMessageBus>();
     }
 
+    /// <summary>
+    /// Binds and validates strongly-typed options (currently <see cref="RabbitMqOptions"/>) from configuration.
+    /// </summary>
     public static IServiceCollection AddSettings(this IServiceCollection services, IConfiguration configuration)
     {
         services
@@ -63,6 +69,9 @@ public static class ServiceConfiguration
         return services;
     }
     
+    /// <summary>
+    /// Registers RabbitMQ publisher infrastructure: options, connection factory, and the topology initializer.
+    /// </summary>
     public static IServiceCollection AddRabbitMqPublisher(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<RabbitMqOptions>(
@@ -144,6 +153,10 @@ public static class ServiceConfiguration
         return services;
     }
 
+    /// <summary>
+    /// Configures OpenTelemetry metrics with a Prometheus exporter, including AspNetCore, runtime,
+    /// business Cards and Messaging meters tagged by deployment environment.
+    /// </summary>
     public static IServiceCollection AddOpenTelemetryPrometheus(this IServiceCollection services, string environmentName)
     {
         var serviceName = "cards";

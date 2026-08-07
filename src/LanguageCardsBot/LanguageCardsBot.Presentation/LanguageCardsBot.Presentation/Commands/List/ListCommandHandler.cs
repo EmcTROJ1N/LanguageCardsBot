@@ -8,7 +8,7 @@ namespace LanguageCardsBot.Presentation.Commands.List;
 public class ListCommandHandler(ITelegramBotClient botClient,
     CardService.CardServiceClient cardRepository): ICommandHandler<ListCommand>
 {
-    
+
     // =========================
     // Cards list (InlineKeyboard)
     // =========================
@@ -20,11 +20,10 @@ public class ListCommandHandler(ITelegramBotClient botClient,
     // cards:del:{cardId}:{p}
     // cards:close
     private const string CardsCbPrefix = "cards";
- 
-    
+
     public async Task HandleAsync(ListCommand command, User user, CancellationToken cancellationToken = default)
     {
-        var cards = (await cardRepository.GetByUserIdAsync(new GetCardsByUserIdRequest() { UserId = user.Id }, 
+        var cards = (await cardRepository.GetByUserIdAsync(new GetCardsByUserIdRequest() { UserId = user.Id },
                 cancellationToken: cancellationToken))
             .Cards
             .OrderBy(c => c.Term)
@@ -48,7 +47,7 @@ public class ListCommandHandler(ITelegramBotClient botClient,
             replyMarkup: keyboard,
             cancellationToken: cancellationToken);
     }
-    
+
     private (string Text, InlineKeyboardMarkup Keyboard) BuildCardsListPage(
         List<Card> cards,
         int page)
@@ -101,7 +100,7 @@ public class ListCommandHandler(ITelegramBotClient botClient,
 
         return (header, new InlineKeyboardMarkup(rows));
     }
-    
+
     private static string BuildCardButtonLabel(string? term, string? translation)
     {
         var t = (term ?? string.Empty).Trim();

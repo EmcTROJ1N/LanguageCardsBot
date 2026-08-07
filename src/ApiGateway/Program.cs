@@ -9,5 +9,4 @@ app.MapGet("/", () => "LanguageCardsBot API Gateway");
 app.MapReverseProxy();
 app.MapMetrics();
 
-
 app.Run();

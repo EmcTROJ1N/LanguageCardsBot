@@ -4,7 +4,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 
-
 namespace Cards.Infrastructure.Services;
 
 public class RabbitMqInitializerService(

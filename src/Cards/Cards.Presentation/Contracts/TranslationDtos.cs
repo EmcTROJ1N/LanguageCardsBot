@@ -5,6 +5,7 @@ namespace Cards.Presentation.Contracts;
 /// </summary>
 public sealed class TranslateRequestDto
 {
+    /// <summary>Gets the source-language term to translate.</summary>
     public string Term { get; init; } = string.Empty;
 }
 
