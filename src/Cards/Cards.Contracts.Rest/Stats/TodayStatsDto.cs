@@ -1,4 +1,4 @@
-namespace Cards.Presentation.Contracts;
+namespace Cards.Contracts.Rest.Stats;
 
 /// <summary>
 /// Represents today's user statistics returned by the REST API.
@@ -11,8 +11,3 @@ public sealed record TodayStatsDto(
     int LearnedCards,
     string? BestDay,
     int BestCount);
-
-/// <summary>
-/// Represents a REST response containing today's statistics.
-/// </summary>
-public sealed record GetTodayStatsResponseDto(TodayStatsDto Stats);

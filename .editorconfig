@@ -86,6 +86,9 @@ dotnet_diagnostic.SA1009.severity = none
 # SA1111: closing parenthesis on line of last parameter — вкусовщина, мешает multi-line стилю
 dotnet_diagnostic.SA1111.severity = none
 
+# SA1201: elements should appear in correct order (field/prop/method/etc) — жёсткий порядок
+dotnet_diagnostic.SA1201.severity = none
+
 # --- Escalate до error: важные инварианты ---
 
 # SA1122: использовать string.Empty вместо ""  — единая конвенция по всему коду

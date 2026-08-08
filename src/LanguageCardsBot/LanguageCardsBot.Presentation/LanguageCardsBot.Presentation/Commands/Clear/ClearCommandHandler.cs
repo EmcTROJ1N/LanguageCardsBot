@@ -13,9 +13,10 @@ public class ClearCommandHandler(ITelegramBotClient botClient,
     /// <inheritdoc />
     public async Task HandleAsync(ClearCommand command, User user, CancellationToken cancellationToken = default)
     {
-        var response = await cardService.DeleteByUserIdAsync(new DeleteCardsByUserIdRequest() { UserId = user.Id },
+        var response = await cardService.DeleteByUserIdAsync(
+            new DeleteCardsByUserIdRequest() { UserId = user.Id },
             cancellationToken: cancellationToken);
-        
+
         // TODO: return deleted cards count
         await botClient.SendMessage(
             chatId: command.ChatId,

@@ -70,7 +70,7 @@ public static class ServiceConfiguration
                 registry,
                 ["/start"],
                 (chatId, _) => new StartCommand(chatId))
-            .AddCommand<TrainCommandHandle, TrainCommand>(
+            .AddCommand<TrainCommandHandler, TrainCommand>(
                 registry,
                 ["/train", "🎯 Тренировка"],
                 (chatId, _) => new TrainCommand(chatId))

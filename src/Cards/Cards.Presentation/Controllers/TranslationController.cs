@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Cards.Application.Translations;
-using Cards.Presentation.Contracts;
+using Cards.Contracts.Rest.Translations;
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
 

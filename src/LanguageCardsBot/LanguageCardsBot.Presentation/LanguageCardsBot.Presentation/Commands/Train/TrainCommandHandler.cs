@@ -8,7 +8,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 namespace LanguageCardsBot.Presentation.Commands.Train;
 
 /// <summary>Handles the /train command: shows the next due card for spaced-repetition review.</summary>
-public class TrainCommandHandle(
+public class TrainCommandHandler(
     ITelegramBotClient botClient,
     CardService.CardServiceClient cardService) : ICommandHandler<TrainCommand>
 {

@@ -13,16 +13,13 @@ using Cards.Infrastructure.Messaging;
 using Cards.Infrastructure.Metrics;
 using Cards.Infrastructure.Repositories;
 using Cards.Infrastructure.Services;
-using LanguageCardsBot.Contracts.Messaging.Settings;
 using Cards.Presentation.Interceptors;
 using Cards.Presentation.Services;
+using LanguageCardsBot.Contracts.Messaging.Settings;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
-using RabbitMQ.Client;
 
 namespace Cards.Presentation;
 
@@ -81,7 +78,7 @@ public static class ServiceConfiguration
         services.AddHostedService<RabbitMqInitializerService>();
 
         // Transient — новый publisher на каждый запрос
-        //services.AddTransient<IEventPublisher, RabbitMqEventPublisher>();
+        // services.AddTransient<IEventPublisher, RabbitMqEventPublisher>();
         return services;
     }
 

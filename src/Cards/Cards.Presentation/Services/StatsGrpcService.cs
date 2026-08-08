@@ -13,7 +13,8 @@ public sealed class StatsGrpcService(IStatsApplicationService statsApplicationSe
     /// <summary>
     /// Handles a gRPC request to get today's statistics for a user.
     /// </summary>
-    public override async Task<GetTodayStatsResponse> GetTodayStats(GetTodayStatsRequest request,
+    public override async Task<GetTodayStatsResponse> GetTodayStats(
+        GetTodayStatsRequest request,
         ServerCallContext context)
     {
         var stats = await statsApplicationService.GetTodayStatsAsync(request.UserId, context.CancellationToken);

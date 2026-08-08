@@ -1,5 +1,5 @@
 using Cards.Application.Imports;
-using Cards.Presentation.Contracts;
+using Cards.Contracts.Rest.Imports;
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
 

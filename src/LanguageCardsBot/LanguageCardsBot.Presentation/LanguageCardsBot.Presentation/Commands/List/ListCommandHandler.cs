@@ -26,8 +26,8 @@ public class ListCommandHandler(ITelegramBotClient botClient,
     /// <inheritdoc />
     public async Task HandleAsync(ListCommand command, User user, CancellationToken cancellationToken = default)
     {
-        var cards = (await cardRepository.GetByUserIdAsync(new GetCardsByUserIdRequest() { UserId = user.Id },
-                cancellationToken: cancellationToken))
+        var cards = (await cardRepository.GetByUserIdAsync(
+            new GetCardsByUserIdRequest() { UserId = user.Id }, cancellationToken: cancellationToken))
             .Cards
             .OrderBy(c => c.Term)
             .ToList();

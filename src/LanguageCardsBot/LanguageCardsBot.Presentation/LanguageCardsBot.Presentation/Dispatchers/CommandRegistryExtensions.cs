@@ -20,8 +20,11 @@ public static class CommandRegistryExtensions
     {
         services.AddScoped<THandler>();
         foreach (var trigger in triggers)
+        {
             registry.Entries[trigger] = (sp, chatId, args, user, ct) =>
                 sp.GetRequiredService<THandler>().HandleAsync(cmdFactory(chatId, args), user, ct);
+        }
+
         return services;
     }
 }

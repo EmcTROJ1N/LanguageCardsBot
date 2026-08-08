@@ -1,5 +1,5 @@
 using Cards.Application.Stats;
-using Cards.Presentation.Contracts;
+using Cards.Contracts.Rest.Stats;
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
 
