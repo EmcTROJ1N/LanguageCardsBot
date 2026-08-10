@@ -77,6 +77,26 @@ In Docker Compose these are overridden via environment variables:
 | `KEYCLOAK_AUTH_SERVER_URL` | `Keycloak__AuthServerUrl`            |
 | `KEYCLOAK_TOKEN_ENDPOINT`  | `KeycloakPublicClient__TokenEndpoint`|
 
+## Keycloak realm seeding
+
+On first launch, the `keycloak` container imports the realm `languagecards` from a bind-mounted JSON export. This makes a freshly cloned repo runnable via `docker compose up` without any manual admin-console setup.
+
+**Where the export lives:** `src/Passport/keycloak/realms/languagecards-realm.json`
+
+**What it contains:** realm `languagecards`, confidential client `languagecards-backend` (service-account enabled, with `realm-management` roles `view-users` and `manage-users`), public client `languagecardsbot-public`, realm role `User`, client role `Admin` on the backend client. No human users are seeded.
+
+**How the import runs:** the `keycloak` service in `docker-compose.yml` uses `command: start-dev --import-realm` and mounts the realm-export directory at `/opt/keycloak/data/import:ro`. Keycloak imports realms that do not yet exist and silently skips those that already do.
+
+**Client secret:** the confidential client secret in the realm export matches `Keycloak:Credentials:Secret` in `appsettings.json`. Both are dev-only bootstrap values. Production deployments must replace both.
+
+**Forcing a re-seed:** the realm is only imported on first launch. To wipe state and re-import:
+
+```bash
+cd src/Passport/Passport.Presentation
+docker compose down -v   # wipes passport-mysql-data volume
+docker compose up --build
+```
+
 ## DI registration
 
 Each layer owns its extension method; `Program.cs` calls them in order:

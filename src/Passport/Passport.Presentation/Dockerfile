@@ -7,6 +7,7 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+COPY ["Directory.Packages.props", "Directory.Build.props", "nuget.config", "stylecop.json", "./"]
 COPY ["src/Passport/Passport.Presentation/Passport.Presentation.csproj", "src/Passport/Passport.Presentation/"]
 COPY ["src/Passport/Passport.Application/Passport.Application.csproj", "src/Passport/Passport.Application/"]
 COPY ["src/Passport/Passport.Domain/Passport.Domain.csproj", "src/Passport/Passport.Domain/"]

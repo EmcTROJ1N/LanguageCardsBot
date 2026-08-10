@@ -1,0 +1,73 @@
+{
+  "realm": "languagecards",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": false,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "User",
+        "description": "Default realm role assigned to registered end-users."
+      }
+    ],
+    "client": {
+      "languagecards-backend": [
+        {
+          "name": "Admin",
+          "description": "Administrative role on the languagecards-backend resource. Required by the AdminAndUser policy.",
+          "clientRole": true
+        }
+      ]
+    }
+  },
+  "clients": [
+    {
+      "clientId": "languagecards-backend",
+      "name": "LanguageCards Backend (confidential)",
+      "description": "Confidential client used by Passport for the client_credentials grant against the Keycloak admin API.",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "bearerOnly": false,
+      "secret": "2ktfaj5K6bPkDLg2yKt4RI99Ct5owXnd",
+      "clientAuthenticatorType": "client-secret",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "attributes": {
+        "use.refresh.tokens": "false"
+      }
+    },
+    {
+      "clientId": "languagecardsbot-public",
+      "name": "LanguageCardsBot Public",
+      "description": "Public client used by the Telegram bot to obtain user tokens via the password grant.",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "bearerOnly": false,
+      "serviceAccountsEnabled": false,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "implicitFlowEnabled": false,
+      "redirectUris": ["*"],
+      "webOrigins": ["*"]
+    }
+  ],
+  "users": [
+    {
+      "username": "service-account-languagecards-backend",
+      "enabled": true,
+      "serviceAccountClientId": "languagecards-backend",
+      "clientRoles": {
+        "realm-management": ["view-users", "manage-users"]
+      }
+    }
+  ]
+}
