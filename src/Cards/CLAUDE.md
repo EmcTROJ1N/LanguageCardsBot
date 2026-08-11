@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Cards is a .NET 8 DDD microservice for spaced-repetition card storage. It exposes two transports simultaneously:
+Cards is a .NET 10 DDD microservice for spaced-repetition card storage. It exposes two transports simultaneously:
 
 - **gRPC** on port `8080` (HTTP/2)
 - **REST** on port `8081` (HTTP/1, Swagger at `/swagger`)

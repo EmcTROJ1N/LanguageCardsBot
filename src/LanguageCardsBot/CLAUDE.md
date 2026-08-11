@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-ASP.NET Core Worker Service (.NET 8) implementing a Telegram bot. It communicates with the Cards microservice exclusively via gRPC, using generated clients from the `LanguageCardsBot.Contracts.Cards` NuGet package.
+ASP.NET Core Worker Service (.NET 10) implementing a Telegram bot. It communicates with the Cards microservice exclusively via gRPC, using generated clients from the `LanguageCardsBot.Contracts.Cards` NuGet package.
 
 Root namespace: `EnglishCardsBot.Presentation`  
 Project file: `src/LanguageCardsBot/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation/LanguageCardsBot.Presentation.csproj`

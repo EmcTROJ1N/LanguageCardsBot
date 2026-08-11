@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-LanguageCardsBot is a .NET 8 microservice-style Telegram bot for spaced-repetition language cards. The current product surface is a Telegram bot used to add, review, import, export, and list cards for memorizing words or phrases.
+LanguageCardsBot is a .NET 10 microservice-style Telegram bot for spaced-repetition language cards. The current product surface is a Telegram bot used to add, review, import, export, and list cards for memorizing words or phrases.
 
 The repository is organized around a cards backend exposed through gRPC and a separate Telegram worker that calls that backend. All microservices are currently implemented using a Domain-Driven Design strategy, and future work should preserve that approach.
 
@@ -75,7 +75,7 @@ There are currently no test projects in the solution. For code changes, at minim
 
 ## Coding Guidelines
 
-- Target framework is `net8.0`; nullable reference types and implicit usings are enabled.
+- Target framework is `net10.0`; nullable reference types and implicit usings are enabled.
 - Follow existing C# style: file-scoped namespaces, constructor injection where already used, async APIs for I/O and gRPC calls.
 - Always add XML documentation comments for new classes, interfaces, records, and methods.
 - When working with existing C# code and a touched class, interface, record, or method lacks XML documentation, add it as part of the change.

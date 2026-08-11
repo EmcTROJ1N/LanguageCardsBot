@@ -31,7 +31,7 @@ docker network create passport               # Passport + Keycloak + ApiGateway
 
 ## Cross-Cutting Coding Standards
 
-- **.NET 8** — nullable enabled, implicit usings, file-scoped namespaces, constructor injection, async I/O throughout.
+- **.NET 10** — nullable enabled, implicit usings, file-scoped namespaces, constructor injection, async I/O throughout.
 - **DDD layer order** in microservices: Domain → Application → Infrastructure → Presentation.
 - **XML docs** required on all public types and members; add to any touched member that lacks them.
 - **UTC** for all cross-service timestamps.
