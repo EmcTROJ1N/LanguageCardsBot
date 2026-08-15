@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Card, statusOf, accuracyOf } from '@/entities/card'
+import { type Card, statusOf, accuracyOf } from '../model'
 import { computed } from 'vue'
 
 const props = defineProps<{ card: Card }>()
