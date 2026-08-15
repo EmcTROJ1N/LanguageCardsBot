@@ -131,6 +131,7 @@ const presets = [30, 60, 90, 180, 360, 720, 1440]
   gap: 24px;
 }
 .grid {
+  display: grid;
   grid-template-columns: 1fr 1fr;
 }
 @media (max-width: 900px) {
