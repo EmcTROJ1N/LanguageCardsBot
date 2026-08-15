@@ -19,8 +19,6 @@ const sortDir = ref<SortDir>('asc')
 const group = ref<Group>('none')
 const query = ref('')
 
-const now = new Date('2026-08-11T15:22:00Z')
-
 function setFilter(f: Filter) {
   filter.value = f
   router.replace({ query: { ...route.query, filter: f } })
@@ -66,13 +64,11 @@ function compare(a: Card, b: Card): number {
 const filtered = computed(() => {
   let result = cards.slice()
   if (filter.value === 'due') {
-    result = result.filter(
-      (c) => !c.learned && (!c.nextReviewAt || new Date(c.nextReviewAt) <= now),
-    )
+    result = result.filter((c) => statusOf(c) === 'due' || statusOf(c) === 'new')
   } else if (filter.value === 'learned') {
-    result = result.filter((c) => c.learned)
+    result = result.filter((c) => statusOf(c) === 'learned')
   } else if (filter.value === 'new') {
-    result = result.filter((c) => c.totalReviews === 0)
+    result = result.filter((c) => statusOf(c) === 'new')
   }
   if (query.value.trim()) {
     const q = query.value.trim().toLowerCase()
@@ -157,11 +153,9 @@ const rows = computed<Row[]>(() => {
 
 const counts = computed(() => ({
   all: cards.length,
-  due: cards.filter(
-    (c) => !c.learned && (!c.nextReviewAt || new Date(c.nextReviewAt) <= now),
-  ).length,
-  learned: cards.filter((c) => c.learned).length,
-  new: cards.filter((c) => c.totalReviews === 0).length,
+  due: cards.filter((c) => statusOf(c) === 'due' || statusOf(c) === 'new').length,
+  learned: cards.filter((c) => statusOf(c) === 'learned').length,
+  new: cards.filter((c) => statusOf(c) === 'new').length,
 }))
 
 const columns: {
@@ -258,7 +252,7 @@ const columns: {
         <p class="serif">Ничего не найдено. Попробуйте другой фильтр или запрос.</p>
       </div>
       <div v-else class="table__body">
-        <template v-for="(r, i) in rows" :key="i">
+        <template v-for="r in rows" :key="r.type === 'group' ? `g-${r.key}` : `c-${r.card.id}`">
           <div v-if="r.type === 'group'" class="group-header">
             <span class="group-header__line" />
             <span class="group-header__label">
@@ -267,7 +261,7 @@ const columns: {
             </span>
             <span class="group-header__line" />
           </div>
-          <CardRow v-else :card="r.card" />
+          <CardRow v-else-if="r.type === 'card'" :card="r.card" />
         </template>
       </div>
 
