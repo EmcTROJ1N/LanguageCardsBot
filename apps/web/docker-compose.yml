@@ -1,0 +1,13 @@
+services:
+  web-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks:
+      - shared-grpc
+
+networks:
+  shared-grpc:
+    name: language-cards-shared
+    external: true

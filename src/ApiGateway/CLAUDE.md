@@ -23,8 +23,11 @@ ApiGateway is a YARP reverse proxy with no business logic. It routes incoming HT
 |---|---|---|
 | `/api/cards/**` | Cards.Presentation (REST) | `http://cards-presentation:8081` |
 | `/api/passport/**` | Passport.Presentation | `http://passport_presentation:8080` |
+| everything else (`{**catch-all}`) | Web UI (nginx serving Vue SPA) | `http://web-ui:80` |
 
-Routing config lives entirely in `appsettings.json` under `ReverseProxy`. Path prefixes are stripped before forwarding (`PathRemovePrefix` transform).
+Route priority is set explicitly via YARP's `Order`: the two `/api/**` routes have `Order: 1`, the catch-all `web-ui` route has `Order: 100`. Lower `Order` wins, so `/api/**` traffic is always matched by the specific routes before falling through to the SPA.
+
+Routing config lives entirely in `appsettings.json` under `ReverseProxy`. `PathRemovePrefix` transforms strip `/api/cards` and `/api/passport` before forwarding; the catch-all route does not transform the path.
 
 ## Docker Networks
 

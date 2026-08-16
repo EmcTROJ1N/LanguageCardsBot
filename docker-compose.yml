@@ -9,5 +9,6 @@ include:
   - infra/docker-compose.infra.yml
   - src/Cards/Cards.Presentation/docker-compose.yml
   - src/Passport/Passport.Presentation/docker-compose.yml
-  - src/LanguageCardsBot/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation/docker-compose.yml
+  - src/LanguageCardsBot/LanguageCardsBot.Presentation/LanguageCardsBot.Presentation/docker-compose.yml
   - src/ApiGateway/docker-compose.yml
+  - apps/web/docker-compose.yml

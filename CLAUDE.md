@@ -11,6 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | `src/Contracts/` | Shared NuGet-packable gRPC contracts | — | [Contracts/CLAUDE.md](src/Contracts/CLAUDE.md) |
 | `src/LanguageCardsBot/` | Telegram bot worker | — | [LanguageCardsBot/CLAUDE.md](src/LanguageCardsBot/CLAUDE.md) |
 | `src/Passport/` | Identity/auth microservice (Keycloak) | — | [Passport/CLAUDE.md](src/Passport/CLAUDE.md) |
+| `apps/web/` | Vue 3 SPA (served behind YARP via nginx) | via 5050 | [web/CLAUDE.md](apps/web/CLAUDE.md) |
 
 ## Solution Build
 
