@@ -1,2 +1,6 @@
-export { default as TodoBanner } from './TodoBanner.vue'
+export { default as AppBtn } from './AppBtn.vue'
+export { default as AppField } from './AppField.vue'
+export { default as AppChip } from './AppChip.vue'
+export { default as PageHeader } from './PageHeader.vue'
 export { default as StatTile } from './StatTile.vue'
+export { default as TodoBanner } from './TodoBanner.vue'
