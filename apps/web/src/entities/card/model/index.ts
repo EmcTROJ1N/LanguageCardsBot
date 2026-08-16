@@ -38,3 +38,7 @@ export function nextReviewTimestamp(card: Card): number {
   if (!card.nextReviewAt) return -1
   return new Date(card.nextReviewAt).getTime()
 }
+
+export function getDueCards(cards: Card[]): Card[] {
+  return cards.filter((c) => statusOf(c) === 'due' || statusOf(c) === 'new')
+}
