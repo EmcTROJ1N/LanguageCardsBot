@@ -1,16 +1,21 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
-import { cards } from '@/entities/card'
+import { cardsApi } from '@/shared/api'
+import { PageHeader } from '@/shared/ui'
 import TodoBanner from '@/shared/ui/TodoBanner.vue'
+import type { Card } from '@/entities/card'
 
 const route = useRoute()
+const allCards = ref<Card[]>([])
+onMounted(async () => { allCards.value = await cardsApi.getAll() })
+
 const card = computed(() =>
-  cards.find((c) => c.id === Number(route.params.id)) ?? cards[0],
+  allCards.value.find((c) => c.id === Number(route.params.id)) ?? allCards.value[0],
 )
 
 const accuracy = computed(() =>
-  card.value.totalReviews === 0
+  !card.value || card.value.totalReviews === 0
     ? null
     : Math.round((card.value.correctReviews / card.value.totalReviews) * 100),
 )
@@ -19,6 +24,7 @@ const history = computed(() => {
   // Мок истории повторений: 8 последних решений, чередующиеся
   const now = new Date('2026-08-11T15:22:00Z')
   const result: { at: Date; correct: boolean; levelBefore: number; levelAfter: number }[] = []
+  if (!card.value) return result
   let level = 1
   for (let i = 0; i < Math.min(card.value.totalReviews, 8); i++) {
     const at = new Date(now.getTime() - (7 - i) * 86400000 * 2)
@@ -35,25 +41,24 @@ const history = computed(() => {
   <section class="detail">
     <div class="crumbs">
       <RouterLink to="/deck">← в колоду</RouterLink>
-      <span class="mono">/ card № {{ card.id }}</span>
+      <span class="mono">/ card № {{ card?.id }}</span>
     </div>
 
     <div class="grid-2">
       <article class="main-col">
-        <span class="eyebrow">Chapter · Card № {{ card.id }}</span>
-        <h1 class="display detail__term">{{ card.term }}</h1>
+        <PageHeader :eyebrow="`Chapter · Card № ${card?.id ?? '…'}`" :title="card?.term ?? '…'" />
         <div class="detail__meta">
-          <span class="mono transcription">{{ card.transcription }}</span>
-          <span class="chip" :class="card.learned ? 'sage' : 'ochre'">
-            {{ card.learned ? 'выучено' : `level ${card.level}` }}
+          <span class="mono transcription">{{ card?.transcription }}</span>
+          <span class="chip" :class="card?.learned ? 'sage' : 'ochre'">
+            {{ card?.learned ? 'выучено' : `level ${card?.level}` }}
           </span>
         </div>
         <p class="translation serif">
-          {{ card.translation }}
+          {{ card?.translation }}
         </p>
-        <p v-if="card.example" class="example">
+        <p v-if="card?.example" class="example">
           <span class="eyebrow">Sentence</span>
-          «{{ card.example }}»
+          «{{ card?.example }}»
         </p>
 
         <div class="detail__actions">
@@ -75,11 +80,11 @@ const history = computed(() => {
               v-for="i in 10"
               :key="i"
               class="pip"
-              :class="{ filled: i <= card.level, learned: card.learned }"
+              :class="{ filled: card && i <= card.level, learned: card?.learned }"
             />
           </div>
           <div class="progress__meta mono">
-            level {{ card.level }} / 10 · {{ card.learned ? 'learned' : `${10 - card.level} шагов до конца` }}
+            level {{ card?.level }} / 10 · {{ card?.learned ? 'learned' : `${10 - (card?.level ?? 0)} шагов до конца` }}
           </div>
         </section>
 
@@ -95,23 +100,23 @@ const history = computed(() => {
             </div>
             <div>
               <dt>Повторений всего</dt>
-              <dd class="mono">{{ card.totalReviews }}</dd>
+              <dd class="mono">{{ card?.totalReviews }}</dd>
             </div>
             <div>
               <dt>Верных</dt>
-              <dd class="mono">{{ card.correctReviews }}</dd>
+              <dd class="mono">{{ card?.correctReviews }}</dd>
             </div>
             <div>
               <dt>Добавлена</dt>
               <dd class="mono">
-                {{ new Date(card.createdAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' }) }}
+                {{ card ? new Date(card.createdAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' }) : '—' }}
               </dd>
             </div>
             <div>
               <dt>Следующий показ</dt>
               <dd class="mono">
                 {{
-                  card.nextReviewAt
+                  card?.nextReviewAt
                     ? new Date(card.nextReviewAt).toLocaleString('ru-RU', {
                         day: 'numeric',
                         month: 'short',
