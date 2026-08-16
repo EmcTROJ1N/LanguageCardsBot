@@ -9,7 +9,7 @@ namespace Cards.Presentation.Controllers;
 /// Exposes statistics use cases through the public REST API.
 /// </summary>
 [ApiController]
-[Route("api/cards/v3/stats")]
+[Route("v3/stats")]
 public sealed class StatsController(IStatsApplicationService statsApplicationService) : ControllerBase
 {
     /// <summary>

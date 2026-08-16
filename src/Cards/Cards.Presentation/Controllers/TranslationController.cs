@@ -10,7 +10,7 @@ namespace Cards.Presentation.Controllers;
 /// Exposes translation use cases through the public REST API.
 /// </summary>
 [ApiController]
-[Route("api/cards/v3/translation")]
+[Route("v3/translation")]
 public sealed class TranslationController(ITranslationApplicationService translationApplicationService)
     : ControllerBase
 {

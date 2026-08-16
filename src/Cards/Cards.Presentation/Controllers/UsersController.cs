@@ -9,7 +9,7 @@ namespace Cards.Presentation.Controllers;
 /// Exposes user use cases through the public REST API.
 /// </summary>
 [ApiController]
-[Route("api/cards/v3/users")]
+[Route("v3/users")]
 public sealed class UsersController(IUserApplicationService userApplicationService) : ControllerBase
 {
     /// <summary>
