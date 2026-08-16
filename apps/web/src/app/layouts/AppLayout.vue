@@ -1,10 +1,20 @@
 <script setup lang="ts">
 import { RouterLink, RouterView, useRoute } from 'vue-router'
-import { computed } from 'vue'
-import { currentProfile } from '@/entities/user'
-import { statsToday } from '@/entities/stats'
+import { computed, onMounted, ref } from 'vue'
+import { userApi, statsApi } from '@/shared/api'
+import type { Profile } from '@/entities/user'
+import type { StatsToday } from '@/entities/stats'
 
 const route = useRoute()
+
+const currentProfile = ref<Profile | null>(null)
+const statsToday = ref<StatsToday | null>(null)
+
+onMounted(async () => {
+  const [profile, stats] = await Promise.all([userApi.getProfile(), statsApi.getToday()])
+  currentProfile.value = profile
+  statsToday.value = stats
+})
 
 const nav = [
   { to: '/', label: 'Кабинет', section: 'ежедневно' },
@@ -63,11 +73,11 @@ const showChrome = computed(() => !['/login', '/link-telegram'].includes(route.p
       <footer class="rail__foot">
         <div class="user">
           <div class="user__avatar">
-            {{ currentProfile.firstName[0] }}{{ currentProfile.lastName[0] }}
+            {{ currentProfile?.firstName?.[0] }}{{ currentProfile?.lastName?.[0] }}
           </div>
           <div class="user__meta">
-            <span class="user__name">{{ currentProfile.firstName }} {{ currentProfile.lastName }}</span>
-            <span class="user__hint mono">@{{ currentProfile.telegramUsername }}</span>
+            <span class="user__name">{{ currentProfile?.firstName }} {{ currentProfile?.lastName }}</span>
+            <span class="user__hint mono">@{{ currentProfile?.telegramUsername }}</span>
           </div>
         </div>
       </footer>
@@ -76,7 +86,7 @@ const showChrome = computed(() => !['/login', '/link-telegram'].includes(route.p
     <main class="main">
       <div class="top-band rise rise-2">
         <div class="masthead">
-          <span class="eyebrow">Sub №{{ statsToday.streakDays }} ·
+          <span class="eyebrow">Sub №{{ statsToday?.streakDays ?? '—' }} ·
             Volume 1 · Weekly Edition</span>
           <span class="masthead__date">
             {{
@@ -94,7 +104,7 @@ const showChrome = computed(() => !['/login', '/link-telegram'].includes(route.p
             <span class="dot dot--sage" /> API online
           </span>
           <span class="chip ochre">
-            {{ statsToday.due }} к повтору
+            {{ statsToday?.due ?? '—' }} к повтору
           </span>
         </div>
       </div>
