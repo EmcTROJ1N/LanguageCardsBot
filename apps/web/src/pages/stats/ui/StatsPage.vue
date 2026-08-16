@@ -1,33 +1,37 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { statsToday, levelDistribution, generateHitmap } from '@/entities/stats'
-import { cards } from '@/entities/card'
-import StatTile from '@/shared/ui/StatTile.vue'
-import TodoBanner from '@/shared/ui/TodoBanner.vue'
+import { computed, onMounted, ref } from 'vue'
+import { statsApi } from '@/shared/api'
+import type { StatsToday } from '@/entities/stats'
+import { PageHeader, StatTile, TodoBanner } from '@/shared/ui'
 
-const hitmap = generateHitmap()
-const max = computed(() => Math.max(...levelDistribution.map((l) => l.count)))
-const totalAccuracy = computed(() => {
-  const total = cards.reduce((a, c) => a + c.totalReviews, 0)
-  const correct = cards.reduce((a, c) => a + c.correctReviews, 0)
-  return total === 0 ? 0 : Math.round((correct / total) * 100)
+const stats = ref<StatsToday | null>(null)
+const levelDist = ref<{ level: number; count: number }[]>([])
+const hitmap = ref<number[][]>([])
+
+onMounted(async () => {
+  stats.value = await statsApi.getToday()
+  levelDist.value = await statsApi.getLevelDistribution()
+  hitmap.value = await statsApi.getHitmap()
 })
 
+const max = computed(() => Math.max(...levelDist.value.map((l) => l.count), 1))
+const totalAccuracy = computed(() => {
+  if (!stats.value) return 0
+  const total = stats.value.reviewsToday
+  const correct = stats.value.correctToday
+  return total === 0 ? 0 : Math.round((correct / total) * 100)
+})
 </script>
 
 <template>
   <section class="stats">
-    <header>
-      <span class="eyebrow">Volume · Almanac</span>
-      <h1 class="display">Статистика</h1>
-      <p class="lede serif">Ретроспектива вашей практики за последние двенадцать недель.</p>
-    </header>
+    <PageHeader eyebrow="Chapter · Chronicle" title="Статистика" />
 
     <div class="grid tiles">
       <StatTile label="Точность всех повторений" :value="totalAccuracy" unit="%" tone="ochre" />
-      <StatTile label="Streak" :value="statsToday.streakDays" unit="дн." tone="rust" />
-      <StatTile label="Всего карточек" :value="statsToday.totalCards" />
-      <StatTile label="Выучено" :value="statsToday.learned" tone="sage" />
+      <StatTile label="Streak" :value="stats?.streakDays ?? 0" unit="дн." tone="rust" />
+      <StatTile label="Всего карточек" :value="stats?.totalCards ?? 0" />
+      <StatTile label="Выучено" :value="stats?.learned ?? 0" tone="sage" />
     </div>
 
     <div class="grid-2">
@@ -64,7 +68,7 @@ const totalAccuracy = computed(() => {
           <span class="mono muted">карточек в каждом level'е</span>
         </header>
         <div class="levels">
-          <div v-for="l in levelDistribution" :key="l.level" class="lvl">
+          <div v-for="l in levelDist" :key="l.level" class="lvl">
             <span class="lvl__label mono">lvl {{ l.level }}</span>
             <div class="lvl__bar" :class="{ learned: l.level === 10 }">
               <span

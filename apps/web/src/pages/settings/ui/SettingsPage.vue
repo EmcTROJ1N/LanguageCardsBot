@@ -1,20 +1,25 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { currentProfile } from '@/entities/user'
-import TodoBanner from '@/shared/ui/TodoBanner.vue'
+import { onMounted, ref } from 'vue'
+import { userApi } from '@/shared/api'
+import type { Profile } from '@/entities/user'
+import { PageHeader, TodoBanner } from '@/shared/ui'
 
-const reminderMinutes = ref(currentProfile.reminderIntervalMinutes)
-const hideTranslations = ref(currentProfile.hideTranslations)
+const profile = ref<Profile | null>(null)
+const reminderMinutes = ref(90)
+const hideTranslations = ref(false)
+
+onMounted(async () => {
+  profile.value = await userApi.getProfile()
+  reminderMinutes.value = profile.value.reminderIntervalMinutes
+  hideTranslations.value = profile.value.hideTranslations
+})
 
 const presets = [30, 60, 90, 180, 360, 720, 1440]
 </script>
 
 <template>
   <section class="settings">
-    <header>
-      <span class="eyebrow">Section · Preferences</span>
-      <h1 class="display">Настройки</h1>
-    </header>
+    <PageHeader eyebrow="Chapter · Apparatus" title="Настройки" />
 
     <div class="grid">
       <article class="panel">
@@ -22,20 +27,20 @@ const presets = [30, 60, 90, 180, 360, 720, 1440]
         <dl class="dl">
           <div>
             <dt>Email</dt>
-            <dd class="mono">{{ currentProfile.email }}</dd>
+            <dd class="mono">{{ profile?.email }}</dd>
           </div>
           <div>
             <dt>Имя</dt>
-            <dd>{{ currentProfile.firstName }} {{ currentProfile.lastName }}</dd>
+            <dd>{{ profile?.firstName }} {{ profile?.lastName }}</dd>
           </div>
           <div>
             <dt>Роль</dt>
-            <dd><span class="chip ink">{{ currentProfile.role }}</span></dd>
+            <dd><span class="chip ink">{{ profile?.role }}</span></dd>
           </div>
           <div>
             <dt>Дата регистрации</dt>
             <dd class="mono">
-              {{ new Date(currentProfile.createdAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' }) }}
+              {{ profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' }) : '—' }}
             </dd>
           </div>
         </dl>
@@ -50,11 +55,11 @@ const presets = [30, 60, 90, 180, 360, 720, 1440]
         <dl class="dl">
           <div>
             <dt>ChatId</dt>
-            <dd class="mono">{{ currentProfile.chatId }}</dd>
+            <dd class="mono">{{ profile?.chatId }}</dd>
           </div>
           <div>
             <dt>Username</dt>
-            <dd class="mono">@{{ currentProfile.telegramUsername }}</dd>
+            <dd class="mono">@{{ profile?.telegramUsername }}</dd>
           </div>
           <div>
             <dt>Статус</dt>
@@ -90,8 +95,8 @@ const presets = [30, 60, 90, 180, 360, 720, 1440]
           <span class="hint mono">
             текущий: {{ reminderMinutes }} мин · следующее в
             {{
-              currentProfile.nextReminderAt
-                ? new Date(currentProfile.nextReminderAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+              profile?.nextReminderAt
+                ? new Date(profile.nextReminderAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
                 : '—'
             }}
           </span>
