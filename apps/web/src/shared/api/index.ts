@@ -1,1 +1,7 @@
-// Placeholder — real API client will be added here when backend integration begins.
+export { cardsApi, reviewIntervalDays } from './cards'
+export type { CreateCardDto, UpdateCardDto } from './cards'
+export { statsApi } from './stats'
+export { userApi } from './user'
+export type { UpdateProfileDto } from './user'
+export { translationApi } from './translation'
+export type { TranslationResult } from './translation'
