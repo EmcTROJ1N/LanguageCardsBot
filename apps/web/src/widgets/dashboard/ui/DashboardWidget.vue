@@ -1,22 +1,45 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import { cards, getDueCards } from '@/entities/card'
-import { statsToday, levelDistribution, generateHitmap } from '@/entities/stats'
-import { currentProfile } from '@/entities/user'
-import TodoBanner from '@/shared/ui/TodoBanner.vue'
+import { cardsApi, statsApi, userApi } from '@/shared/api'
+import { getDueCards } from '@/entities/card'
+import type { Card } from '@/entities/card'
+import type { StatsToday } from '@/entities/stats'
+import type { Profile } from '@/entities/user'
+import { TodoBanner, AppBtn, AppChip } from '@/shared/ui'
 
 const now = new Date('2026-08-11T15:22:00Z')
 
-const due = computed(() => getDueCards())
+const allCards = ref<Card[]>([])
+const statsToday = ref<StatsToday | null>(null)
+const profile = ref<Profile | null>(null)
+const hitmap = ref<number[][]>([])
+const levelDistribution = ref<{ level: number; count: number }[]>([])
+
+onMounted(async () => {
+  const [cards, stats, prof, map, levels] = await Promise.all([
+    cardsApi.getAll(),
+    statsApi.getToday(),
+    userApi.getProfile(),
+    statsApi.getHitmap(),
+    statsApi.getLevelDistribution(),
+  ])
+  allCards.value = cards
+  statsToday.value = stats
+  profile.value = prof
+  hitmap.value = map
+  levelDistribution.value = levels
+})
+
+const due = computed(() => getDueCards(allCards.value))
 const dueSample = computed(() => due.value.slice(0, 4))
 
 // Оценка длительности: 15 сек. на карточку — грубая эвристика для превью.
 const trainEtaMin = computed(() => Math.max(1, Math.round((due.value.length * 15) / 60)))
 
 const nextReminder = computed(() => {
-  if (!currentProfile.nextReminderAt) return null
-  const d = new Date(currentProfile.nextReminderAt)
+  if (!profile.value?.nextReminderAt) return null
+  const d = new Date(profile.value.nextReminderAt)
   const diffMin = Math.round((d.getTime() - now.getTime()) / 60000)
   return {
     time: d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
@@ -26,7 +49,7 @@ const nextReminder = computed(() => {
 
 const streakState = computed(() => {
   // Мок: интервал напоминаний < 6ч и next в будущем — streak safe.
-  if (!nextReminder.value) return { label: 'нет графика', klass: 'muted' as const }
+  if (!nextReminder.value) return { label: 'нет графика', klass: 'default' as const }
   if (nextReminder.value.inMin < 0)
     return { label: `просрочено на ${Math.abs(nextReminder.value.inMin)} мин`, klass: 'rust' as const }
   if (nextReminder.value.inMin < 240)
@@ -35,14 +58,14 @@ const streakState = computed(() => {
 })
 
 const accuracyToday = computed(() =>
-  statsToday.reviewsToday === 0
+  (statsToday.value?.reviewsToday ?? 0) === 0
     ? 0
-    : Math.round((statsToday.correctToday / statsToday.reviewsToday) * 100),
+    : Math.round(((statsToday.value?.correctToday ?? 0) / (statsToday.value?.reviewsToday ?? 0)) * 100),
 )
 
 // Активность за 7 дней (последние 7 дней из hitmap)
 const week = computed(() => {
-  const map = generateHitmap()
+  const map = hitmap.value
   const flat = map.flat()
   const last7 = flat.slice(-7)
   const maxV = Math.max(...last7, 1)
@@ -60,14 +83,14 @@ const weekTotalReviews = computed(() =>
 )
 
 const recent = computed(() =>
-  [...cards].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1)).slice(0, 5),
+  [...allCards.value].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1)).slice(0, 5),
 )
 
 // «Готовящиеся» напоминания (мок): сегодня следующие 3 напоминания
 const upcomingReminders = computed(() => {
   const base = now.getTime()
-  const interval = currentProfile.reminderIntervalMinutes * 60 * 1000
-  const start = new Date(currentProfile.nextReminderAt || now).getTime()
+  const interval = (profile.value?.reminderIntervalMinutes ?? 90) * 60 * 1000
+  const start = new Date(profile.value?.nextReminderAt || now).getTime()
   return [0, 1, 2].map((i) => {
     const d = new Date(start + i * interval)
     const diffMin = Math.round((d.getTime() - base) / 60000)
@@ -84,8 +107,8 @@ const upcomingReminders = computed(() => {
 })
 
 const pipeline = computed(() => {
-  const max = Math.max(...levelDistribution.map((l) => l.count))
-  return levelDistribution.map((l) => ({
+  const max = Math.max(...levelDistribution.value.map((l) => l.count), 1)
+  return levelDistribution.value.map((l) => ({
     ...l,
     pct: (l.count / max) * 100,
   }))
@@ -114,18 +137,18 @@ const pipeline = computed(() => {
             <span class="fact__l">точность за сутки</span>
           </span>
           <span class="fact">
-            <span class="fact__k">{{ statsToday.streakDays }} дн</span>
+            <span class="fact__k">{{ statsToday?.streakDays ?? 0 }} дн</span>
             <span class="fact__l">streak</span>
-            <span class="chip" :class="streakState.klass">{{ streakState.label }}</span>
+            <AppChip :tone="streakState.klass">{{ streakState.label }}</AppChip>
           </span>
         </div>
       </div>
       <div class="cockpit__cta">
-        <RouterLink to="/train" class="btn ochre lg">
+        <AppBtn variant="ochre" size="lg" to="/train">
           Начать сейчас
           <span class="mono">→</span>
-        </RouterLink>
-        <RouterLink to="/add" class="btn ghost lg">Новая карточка</RouterLink>
+        </AppBtn>
+        <AppBtn variant="ghost" size="lg" to="/add">Новая карточка</AppBtn>
       </div>
     </header>
 
@@ -168,7 +191,7 @@ const pipeline = computed(() => {
           </li>
         </ul>
         <footer class="panel__foot">
-          <RouterLink to="/train" class="btn ochre">Тренировать все {{ due.length }}</RouterLink>
+          <AppBtn variant="ochre" to="/train">Тренировать все {{ due.length }}</AppBtn>
           <RouterLink to="/deck?filter=due" class="link-more">развернуть список →</RouterLink>
         </footer>
       </article>
@@ -250,7 +273,7 @@ const pipeline = computed(() => {
           </li>
         </ul>
         <footer class="panel__foot subtle">
-          <span class="mono muted">интервал {{ currentProfile.reminderIntervalMinutes }} мин</span>
+          <span class="mono muted">интервал {{ profile?.reminderIntervalMinutes ?? 90 }} мин</span>
         </footer>
       </article>
 
@@ -352,9 +375,6 @@ const pipeline = computed(() => {
   color: var(--ink-mute);
   font-size: 12px;
   letter-spacing: 0.02em;
-}
-.chip.muted {
-  color: var(--ink-mute);
 }
 .cockpit__cta {
   display: flex;
