@@ -15,13 +15,10 @@ export type Card = {
 
 export type CardStatus = 'new' | 'due' | 'queued' | 'learned'
 
-// Frozen to mock date; replace with Date.now() when integrating real API.
-const _mockNow = new Date('2026-08-11T15:22:00Z')
-
 export function statusOf(card: Card): CardStatus {
   if (card.learned) return 'learned'
   if (card.totalReviews === 0 || !card.nextReviewAt) return 'new'
-  return new Date(card.nextReviewAt) <= _mockNow ? 'due' : 'queued'
+  return new Date(card.nextReviewAt) <= new Date() ? 'due' : 'queued'
 }
 
 export function statusRank(card: Card): number {

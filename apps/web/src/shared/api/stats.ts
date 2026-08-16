@@ -1,46 +1,44 @@
 import type { StatsToday } from '@/entities/stats'
+import { apiFetch } from './http'
 
-const _statsToday: StatsToday = {
-  due: 17, learned: 84, totalCards: 213,
-  streakDays: 12, reviewsToday: 22, correctToday: 18,
+type TodayStatsDto = {
+  newToday: number
+  totalReviewsToday: number
+  correctReviewsToday: number
+  totalCards: number
+  learnedCards: number
+  bestDay: string | null
+  bestCount: number
 }
 
-const _levelDistribution: { level: number; count: number }[] = [
-  { level: 1, count: 21 }, { level: 2, count: 18 }, { level: 3, count: 24 },
-  { level: 4, count: 19 }, { level: 5, count: 22 }, { level: 6, count: 15 },
-  { level: 7, count: 12 }, { level: 8, count: 9 },  { level: 9, count: 6 },
-  { level: 10, count: 84 },
-]
-
-function _generateHitmap(): number[][] {
-  const seed = 42
-  let s = seed
-  const rand = () => {
-    s = (s * 1664525 + 1013904223) % 4294967296
-    return s / 4294967296
-  }
-  const weeks: number[][] = []
-  for (let w = 0; w < 12; w++) {
-    const week: number[] = []
-    for (let d = 0; d < 7; d++) {
-      const base = rand()
-      const boost = w >= 10 ? 0.35 : 0
-      const val = base + boost
-      week.push(val < 0.35 ? 0 : val < 0.55 ? 1 : val < 0.75 ? 2 : val < 0.9 ? 3 : 4)
-    }
-    weeks.push(week)
-  }
-  return weeks
+type GetTodayStatsResponseDto = {
+  stats: TodayStatsDto
 }
 
 export const statsApi = {
   async getToday(): Promise<StatsToday> {
-    return { ..._statsToday }
+    // TODO: replace userId:0 with real user ID from auth session
+    const data = await apiFetch<GetTodayStatsResponseDto>('/api/cards/v3/stats/today/0')
+    const s = data.stats
+    return {
+      // TODO: "due" count — backend has no dedicated endpoint; derive from cards or extend StatsController
+      due: 0,
+      learned: s.learnedCards,
+      totalCards: s.totalCards,
+      // TODO: streakDays — not in backend response; needs ReviewEntity aggregation
+      streakDays: 0,
+      reviewsToday: s.totalReviewsToday,
+      correctToday: s.correctReviewsToday,
+    }
   },
+
   async getLevelDistribution(): Promise<{ level: number; count: number }[]> {
-    return [..._levelDistribution]
+    // TODO: no backend endpoint; needs GET /api/cards/v3/stats/level-distribution
+    return []
   },
+
   async getHitmap(): Promise<number[][]> {
-    return _generateHitmap()
+    // TODO: no backend endpoint; needs GET /api/cards/v3/stats/history?days=84
+    return []
   },
 }

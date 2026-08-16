@@ -1,28 +1,43 @@
 import type { Profile } from '@/entities/user'
+import { apiFetch } from './http'
 
 export type UpdateProfileDto = Partial<
   Pick<Profile, 'firstName' | 'lastName' | 'reminderIntervalMinutes' | 'hideTranslations'>
 >
 
-const _profile: Profile = {
-  email: 'german@yetiora.com',
-  firstName: 'German',
-  lastName: 'Pokrovskiy',
-  role: 'User',
-  chatId: 483920174,
-  telegramUsername: 'gpokrovskiy',
-  reminderIntervalMinutes: 90,
-  hideTranslations: true,
-  nextReminderAt: '2026-08-11T18:30:00Z',
-  createdAt: '2026-05-14T12:04:00Z',
+type PassportMeDto = {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  role: string
+  createdAt: string
 }
 
 export const userApi = {
   async getProfile(): Promise<Profile> {
-    return { ..._profile }
+    // TODO: compose with Cards user (GET /api/cards/v3/users/{id}) for chatId, telegramUsername,
+    //       reminderIntervalMinutes, hideTranslations, nextReminderAt.
+    //       Requires Passport↔Cards user mapping (integer ID federation).
+    const me = await apiFetch<PassportMeDto>('/api/passport/v1/auth/me')
+    return {
+      email: me.email,
+      firstName: me.firstName,
+      lastName: me.lastName,
+      role: me.role === 'Admin' ? 'Admin' : 'User',
+      chatId: null,           // TODO: from Cards user
+      telegramUsername: null, // TODO: from Cards user
+      reminderIntervalMinutes: 90, // TODO: from Cards user
+      hideTranslations: false,     // TODO: from Cards user
+      nextReminderAt: null,        // TODO: from Cards user
+      createdAt: me.createdAt,
+    }
   },
-  async updateProfile(dto: UpdateProfileDto): Promise<Profile> {
-    Object.assign(_profile, dto)
-    return { ..._profile }
+
+  async updateProfile(_dto: UpdateProfileDto): Promise<Profile> {
+    // TODO: split into two requests — PATCH /api/passport/v1/auth/me (firstName, lastName)
+    //       and PUT /api/cards/v3/users/{id} (reminderIntervalMinutes, hideTranslations)
+    //       once user ID federation is in place
+    return userApi.getProfile()
   },
 }

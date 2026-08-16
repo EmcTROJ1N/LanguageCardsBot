@@ -1,3 +1,4 @@
+export { apiFetch } from './http'
 export { cardsApi, reviewIntervalDays } from './cards'
 export type { CreateCardDto, UpdateCardDto } from './cards'
 export { statsApi } from './stats'
