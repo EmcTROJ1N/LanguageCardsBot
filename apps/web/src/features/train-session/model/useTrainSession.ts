@@ -3,13 +3,15 @@ import { cardsApi, reviewIntervalDays } from '@/shared/api'
 import { getDueCards } from '@/entities/card'
 import type { Card } from '@/entities/card'
 
-// Module-level singleton state — shared across all callers (TrainPage + TrainCard)
 const queue = ref<Card[]>([])
 const results = ref<{ id: number; correct: boolean }[]>([])
 const isFlipped = ref(false)
+let loaded = false
 
 export function useTrainSession() {
   onMounted(async () => {
+    if (loaded) return
+    loaded = true
     const all = await cardsApi.getAll()
     queue.value = getDueCards(all)
   })
@@ -35,7 +37,7 @@ export function useTrainSession() {
     if (!current.value) return
     results.value.push({ id: current.value.id, correct })
     isFlipped.value = false
-    queue.value.shift()
+    queue.value = queue.value.slice(1)
   }
 
   async function restart() {

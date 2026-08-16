@@ -3,8 +3,6 @@ import { useTrainSession } from '../model/useTrainSession'
 import { AppBtn } from '@/shared/ui'
 
 const { current, isFlipped, nextIntervalDays, flip, answer, progress, correctCount } = useTrainSession()
-
-defineExpose({ restart: undefined })
 </script>
 
 <template>
