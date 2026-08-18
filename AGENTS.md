@@ -13,7 +13,7 @@ The repository is organized around a cards backend exposed through gRPC and a se
 - `src/Cards.Domain` - card, review, and user domain entities/value objects.
 - `src/Cards.Infrastructure` - EF Core repositories, MySQL `DbContext`, entity configuration, and migrations.
 - `src/Cards.Presentation` - ASP.NET Core gRPC server implementing the cards contracts.
-- `src/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation` - Telegram bot worker service and command handlers. Despite the parent folder name, the active project is `LanguageCardsBot.Presentation.csproj`.
+- `src/LanguageCardsBot/LanguageCardsBot.Presentation/LanguageCardsBot.Presentation` - Telegram bot worker service and command handlers.
 - `docker-compose.yml` - root compose file for MySQL, the gRPC service, and the Telegram bot.
 
 ## Architecture Rules
@@ -44,7 +44,7 @@ dotnet run --project src/Cards.Presentation/Cards.Presentation.csproj
 Run the Telegram worker locally:
 
 ```bash
-dotnet run --project src/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation/LanguageCardsBot.Presentation.csproj
+dotnet run --project src/LanguageCardsBot/LanguageCardsBot.Presentation/LanguageCardsBot.Presentation/LanguageCardsBot.Presentation.csproj
 ```
 
 Run the full stack with Docker Compose:
@@ -112,7 +112,7 @@ Text messages that are not commands are handled as card input. Documents are han
 - Prefer `rg`/`rg --files` for repository search.
 - Before finishing backend or contract work, run `dotnet build LanguageCardsBot.sln` when possible.
 - If Docker behavior changes, verify with `docker compose config` or `docker compose up --build` when the environment permits.
-- Current known build warning observed during inspection: nullable warning `CS8600` in `src/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation/Workers/ReminderWorker.cs`.
+- Current known build warning observed during inspection: nullable warning `CS8600` in `src/LanguageCardsBot/LanguageCardsBot.Presentation/LanguageCardsBot.Presentation/Workers/ReminderWorker.cs`.
 
 ## Git Hygiene
 

@@ -1,8 +1,8 @@
 # Prerequisites:
 #   docker network create language-cards-shared
 #   docker network create passport
-#   cp src/LanguageCardsBot/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation/.env.example \
-#      src/LanguageCardsBot/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation/.env
+#   cp src/LanguageCardsBot/LanguageCardsBot.Presentation/LanguageCardsBot.Presentation/.env.example \
+#      src/LanguageCardsBot/LanguageCardsBot.Presentation/LanguageCardsBot.Presentation/.env
 #   (then fill in BOT_TOKEN)
 
 include:

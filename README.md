@@ -24,8 +24,8 @@ docker network create infra
 ### 2. Настроить переменные окружения для бота
 
 ```bash
-cp src/LanguageCardsBot/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation/.env.example \
-   src/LanguageCardsBot/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation/.env
+cp src/LanguageCardsBot/LanguageCardsBot.Presentation/LanguageCardsBot.Presentation/.env.example \
+   src/LanguageCardsBot/LanguageCardsBot.Presentation/LanguageCardsBot.Presentation/.env
 ```
 
 Открыть `.env` и заполнить `BOT_TOKEN`.

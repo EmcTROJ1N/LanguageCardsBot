@@ -3,8 +3,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>dotnet-EnglishCardsBot.Presentation-f6dc5290-beae-4e11-a0a3-e6cb70b7b98d</UserSecretsId>
-    <RootNamespace>EnglishCardsBot.Presentation</RootNamespace>
+    <UserSecretsId>dotnet-LanguageCardsBot.Presentation-f6dc5290-beae-4e11-a0a3-e6cb70b7b98d</UserSecretsId>
+    <RootNamespace>LanguageCardsBot.Presentation</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="DotNetEnv" />

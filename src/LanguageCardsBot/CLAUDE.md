@@ -6,13 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ASP.NET Core Worker Service (.NET 10) implementing a Telegram bot. It communicates with the Cards microservice exclusively via gRPC, using generated clients from the `LanguageCardsBot.Contracts.Cards` NuGet package.
 
-Root namespace: `EnglishCardsBot.Presentation`  
-Project file: `src/LanguageCardsBot/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation/LanguageCardsBot.Presentation.csproj`
+Root namespace: `LanguageCardsBot.Presentation`  
+Project file: `src/LanguageCardsBot/LanguageCardsBot.Presentation/LanguageCardsBot.Presentation/LanguageCardsBot.Presentation.csproj`
 
 ## Run command
 
 ```bash
-dotnet run --project src/LanguageCardsBot/EnglishCardsBot.Presentation/LanguageCardsBot.Presentation/LanguageCardsBot.Presentation.csproj
+dotnet run --project src/LanguageCardsBot/LanguageCardsBot.Presentation/LanguageCardsBot.Presentation/LanguageCardsBot.Presentation.csproj
 ```
 
 A `.env` file in the project root is auto-loaded via `DotNetEnv` at startup.
