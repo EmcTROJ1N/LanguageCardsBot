@@ -125,6 +125,7 @@ public sealed class AuthController(IAuthService authService) : ControllerBase
             : Ok(ToResponse(user));
     }
 
+    // TODO: use mapster
     /// <summary>
     /// Maps an application token DTO to the HTTP response model.
     /// </summary>
