@@ -3,6 +3,8 @@ services:
     build:
       context: ../../../..
       dockerfile: src/LanguageCardsBot/LanguageCardsBot.Presentation/LanguageCardsBot.Presentation/Dockerfile
+      args:
+        GITHUB_TOKEN: ${GITHUB_TOKEN}
     container_name: language_cards_bot
     restart: unless-stopped
     ports:

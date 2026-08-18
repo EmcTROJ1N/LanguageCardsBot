@@ -3,6 +3,8 @@ services:
     build:
       context: ../../..
       dockerfile: src/Cards/Cards.Presentation/Dockerfile
+      args:
+        GITHUB_TOKEN: ${GITHUB_TOKEN}
     container_name: cards_presentation
     restart: unless-stopped
     depends_on:

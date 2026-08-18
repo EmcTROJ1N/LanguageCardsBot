@@ -7,7 +7,7 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageId>Contracts.Cards</PackageId>
-    <Version>3.0.1</Version>
+    <Version>3.0.2</Version>
     <Authors>EmcTROJ1N team</Authors>
     <Description>Shared gRPC contracts</Description>
     <NoDefaultExcludes>true</NoDefaultExcludes>

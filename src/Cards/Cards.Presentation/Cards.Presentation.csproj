@@ -9,8 +9,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" />
-    <PackageReference Include="LanguageCardsBot.Contracts.Cards" />
-    <PackageReference Include="LanguageCardsBot.Contracts.Common" />
+    <PackageReference Include="Contracts.Cards" />
+    <PackageReference Include="Contracts.Common" />
     <PackageReference Include="Mapster" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
       <PrivateAssets>all</PrivateAssets>

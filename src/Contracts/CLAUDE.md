@@ -16,21 +16,17 @@ NuGet-packable project (`PackageId: Contracts.Cards`, current version `3.0.1`). 
 
 Contains shared enums (`Enum/`) and typed exceptions (`Exceptions/`) used across services. `PackageId: Contracts.Common`, version `1.0.0`. `RootNamespace`: `LanguageCardsBot.Common`.
 
-## Packing and publishing to local source
+## Packing and publishing
 
-The repo's `nuget.config` registers a local feed at `.nuget/local/` alongside nuget.org.
+Packages (`LanguageCardsBot.Contracts.*`) are published to GitHub Packages (`https://nuget.pkg.github.com/EmcTROJ1N/index.json`). There is no local NuGet feed — do not use `.nuget/local/` or `dotnet pack -o .nuget/local`.
 
-Pack `Contracts.Cards` into the local feed:
+Pack and publish to GitHub Packages:
 ```
-dotnet pack src/Contracts/Contracts.Cards/Contracts.Cards.csproj -o .nuget/local
-```
-
-Pack `Contracts.Common` into the local feed:
-```
-dotnet pack src/Contracts/Contracts.Common/Contracts.Common.csproj -o .nuget/local
+dotnet pack src/Contracts/Contracts.Cards/Contracts.Cards.csproj -o ./artifacts
+dotnet nuget push ./artifacts/*.nupkg --source github --api-key <GITHUB_TOKEN>
 ```
 
-After packing, consumer projects pick up the new version automatically on the next restore (no extra `nuget add source` step needed).
+Consumer projects and Docker builds authenticate via `GITHUB_TOKEN` build arg.
 
 ## How consumers wire up gRPC code-gen
 

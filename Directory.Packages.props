@@ -4,8 +4,8 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- Internal contracts -->
-    <PackageVersion Include="LanguageCardsBot.Contracts.Cards" Version="3.0.1" />
-    <PackageVersion Include="LanguageCardsBot.Contracts.Common" Version="1.0.0" />
+    <PackageVersion Include="Contracts.Cards" Version="3.0.2" />
+    <PackageVersion Include="Contracts.Common" Version="1.0.0" />
     <PackageVersion Include="LanguageCardsBot.Contracts.Messaging" Version="1.1.0" />
     <!-- Analyzers -->
     <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
@@ -21,8 +21,8 @@
     <!-- Mapster -->
     <PackageVersion Include="Mapster" Version="10.0.6-a" />
     <!-- MassTransit -->
-    <PackageVersion Include="MassTransit" Version="9.1.2" />
-    <PackageVersion Include="MassTransit.RabbitMQ" Version="9.1.2" />
+    <PackageVersion Include="MassTransit" Version="8.3.6" />
+    <PackageVersion Include="MassTransit.RabbitMQ" Version="8.3.6" />
     <!-- AspNetCore -->
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.8" />
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />

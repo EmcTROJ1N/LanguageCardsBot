@@ -19,7 +19,7 @@
     <PackageReference Include="SharpAbp.Abp.OpenTelemetry.Exporter.Prometheus.AspNetCore" />
     <PackageReference Include="Telegram.Bot" />
     <PackageReference Include="Grpc.AspNetCore" />
-    <PackageReference Include="LanguageCardsBot.Contracts.Cards" />
+    <PackageReference Include="Contracts.Cards" />
   </ItemGroup>
   <PropertyGroup>
     <LanguageCardsBotGrpcServices>Client</LanguageCardsBotGrpcServices>

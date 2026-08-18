@@ -23,8 +23,9 @@ public sealed class CardsMysqlDbContextFactory
             .Build();
 
         var connectionString = configuration.GetConnectionString("CardsMysql")
+                               ?? configuration["Database:ConnectionString"]
                                ?? throw new InvalidOperationException(
-                                   "Connection string 'CardsMysql' is not configured.");
+                                   "Connection string 'CardsMysql' or 'Database:ConnectionString' is not configured.");
 
         var optionsBuilder = new DbContextOptionsBuilder<CardsMysqlDbContext>();
 
