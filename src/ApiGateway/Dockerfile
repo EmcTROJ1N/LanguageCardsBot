@@ -6,7 +6,7 @@ EXPOSE 5050
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Directory.Packages.props", "Directory.Build.props", "./"]
+COPY ["Directory.Packages.props", "Directory.Build.props", "nuget.config", "stylecop.json", "./"]
 COPY ["src/ApiGateway/ApiGateway.csproj", "src/ApiGateway/"]
 RUN dotnet restore "src/ApiGateway/ApiGateway.csproj"
 COPY . .
