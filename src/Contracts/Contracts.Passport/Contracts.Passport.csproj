@@ -7,7 +7,7 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageId>Contracts.Passport</PackageId>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <Authors>EmcTROJ1N team</Authors>
     <Description>Shared OpenAPI contracts for the Passport (identity) service</Description>
     <NoDefaultExcludes>true</NoDefaultExcludes>
