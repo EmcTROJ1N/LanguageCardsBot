@@ -9,16 +9,15 @@ builder.Services
     .AddPassportInfrastructure(builder.Configuration)
     .AddPassportApplicationServices()
     .AddPassportAuthentication(builder.Configuration)
-    .AddPassportAuthorization(builder.Configuration);
-
-builder.Services.AddControllers();
-builder.Services.AddPassportSwaggerDocumentation();
+    .AddPassportAuthorization(builder.Configuration)
+    .AddPassportOpenApiDocumentation()
+    .AddControllers();
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseOpenApi();       // отдаёт /swagger/v1/swagger.json
     app.MapScalarApiReference(options =>
     {
         options.Title = "LanguageCardsBot Passport API";

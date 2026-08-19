@@ -6,8 +6,10 @@
     <!-- Internal contracts -->
     <PackageVersion Include="Contracts.Cards" Version="3.0.2" />
     <PackageVersion Include="Contracts.Common" Version="1.0.0" />
+    <PackageVersion Include="Contracts.Passport" Version="1.0.0" />
     <PackageVersion Include="LanguageCardsBot.Contracts.Messaging" Version="1.1.0" />
     <!-- Analyzers -->
+    <PackageVersion Include="NSwag.AspNetCore" Version="14.7.1" />
     <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
     <!-- gRPC -->
     <PackageVersion Include="Grpc.AspNetCore" Version="2.64.0" />

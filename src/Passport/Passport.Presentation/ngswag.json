@@ -1,0 +1,22 @@
+{
+  "runtime": "Net80",
+  "documentGenerator": {
+    "fromDocument": {
+      "json": "../Passport.Contracts/openapi/passport.yaml",
+      "output": null
+    }
+  },
+  "codeGenerators": {
+    "openApiToCSharpController": {
+      "clientBaseClass": null,
+      "controllerBaseClass": "ControllerBase",
+      "controllerStyle": "Abstract",
+      "controllerTarget": "AspNetCore",
+      "namespace": "Passport.Presentation.Controllers.Generated",
+      "className": "{controller}ControllerBase",
+      "generateOptionalParameters": true,
+      "useCancellationToken": true,
+      "output": "Controllers/Generated/PassportControllers.generated.cs"
+    }
+  }
+}

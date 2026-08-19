@@ -16,6 +16,12 @@ NuGet-packable project (`PackageId: Contracts.Cards`, current version `3.0.1`). 
 
 Contains shared enums (`Enum/`) and typed exceptions (`Exceptions/`) used across services. `PackageId: Contracts.Common`, version `1.0.0`. `RootNamespace`: `LanguageCardsBot.Common`.
 
+### Contracts.Passport
+
+NuGet-packable project (`PackageId: Contracts.Passport`, current version `1.0.0`). Ships only the OpenAPI spec for the Passport (identity) service.
+
+- `OpenApi/passport-auth-v1.yaml` — OpenAPI 3.0 spec for auth endpoints (`/auth/register`, `/auth/login`, `/auth/refresh`, `/auth/me`).
+
 ## Packing and publishing
 
 Packages (`LanguageCardsBot.Contracts.*`) are published to GitHub Packages (`https://nuget.pkg.github.com/EmcTROJ1N/index.json`). There is no local NuGet feed — do not use `.nuget/local/` or `dotnet pack -o .nuget/local`.
@@ -27,6 +33,15 @@ dotnet nuget push ./artifacts/*.nupkg --source github --api-key <GITHUB_TOKEN>
 ```
 
 Consumer projects and Docker builds authenticate via `GITHUB_TOKEN` build arg.
+
+## Central Package Management
+
+All package versions are centralised in `Directory.Packages.props` at the repo root (CPM is enabled). When adding a `PackageReference`, **never specify `Version=` on the reference itself** — add a `<PackageVersion>` entry in `Directory.Packages.props` instead. Violating this causes `NU1008`.
+
+New contract package checklist:
+1. Add `<PackageVersion Include="Contracts.XYZ" Version="x.y.z" />` to `Directory.Packages.props`.
+2. Add `<package pattern="Contracts.XYZ" />` to the `github` source in `nuget.config`.
+3. After publishing, make the GitHub Package **public** (billing limit blocks private package downloads).
 
 ## How consumers wire up gRPC code-gen
 

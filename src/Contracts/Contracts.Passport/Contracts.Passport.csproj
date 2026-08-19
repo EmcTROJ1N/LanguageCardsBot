@@ -1,9 +1,20 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
-
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>true</IsPackable>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageId>Contracts.Passport</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>EmcTROJ1N team</Authors>
+    <Description>Shared OpenAPI contracts for the Passport (identity) service</Description>
+    <NoDefaultExcludes>true</NoDefaultExcludes>
+    <RepositoryUrl>https://github.com/EmcTROJ1N/LanguageCardsBot</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="OpenApi\**\*.yaml" Pack="true" PackagePath="openapi\" />
+  </ItemGroup>
 </Project>

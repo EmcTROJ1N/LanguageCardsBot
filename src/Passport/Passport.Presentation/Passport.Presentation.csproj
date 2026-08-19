@@ -10,6 +10,7 @@
     <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Contracts.Passport" />
     <PackageReference Include="Keycloak.AuthServices.Authentication" />
     <PackageReference Include="Keycloak.AuthServices.Authorization" />
     <PackageReference Include="Keycloak.AuthServices.Sdk" />
@@ -17,6 +18,7 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <!-- Force patched Microsoft.OpenApi (CVE-2026-49451) — transitive from Microsoft.AspNetCore.OpenApi -->
     <PackageReference Include="Microsoft.OpenApi" />
+    <PackageReference Include="NSwag.AspNetCore" />
     <PackageReference Include="Scalar.AspNetCore" />
   </ItemGroup>
   <ItemGroup>

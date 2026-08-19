@@ -57,32 +57,27 @@ public static class ServiceConfiguration
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <returns>The same <paramref name="services"/> instance for chaining.</returns>
-    public static IServiceCollection AddPassportSwaggerDocumentation(this IServiceCollection services)
+    public static IServiceCollection AddPassportOpenApiDocumentation(this IServiceCollection services)
     {
-        services.AddOpenApi(options =>
+        var title = "LanguageCardsBot Passport API";
+        var version = "v1";
+        var description = "Authentication and user management service for LanguageCardsBot.";
+
+        services.AddOpenApiDocument(config =>
         {
-            options.AddDocumentTransformer((document, _, _) =>
+            config.DocumentName = version;
+            config.Title = title;
+            config.Version = version;
+            config.Description = description;
+
+            config.AddSecurity("Bearer", new NSwag.OpenApiSecurityScheme
             {
-                document.Info = new OpenApiInfo
-                {
-                    Title = "LanguageCardsBot Passport API",
-                    Version = "v1",
-                    Description = "Authentication and user management service for LanguageCardsBot."
-                };
-
-                document.Components ??= new OpenApiComponents();
-                document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
-                document.Components.SecuritySchemes[JwtBearerDefaults.AuthenticationScheme] = new OpenApiSecurityScheme
-                {
-                    Type = SecuritySchemeType.Http,
-                    In = ParameterLocation.Header,
-                    Scheme = "bearer",
-                    BearerFormat = "JWT",
-                    Description = "Enter your JWT access token."
-                };
-
-                return Task.CompletedTask;
+                Type = NSwag.OpenApiSecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT"
             });
+            config.OperationProcessors.Add(
+                new NSwag.Generation.Processors.Security.AspNetCoreOperationSecurityScopeProcessor("Bearer"));
         });
 
         return services;
