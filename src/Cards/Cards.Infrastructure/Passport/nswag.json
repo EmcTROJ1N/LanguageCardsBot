@@ -1,0 +1,28 @@
+{
+  "runtime": "Net80",
+  "documentGenerator": {
+    "fromDocument": {
+      "url": "http://localhost:5050/swagger/v1/swagger.json",
+      "output": null
+    }
+  },
+  "codeGenerators": {
+    "openApiToCSharpClient": {
+      "clientBaseClass": null,
+      "generateClientInterfaces": true,
+      "generateDtoTypes": true,
+      "injectHttpClient": true,
+      "useHttpClientCreationMethod": false,
+      "disposeHttpClient": false,
+      "generateExceptionClasses": true,
+      "wrapDtoExceptions": true,
+      "clientClassAccessModifier": "public",
+      "typeAccessModifier": "public",
+      "generateOptionalParameters": true,
+      "generateDefaultValues": true,
+      "namespace": "Cards.Infrastructure.PassportClient.Generated",
+      "className": "PassportClient",
+      "output": "Generated/PassportClient.g.cs"
+    }
+  }
+}
