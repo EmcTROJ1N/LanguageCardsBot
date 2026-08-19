@@ -1,26 +1,24 @@
 {
-  "runtime": "Net80",
+  "runtime": "Net100",
   "documentGenerator": {
     "fromDocument": {
-      "url": "http://localhost:5050/swagger/v1/swagger.json",
+      "url": "../../../Contracts/Contracts.Passport/OpenApi/passport-internal-v1.yaml",
       "output": null
     }
   },
   "codeGenerators": {
     "openApiToCSharpClient": {
-      "clientBaseClass": null,
       "generateClientInterfaces": true,
       "generateDtoTypes": true,
       "injectHttpClient": true,
-      "useHttpClientCreationMethod": false,
       "disposeHttpClient": false,
       "generateExceptionClasses": true,
       "wrapDtoExceptions": true,
       "clientClassAccessModifier": "public",
       "typeAccessModifier": "public",
       "generateOptionalParameters": true,
-      "generateDefaultValues": true,
-      "namespace": "Cards.Infrastructure.PassportClient.Generated",
+      "jsonLibrary": "SystemTextJson",
+      "namespace": "Cards.Infrastructure.Passport.Generated",
       "className": "PassportClient",
       "output": "Generated/PassportClient.g.cs"
     }

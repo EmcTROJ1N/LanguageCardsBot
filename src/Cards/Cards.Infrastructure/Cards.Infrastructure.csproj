@@ -7,6 +7,7 @@
     <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Contracts.Common" />
     <PackageReference Include="LanguageCardsBot.Contracts.Messaging" />
     <PackageReference Include="DotNetEnv" />
@@ -24,8 +25,16 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
+    <PackageReference Include="NSwag.MSBuild" PrivateAssets="All" />
     <PackageReference Include="RabbitMQ.Client" />
     <ProjectReference Include="..\Cards.Application\Cards.Application.csproj" />
     <ProjectReference Include="..\Cards.Domain\Cards.Domain.csproj" />
   </ItemGroup>
+
+  <Target Name="GeneratePassportClient">
+    <MakeDir Directories="$(MSBuildProjectDirectory)/Passport/Generated" />
+    <Exec Command="$(NSwagExe_Net100) run Passport/nswag.json"
+          WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
 </Project>
