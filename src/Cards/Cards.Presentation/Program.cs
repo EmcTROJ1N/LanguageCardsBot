@@ -1,6 +1,8 @@
 using Cards.Presentation;
 using Cards.Presentation.Mapping;
 
+DotNetEnv.Env.TraversePath().Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
 CardsMappingConfiguration.Register();

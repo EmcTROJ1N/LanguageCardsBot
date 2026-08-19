@@ -8,6 +8,7 @@
     <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="DotNetEnv" />
     <PackageReference Include="Grpc.AspNetCore" />
     <PackageReference Include="Contracts.Cards" />
     <PackageReference Include="Contracts.Common" />
