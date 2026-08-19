@@ -11,10 +11,12 @@ using Cards.Application.Users;
 using Cards.Infrastructure.Data;
 using Cards.Infrastructure.Messaging;
 using Cards.Infrastructure.Metrics;
+using Cards.Infrastructure.Passport;
 using Cards.Infrastructure.Repositories;
 using Cards.Infrastructure.Services;
 using Cards.Presentation.Interceptors;
 using Cards.Presentation.Services;
+using Keycloak.AuthServices.Authentication;
 using LanguageCardsBot.Contracts.Messaging.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -123,6 +125,38 @@ public static class ServiceConfiguration
         services.AddSingleton(CreateTranslationOptions(configuration));
         services.AddHttpClient<ITranslationApplicationService, GoogleTranslationApplicationService>();
 
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the Passport HTTP client, auth token forwarding handler,
+    /// and the <see cref="Cards.Application.Abstractions.Services.IPassportService"/> implementation.
+    /// </summary>
+    public static IServiceCollection AddPassportClient(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var baseUrl = configuration["Passport:BaseUrl"]
+            ?? Environment.GetEnvironmentVariable("PASSPORT_BASE_URL")
+            ?? throw new InvalidOperationException("Passport:BaseUrl is not configured.");
+
+        services.AddPassportHttpClient(baseUrl);
+        return services;
+    }
+
+    /// <summary>
+    /// Registers Keycloak JWT Bearer authentication and authorization for the Cards REST API.
+    /// </summary>
+    public static IServiceCollection AddCardsAuthentication(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.AddKeycloakWebApiAuthentication(configuration, options =>
+        {
+            options.RequireHttpsMetadata =
+                configuration.GetValue<bool?>("Keycloak:RequireHttpsMetadata") ?? false;
+        });
+        services.AddAuthorization();
         return services;
     }
 

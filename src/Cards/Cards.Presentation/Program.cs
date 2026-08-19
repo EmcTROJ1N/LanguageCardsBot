@@ -13,6 +13,8 @@ builder.Services
     .AddDbContext(builder.Configuration)
     .AddCardsInfrastructure()
     .AddCardsApplicationServices(builder.Configuration)
+    .AddPassportClient(builder.Configuration)
+    .AddCardsAuthentication(builder.Configuration)
     .AddGrpcServices()
     .AddOpenTelemetryPrometheus(builder.Environment.EnvironmentName)
     .AddSwaggerDocumentation()
@@ -20,6 +22,8 @@ builder.Services
 
 var app = builder.Build();
 
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseSwaggerDocumentation();
 app.MapGrpcServices();
 app.MapControllers();
