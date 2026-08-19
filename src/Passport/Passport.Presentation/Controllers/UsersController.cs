@@ -1,3 +1,5 @@
+using System.Security.Claims;
+
 using Microsoft.AspNetCore.Authorization;
 using Passport.Application.Abstractions.Services;
 using Passport.Presentation.Controllers.Generated;
@@ -14,6 +16,13 @@ public sealed class UsersController(IAuthService authService) : UsersControllerB
     public override async Task<UserResponse> GetUserById(
         Guid id, CancellationToken cancellationToken = default)
     {
+        var subClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!Guid.TryParse(subClaim, out var callerId) || callerId != id)
+        {
+            Response.StatusCode = 403;
+            return null!;
+        }
+
         var user = await authService.GetUserByIdAsync(id, cancellationToken);
         if (user is null)
         {
