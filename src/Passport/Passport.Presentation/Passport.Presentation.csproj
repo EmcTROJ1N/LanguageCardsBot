@@ -11,6 +11,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Contracts.Passport" />
+    <PackageReference Include="NSwag.MSBuild" PrivateAssets="All" />
     <PackageReference Include="Keycloak.AuthServices.Authentication" />
     <PackageReference Include="Keycloak.AuthServices.Authorization" />
     <PackageReference Include="Keycloak.AuthServices.Sdk" />
@@ -30,4 +31,9 @@
       <Link>.dockerignore</Link>
     </Content>
   </ItemGroup>
+  <Target Name="GeneratePassportControllers">
+    <MakeDir Directories="$(MSBuildProjectDirectory)\Controllers\Generated" />
+    <Exec Command="$(NSwagExe_Net100) run ngswag.json /variables:PassportOpenApiSpec=$(PassportOpenApiSpec)"
+          WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
 </Project>

@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup>
+    <PassportOpenApiSpec Condition="'$(PassportOpenApiSpec)' == ''">$(MSBuildThisFileDirectory)..\openapi\passport-auth-v1.yaml</PassportOpenApiSpec>
+  </PropertyGroup>
+</Project>

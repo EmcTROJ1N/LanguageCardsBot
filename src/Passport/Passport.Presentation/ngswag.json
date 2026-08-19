@@ -1,8 +1,8 @@
 {
-  "runtime": "Net80",
+  "runtime": "Net100",
   "documentGenerator": {
     "fromDocument": {
-      "json": "../Passport.Contracts/openapi/passport.yaml",
+      "json": "$(PassportOpenApiSpec)",
       "output": null
     }
   },
