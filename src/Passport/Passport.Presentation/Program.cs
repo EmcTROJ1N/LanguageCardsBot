@@ -3,6 +3,8 @@ using Passport.Infrastructure;
 using Passport.Presentation;
 using Scalar.AspNetCore;
 
+DotNetEnv.Env.TraversePath().Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
