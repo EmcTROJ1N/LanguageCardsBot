@@ -37,4 +37,9 @@
     <Exec Command="$(NSwagExe_Net100) run ngswag.json /variables:PassportOpenApiSpec=$(PassportOpenApiSpec)"
           WorkingDirectory="$(MSBuildProjectDirectory)" />
   </Target>
+  <Target Name="GeneratePassportInternalControllers">
+    <MakeDir Directories="$(MSBuildProjectDirectory)/Controllers/Generated" />
+    <Exec Command="$(NSwagExe_Net100) run ngswag-internal.json"
+          WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
 </Project>

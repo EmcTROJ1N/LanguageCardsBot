@@ -1,0 +1,22 @@
+{
+  "runtime": "Net100",
+  "documentGenerator": {
+    "fromDocument": {
+      "url": "../../Contracts/Contracts.Passport/OpenApi/passport-internal-v1.yaml",
+      "output": null
+    }
+  },
+  "codeGenerators": {
+    "openApiToCSharpController": {
+      "controllerBaseClass": "ControllerBase",
+      "controllerStyle": "Abstract",
+      "controllerTarget": "AspNetCore",
+      "namespace": "Passport.Presentation.Controllers.Generated",
+      "className": "{controller}ControllerBase",
+      "generateOptionalParameters": true,
+      "useCancellationToken": true,
+      "additionalNamespaceUsages": ["Microsoft.AspNetCore.Mvc"],
+      "output": "Controllers/Generated/PassportInternalControllers.generated.cs"
+    }
+  }
+}
