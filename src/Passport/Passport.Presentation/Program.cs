@@ -19,11 +19,12 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseOpenApi();       // отдаёт /swagger/v1/swagger.json
-    app.MapScalarApiReference(options =>
+    app.UseOpenApi(options => options.Path = "/api/passport/openapi/v1.json");
+    app.MapScalarApiReference("/api/passport/scalar", options =>
     {
         options.Title = "LanguageCardsBot Passport API";
         options.AddPreferredSecuritySchemes("Bearer");
+        options.OpenApiRoutePattern = "/api/passport/openapi/v1.json";
     });
 }
 
