@@ -9,7 +9,8 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     localStorage.removeItem('auth_token')
     localStorage.removeItem('refresh_token')
     window.location.href = '/login'
-    return undefined as T
+    await new Promise(() => {})  // hang until navigation completes
+    return undefined as T        // unreachable; satisfies TypeScript
   }
 
   if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`)

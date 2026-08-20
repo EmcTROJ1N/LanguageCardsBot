@@ -14,8 +14,6 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       user.value = await userApi.getProfile()
     } catch {
-      localStorage.removeItem('auth_token')
-      localStorage.removeItem('refresh_token')
       user.value = null
     }
   }
