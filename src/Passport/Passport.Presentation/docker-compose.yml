@@ -3,6 +3,8 @@ services:
     build:
       context: ../../..
       dockerfile: src/Passport/Passport.Presentation/Dockerfile
+      args:
+        GITHUB_TOKEN: ${GITHUB_TOKEN}
     container_name: passport_presentation
     restart: unless-stopped
     depends_on:
