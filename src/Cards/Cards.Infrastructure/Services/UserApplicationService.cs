@@ -1,8 +1,9 @@
 using Cards.Application.Abstractions.Repositories;
 using Cards.Application.Reminders;
+using Cards.Application.Users;
 using Cards.Domain.Entities;
 
-namespace Cards.Application.Users;
+namespace Cards.Infrastructure.Services;
 
 /// <summary>
 /// Implements user use cases shared by gRPC and REST transports.
@@ -119,25 +120,16 @@ public sealed class UserApplicationService(
         return true;
     }
 
-    /// <summary>
-    /// Converts blank usernames to null and trims real usernames.
-    /// </summary>
     private static string? NormalizeUsername(string? username)
     {
         return string.IsNullOrWhiteSpace(username) ? null : username.Trim();
     }
 
-    /// <summary>
-    /// Converts nullable date-time values to UTC.
-    /// </summary>
     private static DateTime? ToUtc(DateTime? value)
     {
         return value.HasValue ? ToUtc(value.Value) : null;
     }
 
-    /// <summary>
-    /// Converts a date-time value to UTC without changing unspecified values semantically.
-    /// </summary>
     private static DateTime ToUtc(DateTime value)
     {
         return value.Kind switch
