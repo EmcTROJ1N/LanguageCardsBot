@@ -27,7 +27,7 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services.Configure<KeycloakOptions>(configuration.GetSection(KeycloakOptions.SectionName));
-        services.AddSingleton<KeycloakAdminAuthHandler>();
+        services.AddTransient<KeycloakAdminAuthHandler>();
         services.AddKeycloakAdminHttpClient(configuration)
             .AddHttpMessageHandler<KeycloakAdminAuthHandler>();
         services.AddHttpClient("keycloak-token");
