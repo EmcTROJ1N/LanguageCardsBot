@@ -1,46 +1,86 @@
 <script setup lang="ts">
-import { useAuth } from '../model/useAuth'
-import { AppField, AppBtn, TodoBanner } from '@/shared/ui'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '../model/useAuthStore'
+import { AppField, AppBtn } from '@/shared/ui'
 
-const { mode, email, password, firstName, lastName, submit } = useAuth()
+const props = defineProps<{ mode: 'login' | 'register' }>()
+
+const router = useRouter()
+const authStore = useAuthStore()
+
+const email = ref('')
+const password = ref('')
+const firstName = ref('')
+const lastName = ref('')
+const error = ref<string | null>(null)
+const loading = ref(false)
+
+async function submit() {
+  error.value = null
+  loading.value = true
+  try {
+    if (props.mode === 'register') {
+      await authStore.register(email.value, password.value, firstName.value, lastName.value)
+    } else {
+      await authStore.login(email.value, password.value)
+    }
+    await router.push('/')
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : 'Произошла ошибка'
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <template>
   <div class="auth__right">
     <div class="tabs">
-      <button class="tab" :class="{ active: mode === 'login' }" @click="mode = 'login'">Вход</button>
-      <button class="tab" :class="{ active: mode === 'register' }" @click="mode = 'register'">Регистрация</button>
+      <button
+        class="tab"
+        :class="{ active: mode === 'login' }"
+        type="button"
+        @click="router.push('/login')"
+      >Вход</button>
+      <button
+        class="tab"
+        :class="{ active: mode === 'register' }"
+        type="button"
+        @click="router.push('/register')"
+      >Регистрация</button>
     </div>
 
     <form class="form" @submit.prevent="submit">
       <div v-if="mode === 'register'" class="grid-2">
         <AppField label="Имя">
-          <input v-model="firstName" type="text" placeholder="Имя" />
+          <input v-model="firstName" type="text" placeholder="Имя" required />
         </AppField>
         <AppField label="Фамилия">
-          <input v-model="lastName" type="text" placeholder="Фамилия" />
+          <input v-model="lastName" type="text" placeholder="Фамилия" required />
         </AppField>
       </div>
 
       <AppField label="Email">
-        <input v-model="email" type="email" placeholder="you@example.com" />
+        <input v-model="email" type="email" placeholder="you@example.com" required />
       </AppField>
 
       <AppField label="Пароль" :hint="mode === 'register' ? 'не короче 8 символов' : undefined">
-        <input v-model="password" type="password" placeholder="••••••••" />
+        <input v-model="password" type="password" placeholder="••••••••" required />
         <template v-if="mode === 'login'">
           <a class="hint" href="#">Забыли пароль?</a>
         </template>
       </AppField>
 
-      <AppBtn variant="ochre" size="lg" type="submit" class="full">
-        {{ mode === 'login' ? 'Войти' : 'Создать аккаунт' }}
-        <span class="mono">↵</span>
-      </AppBtn>
+      <p v-if="error" class="error">{{ error }}</p>
 
-      <TodoBanner
-        text="Реальный флоу: POST /api/passport/v1/auth/login или /register → сохранить access + refresh токены → редирект в кабинет."
-      />
+      <AppBtn variant="ochre" size="lg" type="submit" class="full" :disabled="loading">
+        <span v-if="loading">…</span>
+        <template v-else>
+          {{ mode === 'login' ? 'Войти' : 'Создать аккаунт' }}
+          <span class="mono">↵</span>
+        </template>
+      </AppBtn>
     </form>
   </div>
 </template>
@@ -55,5 +95,6 @@ const { mode, email, password, firstName, lastName, submit } = useAuth()
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .hint { color: var(--ink-mute); font-size: 11px; border: 0; }
 .hint:hover { color: var(--ochre); }
+.error { color: #c0392b; font-size: 13px; margin: 0; }
 :deep(.btn.full) { width: 100%; }
 </style>
