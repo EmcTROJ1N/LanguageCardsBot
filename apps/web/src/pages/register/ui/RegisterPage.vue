@@ -18,7 +18,7 @@ import { AuthForm } from '@/features/auth'
         <span class="mono muted">v0.1.0 · mockup edition</span>
       </div>
     </div>
-    <AuthForm mode="login" />
+    <AuthForm mode="register" />
   </div>
 </template>
 
