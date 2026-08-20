@@ -1,19 +1,18 @@
 <script setup lang="ts">
-import { RouterLink, RouterView, useRoute } from 'vue-router'
+import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { computed, onMounted, ref } from 'vue'
-import { userApi, statsApi } from '@/shared/api'
-import type { Profile } from '@/entities/user'
+import { statsApi } from '@/shared/api'
+import { useAuthStore } from '@/features/auth'
 import type { StatsToday } from '@/entities/stats'
 
 const route = useRoute()
+const router = useRouter()
+const authStore = useAuthStore()
 
-const currentProfile = ref<Profile | null>(null)
 const statsToday = ref<StatsToday | null>(null)
 
 onMounted(async () => {
-  const [profile, stats] = await Promise.all([userApi.getProfile(), statsApi.getToday()])
-  currentProfile.value = profile
-  statsToday.value = stats
+  statsToday.value = await statsApi.getToday()
 })
 
 const nav = [
@@ -35,7 +34,12 @@ const sections = computed(() => {
   return Array.from(grouped.entries()).map(([section, items]) => ({ section, items }))
 })
 
-const showChrome = computed(() => !['/login', '/link-telegram'].includes(route.path))
+const showChrome = computed(() => route.path !== '/link-telegram')
+
+async function logout() {
+  authStore.logout()
+  await router.push('/login')
+}
 </script>
 
 <template>
@@ -73,13 +77,14 @@ const showChrome = computed(() => !['/login', '/link-telegram'].includes(route.p
       <footer class="rail__foot">
         <div class="user">
           <div class="user__avatar">
-            {{ currentProfile?.firstName?.[0] }}{{ currentProfile?.lastName?.[0] }}
+            {{ authStore.user?.firstName?.[0] }}{{ authStore.user?.lastName?.[0] }}
           </div>
           <div class="user__meta">
-            <span class="user__name">{{ currentProfile?.firstName }} {{ currentProfile?.lastName }}</span>
-            <span class="user__hint mono">@{{ currentProfile?.telegramUsername }}</span>
+            <span class="user__name">{{ authStore.user?.firstName }} {{ authStore.user?.lastName }}</span>
+            <span class="user__hint mono">@{{ authStore.user?.telegramUsername }}</span>
           </div>
         </div>
+        <button class="logout-btn mono" type="button" @click="logout">Выйти</button>
       </footer>
     </aside>
 
@@ -328,4 +333,16 @@ const showChrome = computed(() => !['/login', '/link-telegram'].includes(route.p
   color: var(--ink-mute);
   font-size: 12px;
 }
+
+.logout-btn {
+  margin-top: 12px;
+  border: 0;
+  background: transparent;
+  color: var(--ink-mute);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+.logout-btn:hover { color: var(--ink); }
 </style>
