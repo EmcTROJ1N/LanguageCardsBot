@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>true</IsPackable>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageId>LanguageCardsBot.Contracts.Observability</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>EmcTROJ1N team</Authors>
+    <Description>Shared OpenTelemetry distributed tracing setup for LanguageCardsBot services</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RootNamespace>LanguageCardsBot.Observability</RootNamespace>
+    <RepositoryUrl>https://github.com/EmcTROJ1N/LanguageCardsBot</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" />
+  </ItemGroup>
+</Project>

@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- Internal contracts -->
+    <PackageVersion Include="LanguageCardsBot.Contracts.Observability" Version="1.0.0" />
     <PackageVersion Include="Contracts.Cards" Version="3.0.2" />
     <PackageVersion Include="Contracts.Common" Version="1.0.0" />
     <PackageVersion Include="Contracts.Passport" Version="1.2.0" />
@@ -47,12 +48,20 @@
     <!-- MySQL client -->
     <PackageVersion Include="MySqlConnector" Version="2.4.0" />
     <!-- OpenTelemetry -->
+    <PackageVersion Include="OpenTelemetry" Version="1.17.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.17.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.17.0" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.17.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.17.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.10.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.17.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.17.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.9.0-beta.1" />
     <PackageVersion Include="SharpAbp.Abp.OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="4.7.3" />
     <PackageVersion Include="prometheus-net.AspNetCore" Version="8.2.1" />
+    <!-- Serilog -->
+    <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageVersion Include="Serilog.Sinks.OpenTelemetry" Version="4.2.0" />
     <!-- RabbitMQ -->
     <PackageVersion Include="RabbitMQ.Client" Version="7.2.1" />
     <!-- Misc -->

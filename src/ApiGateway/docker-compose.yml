@@ -3,6 +3,8 @@
     build:
       context: ../..
       dockerfile: src/ApiGateway/Dockerfile
+      args:
+        GITHUB_TOKEN: ${GITHUB_TOKEN}
     ports:
       - "5050:5050"
     environment:

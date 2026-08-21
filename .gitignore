@@ -109,4 +109,4 @@ coverage/
 *.coverage
 *.coveragexml
 
-*.db
+*.db.superpowers/
