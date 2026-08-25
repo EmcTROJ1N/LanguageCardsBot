@@ -11,6 +11,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Contracts.Passport" />
+    <PackageReference Include="LanguageCardsBot.Contracts.Observability" />
     <PackageReference Include="DotNetEnv" />
     <PackageReference Include="NSwag.MSBuild" PrivateAssets="All" />
     <PackageReference Include="Keycloak.AuthServices.Authentication" />

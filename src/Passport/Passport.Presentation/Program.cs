@@ -1,3 +1,4 @@
+using LanguageCardsBot.Observability.Extensions;
 using Passport.Application;
 using Passport.Infrastructure;
 using Passport.Presentation;
@@ -12,6 +13,7 @@ builder.Services
     .AddPassportApplicationServices()
     .AddPassportAuthentication(builder.Configuration)
     .AddPassportAuthorization(builder.Configuration)
+    .AddOpenTelemetryTracing(builder.Configuration, "Passport")
     .AddPassportOpenApiDocumentation()
     .AddControllers();
 
