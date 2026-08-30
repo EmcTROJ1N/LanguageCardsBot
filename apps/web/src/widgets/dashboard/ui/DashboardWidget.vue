@@ -285,10 +285,6 @@ const pipeline = computed(() => {
         </header>
         <div class="todos__list">
           <TodoBanner
-            label="Passport ↔ Cards"
-            text="Единого маппинга Passport-user (GUID) с Cards-user (int + Telegram chatId) нет. Все метрики выше подтягиваются из mock-данных."
-          />
-          <TodoBanner
             label="Streak / история"
             text="Streak и недельная активность вычисляются по ReviewEntity — эндпоинта GET /api/cards/stats/history пока нет."
           />

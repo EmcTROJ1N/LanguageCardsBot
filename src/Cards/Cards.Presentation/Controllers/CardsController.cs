@@ -30,12 +30,15 @@ public sealed class CardsController(
     }
 
     /// <summary>
-    /// Gets all cards.
+    /// Gets all cards owned by the authenticated user.
     /// </summary>
     [HttpGet]
+    [Authorize]
     public async Task<ActionResult<GetCardsResponseDto>> GetAll(CancellationToken cancellationToken)
     {
-        var cards = await cardApplicationService.GetAllAsync(cancellationToken);
+        var keycloakId = User.GetKeycloakId();
+        var user = await userApplicationService.GetOrCreateByKeycloakIdAsync(keycloakId, cancellationToken);
+        var cards = await cardApplicationService.GetByUserIdAsync(user.Id, cancellationToken);
         return Ok(new GetCardsResponseDto(cards.Adapt<List<CardDto>>()));
     }
 

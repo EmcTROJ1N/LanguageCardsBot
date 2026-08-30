@@ -47,7 +47,6 @@ function toCard(dto: CardDto): Card {
 
 export const cardsApi = {
   async getAll(): Promise<Card[]> {
-    // TODO: filter by userId once Passport↔Cards user mapping is implemented
     const data = await apiFetch<{ cards: CardDto[] }>('/api/cards/cards')
     return data.cards.map(toCard)
   },
