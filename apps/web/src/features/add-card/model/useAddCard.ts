@@ -9,16 +9,22 @@ export function useAddCard() {
   const example = ref('')
   const autoTranslated = ref(false)
   const saving = ref(false)
+  const translationError = ref('')
 
   const canSave = computed(() => term.value.trim() !== '' && translation.value.trim() !== '')
 
   async function autoTranslate() {
-    if (!term.value.trim()) return
-    const result = await translationApi.translate(term.value)
-    translation.value = result.translation
-    transcription.value = result.transcription
-    example.value = result.example
-    autoTranslated.value = true
+    if (!term.value.trim() || translation.value.trim()) return
+    translationError.value = ''
+    try {
+      const result = await translationApi.translate(term.value)
+      translation.value = result.translation
+      transcription.value = result.transcription
+      example.value = result.example
+      autoTranslated.value = true
+    } catch {
+      translationError.value = 'Автоперевод недоступен — введите перевод вручную.'
+    }
   }
 
   async function save() {
@@ -39,5 +45,5 @@ export function useAddCard() {
     autoTranslated.value = false
   }
 
-  return { term, translation, transcription, example, autoTranslated, canSave, saving, autoTranslate, save }
+  return { term, translation, transcription, example, autoTranslated, translationError, canSave, saving, autoTranslate, save }
 }

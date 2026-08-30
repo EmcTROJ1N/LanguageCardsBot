@@ -23,7 +23,17 @@ public sealed class GoogleTranslationApplicationService(
                   $"&tl={Uri.EscapeDataString(options.TargetLanguage)}" +
                   $"&dt=t&q={Uri.EscapeDataString(normalizedTerm)}";
 
-        var json = await httpClient.GetStringAsync(uri, cancellationToken);
+        var response = await httpClient.GetAsync(uri, cancellationToken);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+            throw new HttpRequestException(
+                "Сервис перевода временно недоступен: превышен лимит запросов. Введите перевод вручную.",
+                inner: null,
+                statusCode: response.StatusCode);
+
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadAsStringAsync(cancellationToken);
         var translation = ParseTranslation(json);
 
         if (string.IsNullOrWhiteSpace(translation))

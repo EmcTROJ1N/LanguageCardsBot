@@ -2,7 +2,7 @@
 import { useAddCard } from '../model/useAddCard'
 import { AppField, AppBtn, TodoBanner } from '@/shared/ui'
 
-const { term, translation, transcription, example, autoTranslated, canSave, saving, autoTranslate, save } = useAddCard()
+const { term, translation, transcription, example, autoTranslated, translationError, canSave, saving, autoTranslate, save } = useAddCard()
 </script>
 
 <template>
@@ -20,6 +20,7 @@ const { term, translation, transcription, example, autoTranslated, canSave, savi
 
       <AppField label="Перевод">
         <textarea v-model="translation" rows="2" placeholder="запах земли после дождя" />
+        <p v-if="translationError" class="translation-error">{{ translationError }}</p>
       </AppField>
 
       <div class="grid-2 sub">
@@ -143,6 +144,11 @@ const { term, translation, transcription, example, autoTranslated, canSave, savi
   border-left: 3px solid var(--ochre);
   padding-left: 12px;
   margin: 0 0 20px;
+}
+.translation-error {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--error, #c0392b);
 }
 .proof__foot {
   display: flex;
