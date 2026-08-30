@@ -51,4 +51,9 @@ public interface IUserApplicationService
     /// Updates the next reminder timestamp for a user.
     /// </summary>
     Task<bool> UpdateNextReminderAtUtcAsync(int userId, DateTime? nextReminderAtUtc, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets an existing user by Keycloak subject claim or creates a new one.
+    /// </summary>
+    Task<UserEntity> GetOrCreateByKeycloakIdAsync(string keycloakId, CancellationToken cancellationToken = default);
 }

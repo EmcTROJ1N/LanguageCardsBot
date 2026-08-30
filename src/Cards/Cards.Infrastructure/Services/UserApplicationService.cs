@@ -30,6 +30,7 @@ public sealed class UserApplicationService(
         var user = new UserEntity
         {
             Id = command.Id,
+            KeycloakId = command.KeycloakId,
             ChatId = command.ChatId,
             Username = NormalizeUsername(command.Username),
             CreatedAt = ToUtc(command.CreatedAt ?? DateTime.UtcNow),
@@ -50,6 +51,7 @@ public sealed class UserApplicationService(
         if (existingUser is null)
             return false;
 
+        existingUser.KeycloakId = command.KeycloakId;
         existingUser.ChatId = command.ChatId;
         existingUser.Username = NormalizeUsername(command.Username);
         existingUser.ReminderIntervalMinutes = Math.Max(1, command.ReminderIntervalMinutes);
@@ -118,6 +120,14 @@ public sealed class UserApplicationService(
         user.NextReminderAtUtc = ToUtc(nextReminderAtUtc);
         await userRepository.UpdateAsync(user, cancellationToken);
         return true;
+    }
+
+    /// <inheritdoc />
+    public Task<UserEntity> GetOrCreateByKeycloakIdAsync(
+        string keycloakId,
+        CancellationToken cancellationToken = default)
+    {
+        return userRepository.GetOrCreateByKeycloakIdAsync(keycloakId, cancellationToken);
     }
 
     private static string? NormalizeUsername(string? username)

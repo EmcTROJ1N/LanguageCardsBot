@@ -42,13 +42,16 @@ public class DailySummaryBackgroundService(
 
                     foreach (var user in users)
                     {
+                        if (!user.ChatId.HasValue)
+                            continue;
+
                         try
                         {
                             var stats = await statsService.GetTodayStatsAsync(user.Id, stoppingToken);
 
                             await messageBus.PublishAsync(
                                 new DailySummaryEvent(
-                                    user.ChatId,
+                                    user.ChatId.Value,
                                     stats.NewToday,
                                     stats.TotalReviewsToday,
                                     stats.CorrectReviewsToday,

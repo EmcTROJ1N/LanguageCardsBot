@@ -5,7 +5,8 @@ namespace Cards.Application.Users;
 /// </summary>
 public sealed record UserCommand(
     int Id,
-    long ChatId,
+    string? KeycloakId,
+    long? ChatId,
     string? Username,
     DateTime? CreatedAt,
     int ReminderIntervalMinutes,

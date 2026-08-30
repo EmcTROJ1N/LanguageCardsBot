@@ -90,10 +90,10 @@ public sealed class CardReminderOrchestrator(
                 }
 
                 var card = await cardRepo.GetRandomActiveCardAsync(user.Id, ct);
-                if (card is not null)
+                if (card is not null && user.ChatId.HasValue)
                 {
                     await messageBus.PublishAsync(
-                        new CardReminderEvent(user.ChatId, card.Id, card.Term, card.Translation, user.HideTranslations),
+                        new CardReminderEvent(user.ChatId.Value, card.Id, card.Term, card.Translation, user.HideTranslations),
                         routingKey: "reminder",
                         ct: ct);
                 }
