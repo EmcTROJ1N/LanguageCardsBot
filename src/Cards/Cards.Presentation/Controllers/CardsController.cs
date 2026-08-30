@@ -91,6 +91,25 @@ public sealed class CardsController(
     }
 
     /// <summary>
+    /// Exports all cards owned by the authenticated user as a downloadable file.
+    /// </summary>
+    /// <param name="format">Output format: <c>json</c> or <c>csv</c>.</param>
+    [HttpGet("export")]
+    [Authorize]
+    public async Task<IActionResult> Export(
+        [FromQuery] string format,
+        CancellationToken cancellationToken)
+    {
+        if (!Enum.TryParse<CardExportFormat>(format, ignoreCase: true, out var exportFormat))
+            return BadRequest(new { error = $"Unsupported format '{format}'. Use 'json' or 'csv'." });
+
+        var keycloakId = User.GetKeycloakId();
+        var user = await userApplicationService.GetOrCreateByKeycloakIdAsync(keycloakId, cancellationToken);
+        var result = await cardApplicationService.ExportAsync(user.Id, exportFormat, cancellationToken);
+        return File(result.Content, result.ContentType, result.FileName);
+    }
+
+    /// <summary>
     /// Updates editable fields for a card.
     /// </summary>
     [HttpPut("{id:int}")]

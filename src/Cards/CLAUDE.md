@@ -83,6 +83,8 @@ Registered gRPC services: `CardGrpcService`, `CardsImportGrpcService`, `StatsGrp
 - **Infrastructure** (`Data/`, `Repositories/`, `Migrations/`): EF Core `CardsMysqlDbContext` with three `DbSet`s (`Users`, `Cards`, `Reviews`). Entity configurations in `Data/Configurations/`.
 - **Presentation** (`Services/` for gRPC, `Controllers/` for REST, `Interceptors/`, `Mapping/`): registers everything via `ServiceConfiguration` extension methods; entry point is `Program.cs`.
 
+**Controllers must not contain business logic.** A controller's only responsibilities are: resolving the caller identity (JWT claims), mapping HTTP input to a command/query, calling the application service, and mapping the result to an HTTP response. Any logic that is not a direct HTTP concern — data transformation, formatting, validation of domain rules, file building — belongs in the Application layer.
+
 ## Configuration Reference
 
 | Key | Source |

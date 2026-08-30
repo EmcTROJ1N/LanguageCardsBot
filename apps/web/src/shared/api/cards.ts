@@ -1,5 +1,5 @@
 import type { Card } from '@/entities/card'
-import { apiFetch } from './http'
+import { apiFetch, apiDownload } from './http'
 
 export type CreateCardDto = {
   term: string
@@ -85,6 +85,10 @@ export const cardsApi = {
     const refreshed = await apiFetch<{ card: CardDto | null }>(`/api/cards/cards/${id}`)
     if (!refreshed.card) throw new Error(`Card ${id} not found after update`)
     return toCard(refreshed.card)
+  },
+
+  async export(format: 'json' | 'csv'): Promise<void> {
+    await apiDownload(`/api/cards/cards/export?format=${format}`, `cards.${format}`)
   },
 
   async delete(id: number): Promise<void> {

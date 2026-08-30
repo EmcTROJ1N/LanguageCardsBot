@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { cardsApi } from '@/shared/api'
+
+const exporting = ref(false)
+async function exportCards(format: 'json' | 'csv') {
+  if (exporting.value) return
+  exporting.value = true
+  try { await cardsApi.export(format) } finally { exporting.value = false }
+}
 import { type Card, statusOf, accuracyOf, nextReviewTimestamp, statusRank } from '@/entities/card'
 import { CardRow } from '@/entities/card'
 import { useRoute, useRouter } from 'vue-router'
@@ -184,6 +191,8 @@ const columns: {
     <div class="head">
       <PageHeader eyebrow="Vol. 1 · Colophon" title="Колода" />
       <div class="head__actions">
+        <button class="btn" :disabled="exporting" @click="exportCards('csv')">CSV</button>
+        <button class="btn" :disabled="exporting" @click="exportCards('json')">JSON</button>
         <RouterLink to="/add" class="btn ochre">Новая карточка</RouterLink>
       </div>
     </div>

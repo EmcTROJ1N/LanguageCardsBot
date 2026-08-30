@@ -288,10 +288,6 @@ const pipeline = computed(() => {
             label="Streak / история"
             text="Streak и недельная активность вычисляются по ReviewEntity — эндпоинта GET /api/cards/stats/history пока нет."
           />
-          <TodoBanner
-            label="Экспорт колоды"
-            text="Только импорт (POST /api/cards/import/json). Экспорт для бэкапа/переноса нужно добавить."
-          />
         </div>
       </article>
     </div>

@@ -1,8 +1,17 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useImportCards } from '../model/useImportCards'
 import { AppBtn, TodoBanner } from '@/shared/ui'
+import { cardsApi } from '@/shared/api'
 
 const { file, isDragging, onDrop, doImport } = useImportCards()
+
+const exporting = ref(false)
+async function exportCards(format: 'json' | 'csv') {
+  if (exporting.value) return
+  exporting.value = true
+  try { await cardsApi.export(format) } finally { exporting.value = false }
+}
 </script>
 
 <template>
@@ -45,12 +54,9 @@ const { file, isDragging, onDrop, doImport } = useImportCards()
         </div>
       </div>
       <div class="row-actions">
-        <AppBtn variant="ghost">Скачать .json</AppBtn>
-        <AppBtn variant="ghost">Скачать .csv</AppBtn>
+        <AppBtn variant="ghost" :disabled="exporting" @click="exportCards('json')">Скачать .json</AppBtn>
+        <AppBtn variant="ghost" :disabled="exporting" @click="exportCards('csv')">Скачать .csv</AppBtn>
       </div>
-      <TodoBanner
-        text="Endpoint экспорта отсутствует. Нужен GET /api/cards/export?userId=…&format=json|csv — реализовать в CardsController."
-      />
     </article>
   </div>
 </template>

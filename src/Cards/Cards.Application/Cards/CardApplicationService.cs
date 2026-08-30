@@ -1,3 +1,6 @@
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using Cards.Application.Abstractions.Metrics;
 using Cards.Application.Abstractions.Repositories;
 using Cards.Domain.Entities;
@@ -150,5 +153,50 @@ public sealed class CardApplicationService(
         if (deleted > 0)
             cardMetrics.IncrementCardsDeletedTotal(deleted, "bulk_user");
         return deleted > 0;
+    }
+
+    /// <inheritdoc />
+    public async Task<CardExportResult> ExportAsync(
+        int userId,
+        CardExportFormat format,
+        CancellationToken cancellationToken = default)
+    {
+        var cards = (await cardRepository.GetAllByUserIdAsync(userId, cancellationToken)).ToList();
+
+        if (format == CardExportFormat.Csv)
+        {
+            var bytes = Encoding.UTF8.GetBytes(BuildCsv(cards));
+            return new CardExportResult(bytes, "text/csv", "cards.csv");
+        }
+
+        var json = JsonSerializer.SerializeToUtf8Bytes(
+            cards.Select(c => new
+            {
+                c.Term, c.Translation, c.Transcription, c.Example,
+                c.Level, c.Learned, createdAt = c.CreatedAt.ToString("yyyy-MM-dd"),
+            }),
+            new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            });
+        return new CardExportResult(json, "application/json", "cards.json");
+    }
+
+    private static string BuildCsv(IReadOnlyCollection<CardEntity> cards)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("term,translation,transcription,example,level,learned,createdAt");
+        foreach (var c in cards)
+            sb.AppendLine($"{CsvField(c.Term)},{CsvField(c.Translation)},{CsvField(c.Transcription)},{CsvField(c.Example)},{c.Level},{c.Learned.ToString().ToLower()},{c.CreatedAt:yyyy-MM-dd}");
+        return sb.ToString();
+    }
+
+    private static string CsvField(string? value)
+    {
+        if (string.IsNullOrEmpty(value)) return string.Empty;
+        return value.AsSpan().ContainsAny(',', '"', '\n')
+            ? $"\"{value.Replace("\"", "\"\"")}\""
+            : value;
     }
 }

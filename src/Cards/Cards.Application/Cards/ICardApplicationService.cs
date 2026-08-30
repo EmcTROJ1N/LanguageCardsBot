@@ -51,4 +51,9 @@ public interface ICardApplicationService
     /// Deletes all cards owned by a user.
     /// </summary>
     Task<bool> DeleteByUserIdAsync(int userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Exports all cards owned by a user as a downloadable file.
+    /// </summary>
+    Task<CardExportResult> ExportAsync(int userId, CardExportFormat format, CancellationToken cancellationToken = default);
 }
