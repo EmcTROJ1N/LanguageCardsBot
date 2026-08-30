@@ -7,7 +7,7 @@ namespace Cards.Infrastructure.Data.Configurations;
 /// <summary>
 /// EF Core entity type configuration for <see cref="UserEntity"/>.
 /// </summary>
-public class UserConfiguration: IEntityTypeConfiguration<UserEntity>
+public class UserConfiguration : IEntityTypeConfiguration<UserEntity>
 {
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<UserEntity> builder)
@@ -19,8 +19,12 @@ public class UserConfiguration: IEntityTypeConfiguration<UserEntity>
         builder.Property(x => x.Id)
             .ValueGeneratedOnAdd();
 
+        builder.Property(x => x.KeycloakId)
+            .HasMaxLength(255)
+            .IsRequired(false);
+
         builder.Property(x => x.ChatId)
-            .IsRequired();
+            .IsRequired(false);
 
         builder.Property(x => x.Username)
             .HasMaxLength(255);
@@ -36,7 +40,13 @@ public class UserConfiguration: IEntityTypeConfiguration<UserEntity>
             .HasDefaultValue(true)
             .IsRequired();
 
+        // Sparse unique index: MySQL allows multiple NULLs in a unique index
+        builder.HasIndex(x => x.KeycloakId)
+            .IsUnique()
+            .HasFilter("`KeycloakId` IS NOT NULL");
+
         builder.HasIndex(x => x.ChatId)
-            .IsUnique();
+            .IsUnique()
+            .HasFilter("`ChatId` IS NOT NULL");
     }
 }
