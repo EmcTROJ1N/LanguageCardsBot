@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useAddCard } from '../model/useAddCard'
-import { AppField, AppBtn, TodoBanner } from '@/shared/ui'
+import { AppField, AppBtn } from '@/shared/ui'
 
 const { term, translation, transcription, example, autoTranslated, translationError, canSave, saving, autoTranslate, save } = useAddCard()
 </script>
@@ -59,14 +59,6 @@ const { term, translation, transcription, example, autoTranslated, translationEr
           <span class="mono">до первого повтора — 1 день</span>
         </div>
       </div>
-      <TodoBanner
-        v-if="autoTranslated"
-        text="Автоперевод сейчас работает от заглушки. При интеграции — POST /api/cards/translation с source=auto, target=ru."
-      />
-      <TodoBanner
-        v-else
-        text="При интеграции с бэком: POST /api/cards с userId (см. Passport ↔ Cards link)."
-      />
     </aside>
   </div>
 </template>
