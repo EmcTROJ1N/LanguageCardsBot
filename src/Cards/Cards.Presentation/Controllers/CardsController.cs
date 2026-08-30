@@ -1,6 +1,9 @@
 using Cards.Application.Cards;
+using Cards.Application.Users;
 using Cards.Contracts.Rest.Cards;
+using Cards.Presentation.Extensions;
 using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cards.Presentation.Controllers;
@@ -10,7 +13,9 @@ namespace Cards.Presentation.Controllers;
 /// </summary>
 [ApiController]
 [Route("cards")]
-public sealed class CardsController(ICardApplicationService cardApplicationService) : ControllerBase
+public sealed class CardsController(
+    ICardApplicationService cardApplicationService,
+    IUserApplicationService userApplicationService) : ControllerBase
 {
     /// <summary>
     /// Gets a card by its identifier.
@@ -59,15 +64,24 @@ public sealed class CardsController(ICardApplicationService cardApplicationServi
     }
 
     /// <summary>
-    /// Adds a card for a user.
+    /// Adds a card for the authenticated user. UserId is resolved from the JWT bearer token.
     /// </summary>
     [HttpPost]
+    [Authorize]
     public async Task<ActionResult<CardResponseDto>> Add(
         AddCardRequestDto request,
         CancellationToken cancellationToken)
     {
+        var keycloakId = User.GetKeycloakId();
+        var user = await userApplicationService.GetOrCreateByKeycloakIdAsync(keycloakId, cancellationToken);
+
         var card = await cardApplicationService.AddAsync(
-            request.Adapt<AddCardCommand>(),
+            new AddCardCommand(
+                UserId: user.Id,
+                Term: request.Term,
+                Translation: request.Translation,
+                Transcription: request.Transcription,
+                Example: request.Example),
             cancellationToken);
 
         return Ok(new CardResponseDto(card.Adapt<CardDto>()));

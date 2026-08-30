@@ -1,6 +1,8 @@
 using Cards.Application.Users;
 using Cards.Contracts.Rest.Users;
+using Cards.Presentation.Extensions;
 using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cards.Presentation.Controllers;
@@ -133,5 +135,15 @@ public sealed class UsersController(IUserApplicationService userApplicationServi
             cancellationToken);
 
         return Ok(new UpdateNextReminderAtUtcResponseDto(updated));
+    }
+
+    /// <summary>Gets or creates the Cards-service user record for the currently authenticated Keycloak principal.</summary>
+    [HttpGet("me")]
+    [Authorize]
+    public async Task<ActionResult<UserResponseDto>> GetMe(CancellationToken cancellationToken)
+    {
+        var keycloakId = User.GetKeycloakId();
+        var user = await userApplicationService.GetOrCreateByKeycloakIdAsync(keycloakId, cancellationToken);
+        return Ok(new UserResponseDto(user.Adapt<UserDto>()));
     }
 }
