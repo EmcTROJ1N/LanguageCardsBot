@@ -1,6 +1,6 @@
 export { apiFetch } from './http'
 export { cardsApi, reviewIntervalDays } from './cards'
-export type { CreateCardDto, UpdateCardDto } from './cards'
+export type { CreateCardDto, UpdateCardDto, ImportChunkResult } from './cards'
 export { statsApi } from './stats'
 export { userApi } from './user'
 export type { UpdateProfileDto } from './user'

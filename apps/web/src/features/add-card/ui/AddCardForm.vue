@@ -2,7 +2,7 @@
 import { useAddCard } from '../model/useAddCard'
 import { AppField, AppBtn } from '@/shared/ui'
 
-const { term, translation, transcription, example, autoTranslated, translationError, canSave, saving, autoTranslate, save } = useAddCard()
+const { term, translation, transcription, example, translationError, canSave, saving, autoTranslate, save } = useAddCard()
 </script>
 
 <template>

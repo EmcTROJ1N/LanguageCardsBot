@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useImportCards } from '../model/useImportCards'
-import { AppBtn, TodoBanner } from '@/shared/ui'
+import { AppBtn } from '@/shared/ui'
 import { cardsApi } from '@/shared/api'
 
-const { file, isDragging, onDrop, doImport } = useImportCards()
+const { file, isDragging, importing, result, error, onDrop, onFileSelect, doImport } = useImportCards()
+
+const fileInput = ref<HTMLInputElement | null>(null)
+function openFilePicker() { fileInput.value?.click() }
 
 const exporting = ref(false)
 async function exportCards(format: 'json' | 'csv') {
@@ -27,18 +30,22 @@ async function exportCards(format: 'json' | 'csv') {
         @drop.prevent="onDrop"
       >
         <span class="dropzone__mark serif">JSON</span>
+        <input ref="fileInput" type="file" accept=".json" class="sr-only" @change="onFileSelect" />
         <p v-if="!file" class="dropzone__hint">
-          Перетащите файл сюда или <span class="link">выберите вручную</span>
+          Перетащите файл сюда или <span class="link" @click="openFilePicker">выберите вручную</span>
         </p>
         <p v-else class="dropzone__hint"><span class="mono">{{ file.name }}</span></p>
         <span class="mono muted">поддерживается формат экспорта из бота (/export)</span>
       </div>
       <div class="row-actions">
-        <AppBtn variant="ochre" :disabled="!file" @click="doImport">Импортировать</AppBtn>
+        <AppBtn variant="ochre" :disabled="!file || importing" @click="doImport">
+          {{ importing ? 'Импортируем…' : 'Импортировать' }}
+        </AppBtn>
       </div>
-      <TodoBanner
-        text="Реальный вызов: POST /api/cards/import/json — уже есть, ожидает { userId, cards[] }. Клиент должен обрабатывать чанки при большой колоде."
-      />
+      <p v-if="result" class="import-result import-result--ok">
+        Импортировано: {{ result.imported }}<span v-if="result.skipped">, пропущено: {{ result.skipped }}</span>
+      </p>
+      <p v-if="error" class="import-result import-result--err">{{ error }}</p>
     </article>
 
     <article class="panel">
@@ -102,4 +109,8 @@ async function exportCards(format: 'json' | 'csv') {
 .export-visual__paper:nth-child(4) { transform: rotate(6deg) translateY(2px); background: var(--ochre); border-color: var(--ochre); z-index: 4; }
 .export-visual__meta { display: flex; flex-direction: column; gap: 6px; font-size: 15px; }
 .row-actions { display: flex; gap: 10px; padding-top: 12px; border-top: 1px solid var(--rule); margin-top: auto; }
+.import-result { margin: 0; font-size: 13px; }
+.import-result--ok { color: var(--ochre); }
+.import-result--err { color: var(--rust); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
 </style>

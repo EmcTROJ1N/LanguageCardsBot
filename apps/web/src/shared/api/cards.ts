@@ -1,6 +1,12 @@
 import type { Card } from '@/entities/card'
 import { apiFetch, apiDownload } from './http'
 
+export type ImportChunkResult = {
+  imported: number
+  skipped: number
+  errors: string[]
+}
+
 export type CreateCardDto = {
   term: string
   translation: string
@@ -100,5 +106,29 @@ export const cardsApi = {
       method: 'POST',
       body: JSON.stringify({ isCorrect }),
     })
+  },
+
+  async getMyUserId(): Promise<number> {
+    const data = await apiFetch<{ user: { id: number } }>('/api/cards/v3/users/me')
+    return data.user.id
+  },
+
+  async importJsonChunk(json: string, userId: number): Promise<ImportChunkResult> {
+    const data = await apiFetch<{
+      isSuccess: boolean
+      data: { imported: number; skipped: number; errors: string[] } | null
+      errors: { message: string }[]
+    }>('/api/cards/import/json', {
+      method: 'POST',
+      body: JSON.stringify({ json, userId }),
+    })
+    if (!data.isSuccess) {
+      throw new Error(data.errors.map(e => e.message).join('; ') || 'Import failed')
+    }
+    return {
+      imported: data.data?.imported ?? 0,
+      skipped: data.data?.skipped ?? 0,
+      errors: data.data?.errors ?? [],
+    }
   },
 }
