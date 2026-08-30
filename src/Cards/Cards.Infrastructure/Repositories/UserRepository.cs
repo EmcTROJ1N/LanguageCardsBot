@@ -42,4 +42,33 @@ public class UserRepository(CardsMysqlDbContext dbContext): AbstractCrudReposito
 
         return user;
     }
+
+    /// <inheritdoc />
+    public Task<UserEntity?> GetByKeycloakIdAsync(string keycloakId, CancellationToken cancellationToken = default)
+    {
+        return dbContext.Set<UserEntity>()
+            .FirstOrDefaultAsync(x => x.KeycloakId == keycloakId, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<UserEntity> GetOrCreateByKeycloakIdAsync(
+        string keycloakId,
+        CancellationToken cancellationToken = default)
+    {
+        var user = await dbContext.Set<UserEntity>()
+            .FirstOrDefaultAsync(x => x.KeycloakId == keycloakId, cancellationToken);
+        if (user != null)
+            return user;
+
+        user = new UserEntity
+        {
+            KeycloakId = keycloakId,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        await dbContext.Set<UserEntity>().AddAsync(user, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return user;
+    }
 }

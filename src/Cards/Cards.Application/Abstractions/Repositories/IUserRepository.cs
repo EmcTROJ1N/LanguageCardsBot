@@ -41,4 +41,14 @@ public interface IUserRepository
     /// Gets an existing user by chat identifier or creates one.
     /// </summary>
     Task<UserEntity> GetOrCreateAsync(long chatId, string? username, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets a user by Keycloak subject claim.
+    /// </summary>
+    Task<UserEntity?> GetByKeycloakIdAsync(string keycloakId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets an existing user by Keycloak subject claim or creates a new one.
+    /// </summary>
+    Task<UserEntity> GetOrCreateByKeycloakIdAsync(string keycloakId, CancellationToken cancellationToken = default);
 }
