@@ -1,11 +1,10 @@
 namespace Cards.Contracts.Rest.Users;
 
-/// <summary>
-/// Represents a user returned by the REST API.
-/// </summary>
+/// <summary>Represents a user returned by the REST API.</summary>
 public sealed record UserDto(
     int Id,
-    long ChatId,
+    string? KeycloakId,
+    long? ChatId,
     string? Username,
     DateTime CreatedAt,
     int ReminderIntervalMinutes,
