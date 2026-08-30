@@ -18,9 +18,12 @@ services:
       RabbitMq__HostName: infra_rabbitmq
       RabbitMq__UserName: ${RABBITMQ_USER:-guest}
       RabbitMq__Password: ${RABBITMQ_PASSWORD:-guest}
+      Keycloak__AuthServerUrl: http://passport_keycloak:8080
+      Passport__BaseUrl: http://passport_presentation:8080
     networks:
       - shared-grpc
       - infra
+      - passport
 
   mysql:
     image: mysql:8.4
@@ -50,6 +53,9 @@ networks:
     external: true
   infra:
     name: infra
+    external: true
+  passport:
+    name: passport
     external: true
 
 volumes:

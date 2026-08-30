@@ -190,14 +190,8 @@ public static class ServiceConfiguration
     /// </summary>
     public static IServiceCollection AddOpenTelemetryPrometheus(this IServiceCollection services, string environmentName)
     {
-        var serviceName = "cards";
-        var serviceVersion = Assembly.GetEntryAssembly()
-            ?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
-            ?? "unknown";
-
         services.AddOpenTelemetry()
             .ConfigureResource(r => r
-                .AddService(serviceName: serviceName, serviceVersion: serviceVersion)
                 .AddAttributes(new Dictionary<string, object>
                 {
                     ["deployment.environment"] = environmentName
@@ -226,6 +220,16 @@ public static class ServiceConfiguration
         app.MapGrpcService<UserGrpcService>();
         app.MapGrpcService<GoogleTranslationService>();
         return app;
+    }
+
+    /// <summary>
+    /// Applies any pending EF Core migrations to the Cards database on startup.
+    /// </summary>
+    public static async Task MigrateDatabase(this WebApplication app)
+    {
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<CardsMysqlDbContext>();
+        await db.Database.MigrateAsync();
     }
 
     /// <summary>

@@ -1,5 +1,6 @@
 using Cards.Presentation;
 using Cards.Presentation.Mapping;
+using LanguageCardsBot.Observability.Extensions;
 
 DotNetEnv.Env.TraversePath().Load();
 
@@ -16,11 +17,14 @@ builder.Services
     .AddPassportClient(builder.Configuration)
     .AddCardsAuthentication(builder.Configuration)
     .AddGrpcServices()
+    .AddOpenTelemetryTracing(builder.Configuration, "Cards")
     .AddOpenTelemetryPrometheus(builder.Environment.EnvironmentName)
     .AddSwaggerDocumentation()
     .AddControllers();
 
 var app = builder.Build();
+
+await app.MigrateDatabase();
 
 app.UseAuthentication();
 app.UseAuthorization();

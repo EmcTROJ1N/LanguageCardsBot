@@ -1,3 +1,4 @@
+using LanguageCardsBot.Observability.Extensions;
 using LanguageCardsBot.Presentation;
 
 DotNetEnv.Env.TraversePath().Load();
@@ -10,6 +11,7 @@ builder.Services
     .AddGrpcClients(builder.Configuration)
     .AddSettings(builder.Configuration)
     .AddMassTransitWithRabbitMq()
+    .AddOpenTelemetryTracing(builder.Configuration, "LanguageCardsBot")
     .AddOpenTelemetryPrometheus(builder.Environment.EnvironmentName)
     .AddWorkers();
 
