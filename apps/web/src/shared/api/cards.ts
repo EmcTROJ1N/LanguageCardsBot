@@ -58,11 +58,9 @@ export const cardsApi = {
   },
 
   async create(dto: CreateCardDto): Promise<Card> {
-    // TODO: replace userId:0 with real user ID from auth session
     const data = await apiFetch<{ card: CardDto }>('/api/cards/cards', {
       method: 'POST',
       body: JSON.stringify({
-        userId: 0,
         term: dto.term,
         translation: dto.translation,
         transcription: dto.transcription,
