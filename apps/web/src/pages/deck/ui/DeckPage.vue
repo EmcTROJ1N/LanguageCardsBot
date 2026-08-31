@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { cardsApi } from '@/shared/api'
+import { computed, onMounted, ref, watch } from 'vue'
+import { cardsApi, type CardSearchCounts } from '@/shared/api'
+import { type Card, statusOf } from '@/entities/card'
+import { CardRow } from '@/entities/card'
+import { useRoute, useRouter } from 'vue-router'
+import { PageHeader } from '@/shared/ui'
 
 const exporting = ref(false)
 async function exportCards(format: 'json' | 'csv') {
@@ -8,28 +12,24 @@ async function exportCards(format: 'json' | 'csv') {
   exporting.value = true
   try { await cardsApi.export(format) } finally { exporting.value = false }
 }
-import { type Card, statusOf, accuracyOf, nextReviewTimestamp, statusRank } from '@/entities/card'
-import { CardRow } from '@/entities/card'
-import { useRoute, useRouter } from 'vue-router'
-import TodoBanner from '@/shared/ui/TodoBanner.vue'
-import { PageHeader } from '@/shared/ui'
-
-const cards = ref<Card[]>([])
-onMounted(async () => { cards.value = await cardsApi.getAll() })
-
-const route = useRoute()
-const router = useRouter()
 
 type Filter = 'all' | 'due' | 'learned' | 'new'
 type SortKey = 'status' | 'term' | 'translation' | 'level' | 'accuracy' | 'next'
 type SortDir = 'asc' | 'desc'
 type Group = 'none' | 'status' | 'level' | 'letter'
 
-const filter = ref<Filter>((route.query.filter as Filter) || 'all')
+const filter = ref<Filter>('all')
 const sortKey = ref<SortKey>('term')
 const sortDir = ref<SortDir>('asc')
 const group = ref<Group>('none')
 const query = ref('')
+const loading = ref(false)
+
+const route = useRoute()
+const router = useRouter()
+
+// Initialise filter from URL query param
+filter.value = (route.query.filter as Filter) || 'all'
 
 function setFilter(f: Filter) {
   filter.value = f
@@ -41,58 +41,43 @@ function toggleSort(key: SortKey) {
     sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
   } else {
     sortKey.value = key
-    // sensible default direction per column
     sortDir.value = key === 'accuracy' || key === 'level' ? 'desc' : 'asc'
   }
 }
 
-function compare(a: Card, b: Card): number {
-  const dir = sortDir.value === 'asc' ? 1 : -1
-  let cmp = 0
-  switch (sortKey.value) {
-    case 'status':
-      cmp = statusRank(a) - statusRank(b)
-      break
-    case 'term':
-      cmp = a.term.localeCompare(b.term)
-      break
-    case 'translation':
-      cmp = a.translation.localeCompare(b.translation, 'ru')
-      break
-    case 'level':
-      cmp = a.level - b.level
-      break
-    case 'accuracy':
-      cmp = accuracyOf(a) - accuracyOf(b)
-      break
-    case 'next':
-      cmp = nextReviewTimestamp(a) - nextReviewTimestamp(b)
-      break
-  }
-  if (cmp === 0) cmp = a.term.localeCompare(b.term)
-  return cmp * dir
+const cards = ref<Card[]>([])
+const counts = ref<CardSearchCounts>({ all: 0, due: 0, new: 0, learned: 0 })
+
+function debounce<T extends (...args: unknown[]) => void>(fn: T, ms: number): T {
+  let timer: ReturnType<typeof setTimeout>
+  return ((...args: unknown[]) => {
+    clearTimeout(timer)
+    timer = setTimeout(() => fn(...args), ms)
+  }) as T
 }
 
-const filtered = computed(() => {
-  let result = cards.value.slice()
-  if (filter.value === 'due') {
-    result = result.filter((c) => statusOf(c) === 'due' || statusOf(c) === 'new')
-  } else if (filter.value === 'learned') {
-    result = result.filter((c) => statusOf(c) === 'learned')
-  } else if (filter.value === 'new') {
-    result = result.filter((c) => statusOf(c) === 'new')
+async function loadCards() {
+  loading.value = true
+  try {
+    const result = await cardsApi.search({
+      q: query.value,
+      sort: sortKey.value,
+      sortDir: sortDir.value,
+      filter: filter.value,
+    })
+    cards.value = result.cards
+    counts.value = result.counts
+  } finally {
+    loading.value = false
   }
-  if (query.value.trim()) {
-    const q = query.value.trim().toLowerCase()
-    result = result.filter(
-      (c) =>
-        c.term.toLowerCase().includes(q) ||
-        c.translation.toLowerCase().includes(q),
-    )
-  }
-  result.sort(compare)
-  return result
-})
+}
+
+const debouncedLoad = debounce(loadCards as (...args: unknown[]) => void, 300)
+
+// Immediate load on mount; debounce on subsequent param changes
+onMounted(loadCards)
+watch(query, debouncedLoad)
+watch([filter, sortKey, sortDir], loadCards)
 
 // Grouping: emit rows as { type: 'group', ... } | { type: 'card', card }
 type Row =
@@ -101,7 +86,7 @@ type Row =
 
 const rows = computed<Row[]>(() => {
   if (group.value === 'none') {
-    return filtered.value.map((c) => ({ type: 'card', card: c }) as Row)
+    return cards.value.map((c) => ({ type: 'card', card: c }) as Row)
   }
   const keyOf = (c: Card): { key: string; label: string } => {
     if (group.value === 'status') {
@@ -125,16 +110,17 @@ const rows = computed<Row[]>(() => {
     return { key: '', label: '' }
   }
 
-  // stable order: honor current sort inside each group, group order by min index or alpha for letter
   const buckets = new Map<string, { label: string; items: Card[] }>()
-  for (const c of filtered.value) {
+  for (const c of cards.value) {
     const { key, label } = keyOf(c)
     if (!buckets.has(key)) buckets.set(key, { label, items: [] })
     buckets.get(key)!.items.push(c)
   }
 
-  // Group-order sort
-  const groupOrder = (a: [string, { label: string; items: Card[] }], b: [string, { label: string; items: Card[] }]) => {
+  const groupOrder = (
+    a: [string, { label: string; items: Card[] }],
+    b: [string, { label: string; items: Card[] }],
+  ) => {
     if (group.value === 'status') {
       const rank: Record<string, number> = { due: 0, new: 1, queued: 2, learned: 3 }
       return (rank[a[0]] ?? 99) - (rank[b[0]] ?? 99)
@@ -144,31 +130,17 @@ const rows = computed<Row[]>(() => {
       const bv = b[0] === 'learned' ? 100 : parseInt(b[0].replace('lvl-', ''), 10)
       return av - bv
     }
-    if (group.value === 'letter') {
-      return a[0].localeCompare(b[0])
-    }
+    if (group.value === 'letter') return a[0].localeCompare(b[0])
     return 0
   }
 
   const result: Row[] = []
   for (const [key, bucket] of Array.from(buckets.entries()).sort(groupOrder)) {
-    result.push({
-      type: 'group',
-      key,
-      label: bucket.label,
-      count: bucket.items.length,
-    })
+    result.push({ type: 'group', key, label: bucket.label, count: bucket.items.length })
     for (const card of bucket.items) result.push({ type: 'card', card })
   }
   return result
 })
-
-const counts = computed(() => ({
-  all: cards.value.length,
-  due: cards.value.filter((c) => statusOf(c) === 'due' || statusOf(c) === 'new').length,
-  learned: cards.value.filter((c) => statusOf(c) === 'learned').length,
-  new: cards.value.filter((c) => statusOf(c) === 'new').length,
-}))
 
 const columns: {
   key: SortKey
@@ -236,10 +208,6 @@ const columns: {
       </div>
     </div>
 
-    <TodoBanner
-      text="Клиентский поиск / сортировка / группировка. При 200+ карточках — серверный GET /api/cards/search?q=&sort=&filter=&group=."
-    />
-
     <div class="table">
       <div class="table__header">
         <button
@@ -259,7 +227,7 @@ const columns: {
         </button>
       </div>
 
-      <div v-if="filtered.length === 0" class="empty">
+      <div v-if="cards.length === 0 && !loading" class="empty">
         <p class="serif">Ничего не найдено. Попробуйте другой фильтр или запрос.</p>
       </div>
       <div v-else class="table__body">
@@ -277,7 +245,7 @@ const columns: {
       </div>
 
       <div class="table__footer mono">
-        показано {{ filtered.length }} из {{ counts.all }} · сортировка:
+        показано {{ cards.length }} из {{ counts.all }} · сортировка:
         <span class="table__footer-hi">{{ columns.find((c) => c.key === sortKey)?.label }} {{ sortDir === 'asc' ? '↑' : '↓' }}</span>
         <template v-if="group !== 'none'"> · группировка: <span class="table__footer-hi">{{ group === 'status' ? 'статус' : group === 'level' ? 'уровень' : 'первая буква' }}</span></template>
       </div>
