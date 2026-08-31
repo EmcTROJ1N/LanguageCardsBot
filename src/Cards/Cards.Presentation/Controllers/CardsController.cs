@@ -165,4 +165,33 @@ public sealed class CardsController(
         var deleted = await cardApplicationService.DeleteByUserIdAsync(userId, cancellationToken);
         return Ok(new DeleteCardsByUserIdResponseDto(deleted));
     }
+
+    /// <summary>
+    /// Searches, filters, and sorts cards for the authenticated user.
+    /// </summary>
+    /// <param name="q">Optional substring to match against term or translation.</param>
+    /// <param name="sort">Sort column: term | translation | level | accuracy | next. Default: term.</param>
+    /// <param name="sortDir">Sort direction: asc | desc. Default: asc.</param>
+    /// <param name="filter">Status filter: all | due | new | learned. Default: all.</param>
+    [HttpGet("search")]
+    [Authorize]
+    public async Task<ActionResult<SearchCardsResponseDto>> Search(
+        [FromQuery] string? q,
+        [FromQuery] string sort = "term",
+        [FromQuery] string sortDir = "asc",
+        [FromQuery] string filter = "all",
+        CancellationToken cancellationToken = default)
+    {
+        var keycloakId = User.GetKeycloakId();
+        var user = await userApplicationService.GetOrCreateByKeycloakIdAsync(keycloakId, cancellationToken);
+
+        var (cards, counts) = await cardApplicationService.SearchAsync(
+            user.Id,
+            new CardSearchQuery(q, sort, sortDir, filter),
+            cancellationToken);
+
+        return Ok(new SearchCardsResponseDto(
+            cards.Adapt<List<CardDto>>(),
+            new CardCountsDto(counts.All, counts.Due, counts.New, counts.Learned)));
+    }
 }
