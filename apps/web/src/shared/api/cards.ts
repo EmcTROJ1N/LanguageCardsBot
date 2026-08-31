@@ -16,6 +16,13 @@ export type CreateCardDto = {
 
 export type UpdateCardDto = Partial<CreateCardDto>
 
+export type CardSearchCounts = {
+  all: number
+  due: number
+  new: number
+  learned: number
+}
+
 export const reviewIntervalDays = [1, 1, 2, 4, 7, 14, 21, 21, 19, 0]
 
 type CardDto = {
@@ -55,6 +62,23 @@ export const cardsApi = {
   async getAll(): Promise<Card[]> {
     const data = await apiFetch<{ cards: CardDto[] }>('/api/cards/cards')
     return data.cards.map(toCard)
+  },
+
+  async search(params: {
+    q?: string
+    sort?: string
+    sortDir?: string
+    filter?: string
+  }): Promise<{ cards: Card[]; counts: CardSearchCounts }> {
+    const qs = new URLSearchParams()
+    if (params.q) qs.set('q', params.q)
+    if (params.sort) qs.set('sort', params.sort)
+    if (params.sortDir) qs.set('sortDir', params.sortDir)
+    if (params.filter) qs.set('filter', params.filter)
+    const data = await apiFetch<{ cards: CardDto[]; counts: CardSearchCounts }>(
+      `/api/cards/cards/search?${qs.toString()}`,
+    )
+    return { cards: data.cards.map(toCard), counts: data.counts }
   },
 
   async getById(id: number): Promise<Card | undefined> {
