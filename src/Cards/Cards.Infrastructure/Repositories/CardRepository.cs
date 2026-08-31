@@ -1,4 +1,5 @@
 using Cards.Application.Abstractions.Repositories;
+using Cards.Application.Cards;
 using Cards.Domain.Entities;
 using Cards.Infrastructure.Common.Abstractions;
 using Cards.Infrastructure.Data;
@@ -83,5 +84,64 @@ public class CardRepository(CardsMysqlDbContext dbContext): AbstractCrudReposito
             .ToListAsync(cancellationToken);
 
         return groups.ToDictionary(g => g.Level, g => g.Count);
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyCollection<CardEntity>> SearchAsync(
+        int userId,
+        CardSearchQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.UtcNow;
+        var q = query.Q?.Trim();
+
+        var set = dbContext.Set<CardEntity>().Where(c => c.UserId == userId);
+
+        // Text search
+        if (!string.IsNullOrEmpty(q))
+            set = set.Where(c => c.Term.Contains(q) || c.Translation.Contains(q));
+
+        // Status filter
+        set = query.Filter switch
+        {
+            // "due" tab includes both 'due' and 'new' status cards (mirrors client statusOf logic)
+            "due"     => set.Where(c => !c.Learned && (c.TotalReviews == 0 || !c.NextReviewAt.HasValue || c.NextReviewAt <= now)),
+            "new"     => set.Where(c => !c.Learned && (c.TotalReviews == 0 || !c.NextReviewAt.HasValue)),
+            "learned" => set.Where(c => c.Learned),
+            _         => set,
+        };
+
+        // Sort
+        bool desc = query.SortDir == "desc";
+        set = query.Sort switch
+        {
+            "translation" => desc ? set.OrderByDescending(c => c.Translation) : set.OrderBy(c => c.Translation),
+            "level"       => desc ? set.OrderByDescending(c => c.Level)       : set.OrderBy(c => c.Level),
+            "next"        => desc ? set.OrderByDescending(c => c.NextReviewAt) : set.OrderBy(c => c.NextReviewAt),
+            "accuracy"    => desc
+                ? set.OrderByDescending(c => c.TotalReviews == 0 ? 0.0 : (double)c.CorrectReviews / c.TotalReviews)
+                : set.OrderBy(c => c.TotalReviews == 0 ? 0.0 : (double)c.CorrectReviews / c.TotalReviews),
+            _ => desc ? set.OrderByDescending(c => c.Term) : set.OrderBy(c => c.Term),
+        };
+
+        return await set.ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<(int All, int Due, int New, int Learned)> CountByStatusAsync(
+        int userId,
+        CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.UtcNow;
+        var cards = dbContext.Set<CardEntity>().Where(c => c.UserId == userId);
+
+        var allTask     = cards.CountAsync(cancellationToken);
+        var dueTask     = cards.CountAsync(c => !c.Learned && (c.TotalReviews == 0 || !c.NextReviewAt.HasValue || c.NextReviewAt <= now), cancellationToken);
+        var newTask     = cards.CountAsync(c => !c.Learned && (c.TotalReviews == 0 || !c.NextReviewAt.HasValue), cancellationToken);
+        var learnedTask = cards.CountAsync(c => c.Learned, cancellationToken);
+
+        await Task.WhenAll(allTask, dueTask, newTask, learnedTask);
+
+        return (allTask.Result, dueTask.Result, newTask.Result, learnedTask.Result);
     }
 }
