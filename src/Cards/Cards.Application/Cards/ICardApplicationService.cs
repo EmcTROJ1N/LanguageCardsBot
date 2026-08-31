@@ -56,4 +56,12 @@ public interface ICardApplicationService
     /// Exports all cards owned by a user as a downloadable file.
     /// </summary>
     Task<CardExportResult> ExportAsync(int userId, CardExportFormat format, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Searches, filters, and sorts cards for a user and returns their current status counts.
+    /// </summary>
+    Task<(IReadOnlyCollection<CardEntity> Cards, (int All, int Due, int New, int Learned) Counts)> SearchAsync(
+        int userId,
+        CardSearchQuery query,
+        CancellationToken cancellationToken = default);
 }

@@ -1,3 +1,4 @@
+using Cards.Application.Cards;
 using Cards.Domain.Entities;
 
 namespace Cards.Application.Abstractions.Repositories;
@@ -61,4 +62,20 @@ public interface ICardRepository
     /// Counts non-learned cards grouped by Level across all users.
     /// </summary>
     Task<IReadOnlyDictionary<int, int>> CountActiveByLevelAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Searches and sorts cards owned by a user according to the supplied query parameters.
+    /// </summary>
+    Task<IReadOnlyCollection<CardEntity>> SearchAsync(
+        int userId,
+        CardSearchQuery query,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns per-status card counts for a user.
+    /// Due count includes both 'due' and 'new' status cards, matching client-side tab behaviour.
+    /// </summary>
+    Task<(int All, int Due, int New, int Learned)> CountByStatusAsync(
+        int userId,
+        CancellationToken cancellationToken = default);
 }
