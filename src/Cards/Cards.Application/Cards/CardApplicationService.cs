@@ -199,4 +199,16 @@ public sealed class CardApplicationService(
             ? $"\"{value.Replace("\"", "\"\"")}\""
             : value;
     }
+
+    /// <inheritdoc />
+    public async Task<(IReadOnlyCollection<CardEntity> Cards, (int All, int Due, int New, int Learned) Counts)> SearchAsync(
+        int userId,
+        CardSearchQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        var cardsTask  = cardRepository.SearchAsync(userId, query, cancellationToken);
+        var countsTask = cardRepository.CountByStatusAsync(userId, cancellationToken);
+        await Task.WhenAll(cardsTask, countsTask);
+        return (cardsTask.Result, countsTask.Result);
+    }
 }
