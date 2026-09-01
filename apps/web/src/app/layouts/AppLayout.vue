@@ -1,19 +1,11 @@
 <script setup lang="ts">
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
-import { computed, onMounted, ref } from 'vue'
-import { statsApi } from '@/shared/api'
+import { computed } from 'vue'
 import { useAuthStore } from '@/features/auth'
-import type { StatsToday } from '@/entities/stats'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
-
-const statsToday = ref<StatsToday | null>(null)
-
-onMounted(async () => {
-  statsToday.value = await statsApi.getToday()
-})
 
 const nav = [
   { to: '/', label: 'Кабинет', section: 'ежедневно' },
@@ -91,8 +83,7 @@ async function logout() {
     <main class="main">
       <div class="top-band rise rise-2">
         <div class="masthead">
-          <span class="eyebrow">Sub №{{ statsToday?.streakDays ?? '—' }} ·
-            Volume 1 · Weekly Edition</span>
+          <span class="eyebrow">Volume 1 · Weekly Edition</span>
           <span class="masthead__date">
             {{
               new Date().toLocaleDateString('ru-RU', {
@@ -107,9 +98,6 @@ async function logout() {
         <div class="top-band__right">
           <span class="chip">
             <span class="dot dot--sage" /> API online
-          </span>
-          <span class="chip ochre">
-            {{ statsToday?.due ?? '—' }} к повтору
           </span>
         </div>
       </div>

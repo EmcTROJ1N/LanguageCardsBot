@@ -6,28 +6,25 @@ import { getDueCards } from '@/entities/card'
 import type { Card } from '@/entities/card'
 import type { StatsToday } from '@/entities/stats'
 import type { Profile } from '@/entities/user'
-import { TodoBanner, AppBtn, AppChip } from '@/shared/ui'
+import { AppBtn } from '@/shared/ui'
 
 const now = new Date('2026-08-11T15:22:00Z')
 
 const allCards = ref<Card[]>([])
 const statsToday = ref<StatsToday | null>(null)
 const profile = ref<Profile | null>(null)
-const hitmap = ref<number[][]>([])
 const levelDistribution = ref<{ level: number; count: number }[]>([])
 
 onMounted(async () => {
-  const [cards, stats, prof, map, levels] = await Promise.all([
+  const [cards, stats, prof, levels] = await Promise.all([
     cardsApi.getAll(),
     statsApi.getToday(),
     userApi.getProfile(),
-    statsApi.getHitmap(),
     statsApi.getLevelDistribution(),
   ])
   allCards.value = cards
   statsToday.value = stats
   profile.value = prof
-  hitmap.value = map
   levelDistribution.value = levels
 })
 
@@ -37,50 +34,16 @@ const dueSample = computed(() => due.value.slice(0, 4))
 // Оценка длительности: 15 сек. на карточку — грубая эвристика для превью.
 const trainEtaMin = computed(() => Math.max(1, Math.round((due.value.length * 15) / 60)))
 
-const nextReminder = computed(() => {
-  if (!profile.value?.nextReminderAt) return null
-  const d = new Date(profile.value.nextReminderAt)
-  const diffMin = Math.round((d.getTime() - now.getTime()) / 60000)
-  return {
-    time: d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
-    inMin: diffMin,
-  }
-})
-
-const streakState = computed(() => {
-  // Мок: интервал напоминаний < 6ч и next в будущем — streak safe.
-  if (!nextReminder.value) return { label: 'нет графика', klass: 'default' as const }
-  if (nextReminder.value.inMin < 0)
-    return { label: `просрочено на ${Math.abs(nextReminder.value.inMin)} мин`, klass: 'rust' as const }
-  if (nextReminder.value.inMin < 240)
-    return { label: `в безопасности до ${nextReminder.value.time}`, klass: 'sage' as const }
-  return { label: 'без риска', klass: 'sage' as const }
-})
-
 const accuracyToday = computed(() =>
   (statsToday.value?.reviewsToday ?? 0) === 0
     ? 0
     : Math.round(((statsToday.value?.correctToday ?? 0) / (statsToday.value?.reviewsToday ?? 0)) * 100),
 )
 
-// Активность за 7 дней (последние 7 дней из hitmap)
-const week = computed(() => {
-  const map = hitmap.value
-  const flat = map.flat()
-  const last7 = flat.slice(-7)
-  const maxV = Math.max(...last7, 1)
-  const labels = ['ср', 'чт', 'пт', 'сб', 'вс', 'пн', 'вт']
-  return last7.map((v, i) => ({
-    day: labels[i],
-    intensity: v,
-    height: (v / maxV) * 100,
-    reviews: v * 6 + 2, // мок значений повторений
-    today: i === last7.length - 1,
-  }))
+const bestDayLabel = computed(() => {
+  if (!statsToday.value?.bestDay) return null
+  return new Date(statsToday.value.bestDay).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
 })
-const weekTotalReviews = computed(() =>
-  week.value.reduce((a, d) => a + d.reviews, 0),
-)
 
 const recent = computed(() =>
   [...allCards.value].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1)).slice(0, 5),
@@ -137,9 +100,8 @@ const pipeline = computed(() => {
             <span class="fact__l">точность за сутки</span>
           </span>
           <span class="fact">
-            <span class="fact__k">{{ statsToday?.streakDays ?? 0 }} дн</span>
-            <span class="fact__l">streak</span>
-            <AppChip :tone="streakState.klass">{{ streakState.label }}</AppChip>
+            <span class="fact__k">{{ statsToday?.bestCount ?? 0 }}</span>
+            <span class="fact__l">лучший день{{ bestDayLabel ? ` · ${bestDayLabel}` : '' }}</span>
           </span>
         </div>
       </div>
@@ -194,26 +156,6 @@ const pipeline = computed(() => {
           <AppBtn variant="ochre" to="/train">Тренировать все {{ due.length }}</AppBtn>
           <RouterLink to="/deck?filter=due" class="link-more">развернуть список →</RouterLink>
         </footer>
-      </article>
-
-      <!-- Week activity -->
-      <article class="panel">
-        <header class="panel__head">
-          <h2>Эта неделя</h2>
-          <span class="mono muted">{{ weekTotalReviews }} повторений</span>
-        </header>
-        <div class="week">
-          <div v-for="d in week" :key="d.day" class="week__col" :class="{ today: d.today }">
-            <div class="week__bar-wrap">
-              <div
-                class="week__bar"
-                :style="{ height: Math.max(4, d.height) + '%' }"
-              />
-            </div>
-            <span class="week__day mono">{{ d.day }}</span>
-            <span class="week__count mono">{{ d.reviews }}</span>
-          </div>
-        </div>
       </article>
 
       <!-- Level pipeline -->
@@ -277,19 +219,6 @@ const pipeline = computed(() => {
         </footer>
       </article>
 
-      <!-- TODO / system status -->
-      <article class="panel span-2 todos">
-        <header class="panel__head">
-          <h2>Что не готово в API</h2>
-          <span class="mono muted">заметки для интеграции</span>
-        </header>
-        <div class="todos__list">
-          <TodoBanner
-            label="Streak / история"
-            text="Streak и недельная активность вычисляются по ReviewEntity — эндпоинта GET /api/cards/stats/history пока нет."
-          />
-        </div>
-      </article>
     </div>
   </section>
 </template>
@@ -527,58 +456,6 @@ const pipeline = computed(() => {
   justify-content: flex-end;
 }
 
-/* ---------- Week bars ---------- */
-
-.week {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-  align-items: end;
-  flex: 1;
-  min-height: 140px;
-}
-.week__col {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  height: 100%;
-  justify-content: flex-end;
-}
-.week__bar-wrap {
-  width: 100%;
-  height: 100px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-.week__bar {
-  width: 100%;
-  max-width: 22px;
-  background: var(--ink-soft);
-  border-radius: 2px 2px 0 0;
-  transition: background 0.15s ease;
-}
-.week__col.today .week__bar {
-  background: var(--ochre);
-}
-.week__col:hover .week__bar {
-  background: var(--ochre);
-}
-.week__day {
-  font-size: 10px;
-  color: var(--ink-mute);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-.week__col.today .week__day {
-  color: var(--ochre);
-}
-.week__count {
-  font-size: 10px;
-  color: var(--ink-mute);
-}
-
 /* ---------- Pipeline ---------- */
 
 .pipeline {
@@ -697,13 +574,5 @@ const pipeline = computed(() => {
 }
 .reminders__time {
   font-size: 13px;
-}
-
-/* ---------- TODOs section ---------- */
-
-.todos__list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 </style>

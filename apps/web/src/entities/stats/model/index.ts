@@ -2,7 +2,8 @@ export type StatsToday = {
   due: number
   learned: number
   totalCards: number
-  streakDays: number
+  bestDay: string | null
+  bestCount: number
   reviewsToday: number
   correctToday: number
 }

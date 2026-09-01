@@ -25,8 +25,8 @@ export const statsApi = {
       due: 0,
       learned: s.learnedCards,
       totalCards: s.totalCards,
-      // TODO: streakDays — not in backend response; needs ReviewEntity aggregation
-      streakDays: 0,
+      bestDay: s.bestDay,
+      bestCount: s.bestCount,
       reviewsToday: s.totalReviewsToday,
       correctToday: s.correctReviewsToday,
     }
@@ -34,11 +34,6 @@ export const statsApi = {
 
   async getLevelDistribution(): Promise<{ level: number; count: number }[]> {
     // TODO: no backend endpoint; needs GET /api/cards/v3/stats/level-distribution
-    return []
-  },
-
-  async getHitmap(): Promise<number[][]> {
-    // TODO: no backend endpoint; needs GET /api/cards/v3/stats/history?days=84
     return []
   },
 }
