@@ -1,10 +1,20 @@
 <script setup lang="ts">
+import { onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useTrainSession } from '@/features/train-session'
 import { TrainCard } from '@/features/train-session'
-import { TodoBanner } from '@/shared/ui'
 
-const { current, isFinished, correctCount, results, progress, restart } = useTrainSession()
+const { current, isFinished, correctCount, results, progress, restart, flip, answer } = useTrainSession()
+
+function handleKey(e: KeyboardEvent) {
+  if (!current.value) return
+  if (e.code === 'Space') { e.preventDefault(); flip() }
+  else if (e.key === '1') answer(false)
+  else if (e.key === '2') answer(true)
+}
+
+onMounted(() => window.addEventListener('keydown', handleKey))
+onUnmounted(() => window.removeEventListener('keydown', handleKey))
 </script>
 
 <template>
@@ -38,9 +48,6 @@ const { current, isFinished, correctCount, results, progress, restart } = useTra
       </div>
     </div>
 
-    <TodoBanner
-      text="Быстрые клавиши 1 / 2 / space пока только визуально подсказаны — привязку keydown-обработчиков делаем при интеграции."
-    />
   </section>
 </template>
 

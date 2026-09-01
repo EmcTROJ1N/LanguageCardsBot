@@ -47,10 +47,10 @@ const { current, isFlipped, nextIntervalDays, flip, answer, progress, correctCou
   </div>
 
   <div v-if="current" class="actions">
-    <AppBtn variant="rust" size="lg" :disabled="!isFlipped" @click="answer(false)">
+    <AppBtn variant="rust" size="lg" @click="answer(false)">
       Не помню <span class="mono">1</span>
     </AppBtn>
-    <AppBtn variant="sage" size="lg" :disabled="!isFlipped" @click="answer(true)">
+    <AppBtn variant="sage" size="lg" @click="answer(true)">
       Помню <span class="mono">2</span>
     </AppBtn>
     <AppBtn v-if="!isFlipped" variant="ghost" size="lg" @click="flip">
