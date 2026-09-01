@@ -206,9 +206,9 @@ public sealed class CardApplicationService(
         CardSearchQuery query,
         CancellationToken cancellationToken = default)
     {
-        var cardsTask  = cardRepository.SearchAsync(userId, query, cancellationToken);
-        var countsTask = cardRepository.CountByStatusAsync(userId, cancellationToken);
-        await Task.WhenAll(cardsTask, countsTask);
-        return (cardsTask.Result, countsTask.Result);
+        // DbContext is not thread-safe — run sequentially
+        var cards  = await cardRepository.SearchAsync(userId, query, cancellationToken);
+        var counts = await cardRepository.CountByStatusAsync(userId, cancellationToken);
+        return (cards, counts);
     }
 }

@@ -135,13 +135,12 @@ public class CardRepository(CardsMysqlDbContext dbContext): AbstractCrudReposito
         var now = DateTime.UtcNow;
         var cards = dbContext.Set<CardEntity>().Where(c => c.UserId == userId);
 
-        var allTask     = cards.CountAsync(cancellationToken);
-        var dueTask     = cards.CountAsync(c => !c.Learned && (c.TotalReviews == 0 || !c.NextReviewAt.HasValue || c.NextReviewAt <= now), cancellationToken);
-        var newTask     = cards.CountAsync(c => !c.Learned && (c.TotalReviews == 0 || !c.NextReviewAt.HasValue), cancellationToken);
-        var learnedTask = cards.CountAsync(c => c.Learned, cancellationToken);
+        // EF Core DbContext is not thread-safe — run counts sequentially on the same instance
+        var all     = await cards.CountAsync(cancellationToken);
+        var due     = await cards.CountAsync(c => !c.Learned && (c.TotalReviews == 0 || !c.NextReviewAt.HasValue || c.NextReviewAt <= now), cancellationToken);
+        var newCards = await cards.CountAsync(c => !c.Learned && (c.TotalReviews == 0 || !c.NextReviewAt.HasValue), cancellationToken);
+        var learned = await cards.CountAsync(c => c.Learned, cancellationToken);
 
-        await Task.WhenAll(allTask, dueTask, newTask, learnedTask);
-
-        return (allTask.Result, dueTask.Result, newTask.Result, learnedTask.Result);
+        return (all, due, newCards, learned);
     }
 }
