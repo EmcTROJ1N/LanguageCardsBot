@@ -6,8 +6,12 @@ import { getDueCards } from '@/entities/card'
 import type { Card } from '@/entities/card'
 import type { StatsToday } from '@/entities/stats'
 import type { Profile } from '@/entities/user'
-import { AppBtn } from '@/shared/ui'
+import { AppBtn, TodoBanner } from '@/shared/ui'
 
+// TODO: now захардкожена — заменить на Date.now() после подключения реального времени/сессии
+// TODO: userId:0 в statsApi.getToday() — заменить на Keycloak ID
+// TODO: getLevelDistribution() возвращает [] — панель Pipeline пуста; нужен бэкенд-эндпоинт
+// TODO: напоминания (upcomingReminders) вычисляются из настроек профиля, реального расписания нет
 const now = new Date('2026-08-11T15:22:00Z')
 
 const allCards = ref<Card[]>([])
@@ -220,6 +224,11 @@ const pipeline = computed(() => {
       </article>
 
     </div>
+
+    <TodoBanner
+      label="Кабинет"
+      text="`now` захардкожена ('2026-08-11') — нужна Date.now() · Pipeline пуст, нет level-distribution · напоминания — мок из настроек профиля, реального бэкенда нет · userId:0 в statsApi"
+    />
   </section>
 </template>
 

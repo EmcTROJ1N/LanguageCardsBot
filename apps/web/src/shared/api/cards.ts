@@ -125,6 +125,10 @@ export const cardsApi = {
     await apiFetch<{ deleted: boolean }>(`/api/cards/cards/${id}`, { method: 'DELETE' })
   },
 
+  async deleteAllByUser(userId: number): Promise<void> {
+    await apiFetch<{ deleted: boolean }>(`/api/cards/cards/by-user/${userId}`, { method: 'DELETE' })
+  },
+
   async recordReview(cardId: number, isCorrect: boolean): Promise<void> {
     await apiFetch<unknown>(`/api/cards/cards/${cardId}/review`, {
       method: 'POST',

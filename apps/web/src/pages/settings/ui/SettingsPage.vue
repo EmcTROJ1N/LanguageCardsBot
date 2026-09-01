@@ -1,12 +1,19 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { userApi } from '@/shared/api'
+import { useRouter } from 'vue-router'
+import { userApi, cardsApi } from '@/shared/api'
 import type { Profile } from '@/entities/user'
 import { PageHeader, TodoBanner } from '@/shared/ui'
+import { useAuthStore } from '@/features/auth'
+
+const router = useRouter()
+const authStore = useAuthStore()
 
 const profile = ref<Profile | null>(null)
 const reminderMinutes = ref(90)
 const hideTranslations = ref(false)
+const saving = ref(false)
+const deleting = ref(false)
 
 onMounted(async () => {
   profile.value = await userApi.getProfile()
@@ -15,6 +22,36 @@ onMounted(async () => {
 })
 
 const presets = [30, 60, 90, 180, 360, 720, 1440]
+
+async function save() {
+  saving.value = true
+  try {
+    await userApi.updateProfile({
+      reminderIntervalMinutes: reminderMinutes.value,
+      hideTranslations: hideTranslations.value,
+    })
+  } finally {
+    saving.value = false
+  }
+}
+
+function logout() {
+  authStore.logout()
+  router.push('/login')
+}
+
+async function deleteAllCards() {
+  const cardsUserId = profile.value?.cardsUserId
+  if (!cardsUserId) return
+  if (!window.confirm('Удалить все карточки? Это действие нельзя откатить.')) return
+  deleting.value = true
+  try {
+    await cardsApi.deleteAllByUser(cardsUserId)
+    router.push('/deck')
+  } finally {
+    deleting.value = false
+  }
+}
 </script>
 
 <template>
@@ -45,8 +82,8 @@ const presets = [30, 60, 90, 180, 360, 720, 1440]
           </div>
         </dl>
         <div class="row-actions">
-          <button class="btn ghost">Сменить пароль</button>
-          <button class="btn ghost">Выйти</button>
+          <button class="btn ghost" disabled>Сменить пароль</button>
+          <button class="btn ghost" @click="logout">Выйти</button>
         </div>
       </article>
 
@@ -108,7 +145,9 @@ const presets = [30, 60, 90, 180, 360, 720, 1440]
           </label>
         </div>
         <div class="row-actions">
-          <button class="btn ochre">Сохранить</button>
+          <button class="btn ochre" :disabled="saving" @click="save">
+            {{ saving ? 'Сохраняется…' : 'Сохранить' }}
+          </button>
         </div>
       </article>
 
@@ -118,12 +157,11 @@ const presets = [30, 60, 90, 180, 360, 720, 1440]
           Действия, которые нельзя откатить. Экспортируйте колоду перед тем, как что-то удалять.
         </p>
         <div class="row-actions">
-          <router-link to="/import" class="btn ghost">Экспорт колоды</router-link>
-          <button class="btn rust">Удалить всю колоду</button>
+          <button class="btn ghost" disabled>Экспорт колоды</button>
+          <button class="btn rust" :disabled="deleting || !profile?.cardsUserId" @click="deleteAllCards">
+            {{ deleting ? 'Удаляется…' : 'Удалить всю колоду' }}
+          </button>
         </div>
-        <TodoBanner
-          text="DELETE /api/cards/by-user/{userId} уже есть. Экспорт — endpoint отсутствует, реализовать отдельно."
-        />
       </article>
     </div>
   </section>

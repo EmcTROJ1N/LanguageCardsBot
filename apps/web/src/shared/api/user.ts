@@ -14,12 +14,25 @@ type PassportMeDto = {
   createdAt: string
 }
 
+type CardsUserDto = {
+  id: number
+  keycloakId: string | null
+  chatId: number | null
+  username: string | null
+  createdAt: string
+  reminderIntervalMinutes: number
+  nextReminderAtUtc: string | null
+  hideTranslations: boolean
+}
+
 export type TokenResponse = {
   accessToken: string
   refreshToken: string
   expiresIn: number
   tokenType: string
 }
+
+let _cardsUser: CardsUserDto | null = null
 
 export const userApi = {
   async login(email: string, password: string): Promise<TokenResponse> {
@@ -42,28 +55,50 @@ export const userApi = {
   },
 
   async getProfile(): Promise<Profile> {
-    // TODO: compose with Cards user (GET /api/cards/v3/users/{id}) for chatId, telegramUsername,
-    //       reminderIntervalMinutes, hideTranslations, nextReminderAt.
-    //       Requires Passport↔Cards user mapping (integer ID federation).
-    const me = await apiFetch<PassportMeDto>('/api/passport/v1/auth/me')
+    const [me, cardsResp] = await Promise.all([
+      apiFetch<PassportMeDto>('/api/passport/v1/auth/me'),
+      apiFetch<{ user: CardsUserDto }>('/api/cards/v3/users/me').catch(() => null),
+    ])
+
+    if (cardsResp?.user) {
+      _cardsUser = cardsResp.user
+    }
+
     return {
       email: me.email,
       firstName: me.firstName,
       lastName: me.lastName,
       role: me.role === 'Admin' ? 'Admin' : 'User',
-      chatId: null,
-      telegramUsername: null,
-      reminderIntervalMinutes: 90,
-      hideTranslations: false,
-      nextReminderAt: null,
+      chatId: _cardsUser?.chatId ?? null,
+      telegramUsername: _cardsUser?.username ?? null,
+      reminderIntervalMinutes: _cardsUser?.reminderIntervalMinutes ?? 90,
+      hideTranslations: _cardsUser?.hideTranslations ?? false,
+      nextReminderAt: _cardsUser?.nextReminderAtUtc ?? null,
       createdAt: me.createdAt,
+      cardsUserId: _cardsUser?.id ?? null,
     }
   },
 
-  async updateProfile(_dto: UpdateProfileDto): Promise<Profile> {
-    // TODO: split into two requests — PATCH /api/passport/v1/auth/me (firstName, lastName)
-    //       and PUT /api/cards/v3/users/{id} (reminderIntervalMinutes, hideTranslations)
-    //       once user ID federation is in place
+  async updateProfile(dto: UpdateProfileDto): Promise<Profile> {
+    if (_cardsUser !== null) {
+      const merged: CardsUserDto = {
+        ..._cardsUser,
+        reminderIntervalMinutes: dto.reminderIntervalMinutes ?? _cardsUser.reminderIntervalMinutes,
+        hideTranslations: dto.hideTranslations ?? _cardsUser.hideTranslations,
+      }
+      await apiFetch(`/api/cards/v3/users/${_cardsUser.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          keycloakId: merged.keycloakId,
+          chatId: merged.chatId,
+          username: merged.username,
+          reminderIntervalMinutes: merged.reminderIntervalMinutes,
+          nextReminderAtUtc: merged.nextReminderAtUtc,
+          hideTranslations: merged.hideTranslations,
+        }),
+      })
+      _cardsUser = merged
+    }
     return userApi.getProfile()
   },
 }

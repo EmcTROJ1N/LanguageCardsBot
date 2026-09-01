@@ -9,4 +9,5 @@ export type Profile = {
   hideTranslations: boolean
   nextReminderAt: string | null
   createdAt: string
+  cardsUserId: number | null
 }

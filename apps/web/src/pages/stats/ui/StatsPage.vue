@@ -2,8 +2,10 @@
 import { computed, onMounted, ref } from 'vue'
 import { statsApi } from '@/shared/api'
 import type { StatsToday } from '@/entities/stats'
-import { PageHeader, StatTile } from '@/shared/ui'
+import { PageHeader, StatTile, TodoBanner } from '@/shared/ui'
 
+// TODO: userId захардкожен в 0 в statsApi.getToday() — заменить на реальный Keycloak ID из сессии
+// TODO: getLevelDistribution() возвращает [] — нужен GET /api/cards/v3/stats/level-distribution на бэкенде
 const stats = ref<StatsToday | null>(null)
 const levelDist = ref<{ level: number; count: number }[]>([])
 
@@ -55,6 +57,11 @@ const bestDayLabel = computed(() => {
         </div>
       </div>
     </article>
+
+    <TodoBanner
+      label="Статистика"
+      text="userId захардкожен в 0 — нужен реальный Keycloak ID из сессии · график «По уровням» пуст, нет эндпоинта GET /api/cards/v3/stats/level-distribution"
+    />
   </section>
 </template>
 
