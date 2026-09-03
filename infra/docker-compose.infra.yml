@@ -75,7 +75,7 @@ services:
     networks:
       - infra
       - passport
-    
+
   grafana:
     image: grafana/grafana-oss:latest
     container_name: grafana
@@ -105,6 +105,31 @@ services:
       - language-cards-shared
       - passport
 
+  loki:
+    image: grafana/loki:3.0.0
+    container_name: infra_loki
+    restart: unless-stopped
+    ports:
+      - "${LOKI_PORT:-3100}:3100"
+    volumes:
+      - loki-data:/loki
+    networks:
+      - monitoring
+
+  promtail:
+    image: grafana/promtail:3.0.0
+    container_name: infra_promtail
+    restart: unless-stopped
+    command: -config.file=/etc/promtail/config.yaml
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./promtail-config.yaml:/etc/promtail/config.yaml:ro
+    depends_on:
+      - loki
+    networks:
+      - monitoring
+
 networks:
   infra:
     name: infra
@@ -122,3 +147,4 @@ volumes:
   rabbitmq-data:
   prometheus-data:
   grafana-data:
+  loki-data:
