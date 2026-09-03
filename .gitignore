@@ -110,3 +110,8 @@ coverage/
 *.coveragexml
 
 *.db.superpowers/
+
+####################################
+# Claude Code (personal local settings)
+####################################
+.claude/settings.local.json
