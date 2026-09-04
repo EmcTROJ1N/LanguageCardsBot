@@ -13,6 +13,7 @@
     <PackageVersion Include="NSwag.AspNetCore" Version="14.7.1" />
     <PackageVersion Include="NSwag.MSBuild" Version="14.7.1" />
     <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
+    <PackageVersion Include="GitVersion.MsBuild" Version="5.12.0" />
     <!-- gRPC -->
     <PackageVersion Include="Grpc.AspNetCore" Version="2.64.0" />
     <PackageVersion Include="Grpc.Net.ClientFactory" Version="2.64.0" />
