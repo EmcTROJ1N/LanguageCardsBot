@@ -137,8 +137,6 @@ flowchart TD
 - **Telegram Bot Token** (от [@BotFather](https://t.me/BotFather))
 - Для локальной разработки: **.NET 10 SDK**, **Node.js 22+**
 
----
-
 ## Быстрый старт
 
 ### 1. Создать внешние Docker-сети (один раз)
