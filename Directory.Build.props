@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <!-- GitVersion.MsBuild only for non-packable projects (services, not Contracts) -->
-  <ItemGroup Condition="'$(IsPackable)' == 'false'">
+  <ItemGroup Condition="'$(IsPackable)' != 'true'">
     <PackageReference Include="GitVersion.MsBuild">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
