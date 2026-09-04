@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { userApi, cardsApi } from '@/shared/api'
 import type { Profile } from '@/entities/user'
-import { PageHeader, TodoBanner } from '@/shared/ui'
+import { PageHeader } from '@/shared/ui'
 import { useAuthStore } from '@/features/auth'
 
 const router = useRouter()
@@ -14,6 +14,8 @@ const reminderMinutes = ref(90)
 const hideTranslations = ref(false)
 const saving = ref(false)
 const deleting = ref(false)
+const telegramId = ref<number | null>(null)
+const savingTelegram = ref(false)
 
 onMounted(async () => {
   profile.value = await userApi.getProfile()
@@ -32,6 +34,17 @@ async function save() {
     })
   } finally {
     saving.value = false
+  }
+}
+
+async function saveTelegramId() {
+  if (!telegramId.value) return
+  savingTelegram.value = true
+  try {
+    profile.value = await userApi.updateProfile({ chatId: telegramId.value })
+    telegramId.value = null
+  } finally {
+    savingTelegram.value = false
   }
 }
 
@@ -89,26 +102,41 @@ async function deleteAllCards() {
 
       <article class="panel">
         <span class="eyebrow">Telegram</span>
-        <dl class="dl">
-          <div>
-            <dt>ChatId</dt>
-            <dd class="mono">{{ profile?.chatId }}</dd>
+
+        <template v-if="profile?.chatId">
+          <dl class="dl">
+            <div>
+              <dt>Telegram ID</dt>
+              <dd class="mono">{{ profile.chatId }}</dd>
+            </div>
+          </dl>
+          <span class="chip sage">✓ привязан</span>
+        </template>
+
+        <template v-else>
+          <p class="serif descr">
+            Введите ваш Telegram ID, чтобы использовать бота. Бот сообщит ID при первом обращении к нему.
+          </p>
+          <div class="field">
+            <label>Telegram ID</label>
+            <input
+              v-model.number="telegramId"
+              type="number"
+              class="tg-input"
+              placeholder="123456789"
+              min="1"
+            />
           </div>
-          <div>
-            <dt>Username</dt>
-            <dd class="mono">@{{ profile?.telegramUsername }}</dd>
+          <div class="row-actions">
+            <button
+              class="btn ochre"
+              :disabled="!telegramId || savingTelegram"
+              @click="saveTelegramId"
+            >
+              {{ savingTelegram ? 'Сохраняется…' : 'Сохранить' }}
+            </button>
           </div>
-          <div>
-            <dt>Статус</dt>
-            <dd><span class="chip ochre">заглушка · linked mock</span></dd>
-          </div>
-        </dl>
-        <div class="row-actions">
-          <router-link to="/link-telegram" class="btn ochre">Открыть модалку линковки</router-link>
-        </div>
-        <TodoBanner
-          text="Реальной связки нет. Планируемый флоу: пользователь запускает /link {code} в боте → Passport записывает telegram_chat_id ↔ passport_user_id."
-        />
+        </template>
       </article>
 
       <article class="panel">
@@ -296,5 +324,20 @@ async function deleteAllCards() {
   accent-color: var(--ochre);
   width: 16px;
   height: 16px;
+}
+.tg-input {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--ink);
+  box-sizing: border-box;
+}
+.tg-input:focus {
+  outline: none;
+  border-color: var(--ochre);
 }
 </style>
