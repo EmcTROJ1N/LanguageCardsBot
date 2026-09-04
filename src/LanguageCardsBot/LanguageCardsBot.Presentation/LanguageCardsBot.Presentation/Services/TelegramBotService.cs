@@ -1,6 +1,5 @@
 using LanguageCardsBot.Contracts.Cards.V3;
 using LanguageCardsBot.Presentation.Abstractions;
-using Microsoft.Extensions.Configuration;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -20,8 +19,7 @@ public class TelegramBotService(
     ICommandDispatcher commandDispatcher,
     ICallbackDispatcher callbackDispatcher,
     IDocumentHandler documentHandler,
-    ICardInputHandler cardInputHandler,
-    IConfiguration configuration)
+    ICardInputHandler cardInputHandler)
 {
     /// <summary>Starts the Telegram long-polling loop.</summary>
     public Task InitializeAsync(CancellationToken cancellationToken = default)
@@ -92,11 +90,10 @@ public class TelegramBotService(
 
     private async Task SendRegistrationPromptAsync(long chatId, CancellationToken ct)
     {
-        var siteUrl = configuration["Bot:SiteUrl"] ?? "https://languagecards.app";
         await botClient.SendMessage(
             chatId: chatId,
             text: $"Ваш Telegram ID: {chatId}\n\n" +
-                  $"Чтобы пользоваться ботом, зарегистрируйтесь на сайте:\n{siteUrl}\n\n" +
+                  "Чтобы пользоваться ботом, зарегистрируйтесь на сайте:\nhttps://languagecards.app\n\n" +
                   "После регистрации введите ваш Telegram ID в настройках профиля.",
             cancellationToken: ct);
     }
