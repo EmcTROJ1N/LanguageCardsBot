@@ -26,8 +26,6 @@ const sections = computed(() => {
   return Array.from(grouped.entries()).map(([section, items]) => ({ section, items }))
 })
 
-const showChrome = computed(() => route.path !== '/link-telegram')
-
 async function logout() {
   authStore.logout()
   await router.push('/login')
@@ -35,11 +33,7 @@ async function logout() {
 </script>
 
 <template>
-  <div v-if="!showChrome" class="bare">
-    <RouterView />
-  </div>
-
-  <div v-else class="shell">
+  <div class="shell">
     <aside class="rail rise rise-1">
       <div class="brand">
         <div class="brand__mark">
@@ -119,14 +113,6 @@ async function logout() {
   grid-template-columns: var(--rail-w) 1fr;
   min-height: 100vh;
 }
-.bare {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-
 /* ---- Rail ---- */
 .rail {
   padding: 32px 24px;
