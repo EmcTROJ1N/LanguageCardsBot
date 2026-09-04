@@ -22,6 +22,7 @@ services:
     restart: unless-stopped
     command:
       - "--config.my-cnf=/etc/mysql/my.cnf"
+      - "--no-collect.slave_status"
     ports:
       - "${MYSQL_EXPORTER_CARDS_PORT:-9104}:9104"
     volumes:
@@ -36,6 +37,7 @@ services:
     restart: unless-stopped
     command:
       - "--config.my-cnf=/etc/mysql/my.cnf"
+      - "--no-collect.slave_status"
     ports:
       - "${MYSQL_EXPORTER_PASSPORT_PORT:-9105}:9104"
     volumes:
