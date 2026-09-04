@@ -2,7 +2,7 @@ import type { Profile } from '@/entities/user'
 import { apiFetch } from './http'
 
 export type UpdateProfileDto = Partial<
-  Pick<Profile, 'firstName' | 'lastName' | 'reminderIntervalMinutes' | 'hideTranslations'>
+  Pick<Profile, 'firstName' | 'lastName' | 'reminderIntervalMinutes' | 'hideTranslations' | 'chatId'>
 >
 
 type PassportMeDto = {
@@ -85,6 +85,7 @@ export const userApi = {
         ..._cardsUser,
         reminderIntervalMinutes: dto.reminderIntervalMinutes ?? _cardsUser.reminderIntervalMinutes,
         hideTranslations: dto.hideTranslations ?? _cardsUser.hideTranslations,
+        chatId: dto.chatId !== undefined ? dto.chatId : _cardsUser.chatId,
       }
       await apiFetch(`/api/cards/v3/users/${_cardsUser.id}`, {
         method: 'PUT',
