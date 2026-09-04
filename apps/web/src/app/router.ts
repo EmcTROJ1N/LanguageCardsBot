@@ -24,11 +24,6 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/pages/settings').then((m) => m.SettingsPage),
       },
       { path: 'import', name: 'import', component: () => import('@/pages/import').then((m) => m.ImportPage) },
-      {
-        path: 'link-telegram',
-        name: 'link-telegram',
-        component: () => import('@/pages/link-telegram').then((m) => m.LinkTelegramPage),
-      },
     ],
   },
   {
