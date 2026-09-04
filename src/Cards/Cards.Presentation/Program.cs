@@ -1,6 +1,9 @@
+using System.Reflection;
 using Cards.Presentation;
 using Cards.Presentation.Mapping;
 using LanguageCardsBot.Observability.Extensions;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 DotNetEnv.Env.TraversePath().Load();
 
@@ -22,6 +25,8 @@ builder.Services
     .AddSwaggerDocumentation()
     .AddControllers();
 
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
 await app.MigrateDatabase();
@@ -32,5 +37,16 @@ app.UseSwaggerDocumentation();
 app.MapGrpcServices();
 app.MapControllers();
 app.MapPrometheusScrapingEndpoint();
+app.MapHealthChecks("/healthz", new HealthCheckOptions
+{
+    ResponseWriter = async (ctx, report) =>
+    {
+        ctx.Response.ContentType = "application/json";
+        var version = Assembly.GetExecutingAssembly()
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+            ?.InformationalVersion ?? "unknown";
+        await ctx.Response.WriteAsJsonAsync(new { status = report.Status.ToString(), version });
+    }
+});
 
 app.Run();
