@@ -1,5 +1,6 @@
 using LanguageCardsBot.Contracts.Cards.V3;
 using LanguageCardsBot.Presentation.Abstractions;
+using Microsoft.Extensions.Configuration;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -19,7 +20,8 @@ public class TelegramBotService(
     ICommandDispatcher commandDispatcher,
     ICallbackDispatcher callbackDispatcher,
     IDocumentHandler documentHandler,
-    ICardInputHandler cardInputHandler)
+    ICardInputHandler cardInputHandler,
+    IConfiguration configuration)
 {
     /// <summary>Starts the Telegram long-polling loop.</summary>
     public Task InitializeAsync(CancellationToken cancellationToken = default)
@@ -41,7 +43,12 @@ public class TelegramBotService(
 
     private async Task HandleMessageAsync(Message message, CancellationToken ct)
     {
-        var user = await ResolveUserAsync(message.Chat.Id, message.From?.Username, ct);
+        var user = await ResolveUserAsync(message.Chat.Id, ct);
+        if (user is null)
+        {
+            await SendRegistrationPromptAsync(message.Chat.Id, ct);
+            return;
+        }
 
         if (message.Document is { } document)
         {
@@ -65,16 +72,33 @@ public class TelegramBotService(
     private async Task HandleCallbackQueryAsync(CallbackQuery cb, CancellationToken ct)
     {
         await botClient.AnswerCallbackQuery(cb.Id, cancellationToken: ct);
-        var user = await ResolveUserAsync(cb.Message!.Chat.Id, cb.From.Username, ct);
+        var user = await ResolveUserAsync(cb.Message!.Chat.Id, ct);
+        if (user is null)
+        {
+            await SendRegistrationPromptAsync(cb.Message!.Chat.Id, ct);
+            return;
+        }
         await callbackDispatcher.TryDispatchAsync(cb, user, ct);
     }
 
-    private async Task<User> ResolveUserAsync(long chatId, string? username, CancellationToken ct)
+    /// <summary>Looks up the Cards-service user by Telegram chat identifier. Returns null if no account is linked.</summary>
+    private async Task<User?> ResolveUserAsync(long chatId, CancellationToken ct)
     {
-        var response = await userService.GetOrCreateAsync(
-            new GetOrCreateUserRequest { ChatId = chatId, Username = username },
+        var response = await userService.GetByChatIdAsync(
+            new GetUserByChatIdRequest { ChatId = chatId },
             cancellationToken: ct);
         return response.User;
+    }
+
+    private async Task SendRegistrationPromptAsync(long chatId, CancellationToken ct)
+    {
+        var siteUrl = configuration["Bot:SiteUrl"] ?? "https://languagecards.app";
+        await botClient.SendMessage(
+            chatId: chatId,
+            text: $"Ваш Telegram ID: {chatId}\n\n" +
+                  $"Чтобы пользоваться ботом, зарегистрируйтесь на сайте:\n{siteUrl}\n\n" +
+                  "После регистрации введите ваш Telegram ID в настройках профиля.",
+            cancellationToken: ct);
     }
 
     internal Task HandlePollingErrorAsync(ITelegramBotClient _, Exception exception, CancellationToken __)
