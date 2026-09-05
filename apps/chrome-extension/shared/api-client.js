@@ -1,3 +1,5 @@
+import { getTokens, saveTokens, clearTokens } from "./config.js";
+
 export class CardsApiClient {
   constructor(baseUrl) {
     this.baseUrl = baseUrl;
@@ -11,21 +13,39 @@ export class CardsApiClient {
   }
 
   async addCard(card) {
-    return this.#request("/cards", {
+    return this.#request("/api/cards/cards", {
       method: "POST",
-      body: JSON.stringify(card)
+      body: JSON.stringify({
+        term: card.term,
+        translation: card.translation,
+        transcription: card.transcription,
+        example: card.example ?? null
+      })
     });
   }
 
   async #request(path, init = {}) {
-    const response = await fetch(`${this.baseUrl}${path}`, {
-      ...init,
-      headers: {
+    const url = `${this.baseUrl}${path}`;
+    const send = async () => {
+      const { authToken } = await getTokens();
+      const headers = {
         Accept: "application/json",
         "Content-Type": "application/json",
+        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
         ...init.headers
+      };
+      return fetch(url, { ...init, headers });
+    };
+
+    let response = await send();
+    if (response.status === 401) {
+      const refreshed = await refreshTokens(this.baseUrl);
+      if (!refreshed) {
+        await clearTokens();
+        throw new Error("Sign in via web app to use the extension.");
       }
-    });
+      response = await send();
+    }
 
     if (!response.ok) {
       const message = await readErrorMessage(response);
@@ -38,6 +58,36 @@ export class CardsApiClient {
 
     return response.json();
   }
+}
+
+let refreshInFlight = null;
+
+async function refreshTokens(baseUrl) {
+  if (refreshInFlight) return refreshInFlight;
+  refreshInFlight = (async () => {
+    try {
+      const { refreshToken } = await getTokens();
+      if (!refreshToken) return false;
+      const res = await fetch(`${baseUrl}/api/passport/v1/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(refreshToken)
+      });
+      if (!res.ok) return false;
+      const tokens = await res.json();
+      if (!tokens?.accessToken || !tokens?.refreshToken) return false;
+      await saveTokens({
+        authToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken
+      });
+      return true;
+    } catch {
+      return false;
+    } finally {
+      refreshInFlight = null;
+    }
+  })();
+  return refreshInFlight;
 }
 
 async function readErrorMessage(response) {

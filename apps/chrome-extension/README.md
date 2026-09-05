@@ -4,23 +4,47 @@ Language Cards Companion is an Chrome Extension for adding cards to LanguageCard
 
 ## Directory Layout
 
+```text
+apps/chrome-extension/
+  manifest.json
+  background/service-worker.js       Message router, API client owner, dynamic content-script registrations
+  popup/                             Toolbar popup UI
+  options/                           Options page (settings, custom providers, auth status)
+  content/
+    translation-tooltip.js           Shared translate/save tooltip (window.__lcTranslationTooltip)
+    selection-translator.js          Global text-selection translator (all URLs)
+    subtitle-clicker.js              Per-host subtitle word clicker
+    token-sync.js                    Web-app-origin script that syncs auth tokens into chrome.storage
+    tooltip.css                      Styles for tooltip and selection icon
+  shared/                            API client and settings helpers (background only)
+```
+
 ## Runtime Architecture
 
 ```text
-Popup UI
-  |
-  | chrome.runtime.sendMessage(...)
-  v
-Background service worker
-  |
-  | CardsApiClient
-  v
-Cards.Presentation REST endpoint
+Popup UI                     Content scripts (selection-translator, subtitle-clicker)
+       \                    /
+        \                  /
+         chrome.runtime.sendMessage(...)
+                  |
+                  v
+         Background service worker
+                  |
+                  | CardsApiClient
+                  v
+         Cards.Presentation REST endpoint
 ```
 
-The popup does not call the backend directly. It sends messages to the background service worker. The service worker loads settings from `chrome.storage.local`, validates required values, and calls the LanguageCardsBot HTTP API.
+The popup and every content script send messages to the background service worker. The service worker loads settings from `chrome.storage.local`, validates required values, and calls the LanguageCardsBot HTTP API. Content scripts never call the backend directly.
 
-This keeps backend access in one place and makes future features easier to add, such as context menus, selected text capture, or keyboard commands.
+There are two content-script entry points:
+
+- `content/selection-translator.js` is declared in `manifest.json` under `content_scripts` with `matches: ["<all_urls>"]` and runs on every page. It shows a small icon next to a text selection and opens the shared tooltip on click.
+- `content/subtitle-clicker.js` is registered per host by the service worker (`subtitles.enable` / `subtitles.disable`) and only runs on sites the user opts into from the popup.
+
+Both entries reuse `content/translation-tooltip.js`, which exposes `window.__lcTranslationTooltip.show({ term, anchorRect, context, onClose })` and encapsulates the translate/save flow.
+
+A third content script, `content/token-sync.js`, is registered dynamically by the service worker for the current `apiBaseUrl` origin. When the web SPA is loaded there, it reads `auth_token` / `refresh_token` from `localStorage` and forwards them to the background via `auth.sync`. The background stores them in `chrome.storage.local`, and `shared/api-client.js` attaches them as `Authorization: Bearer` on every request (with a one-shot refresh on `401`).
 
 ## Chrome Platform Model
 
@@ -58,20 +82,19 @@ Official Chrome docs used for this structure:
 
 ## Backend Requirements
 
-Run the cards backend with separated ports:
-
-- gRPC: `http://localhost:8080`, HTTP/2
-- REST: `http://localhost:8081`, HTTP/1
-
-The extension must use the REST port.
-
-Default extension setting:
+The extension talks to the API through the YARP `ApiGateway`, the same URL the web SPA is served from. In local development that is:
 
 ```text
-API base URL: http://localhost:8081
+API base URL: http://localhost:5050
 ```
 
-The Telegram bot should continue using the gRPC URL:
+Under this URL both the SPA and the API are reachable:
+
+- `http://localhost:5050/` — web SPA (used for login and for token capture)
+- `http://localhost:5050/api/cards/**` — Cards service
+- `http://localhost:5050/api/passport/**` — Passport (auth) service
+
+The Telegram bot continues to use the internal gRPC URL:
 
 ```text
 Grpc:CardsServiceUrl=http://localhost:8080
@@ -79,21 +102,20 @@ Grpc:CardsServiceUrl=http://localhost:8080
 
 ## API Calls
 
-The extension currently calls these REST endpoints on `Cards.Presentation`.
+The extension calls these endpoints through the gateway, always with an `Authorization: Bearer <accessToken>` header.
 
 ### Translate Term
 
 ```http
-POST /api/cards/translation
+POST /api/cards/v3/translation
+Authorization: Bearer <accessToken>
 Content-Type: application/json
 ```
 
 Request:
 
 ```json
-{
-  "term": "example"
-}
+{ "term": "example" }
 ```
 
 Expected response:
@@ -111,42 +133,31 @@ Expected response:
 ### Add Card
 
 ```http
-POST /cards
+POST /api/cards/cards
+Authorization: Bearer <accessToken>
 Content-Type: application/json
 ```
 
-Request:
+Request (the user is derived from the token — no `userId` field):
 
 ```json
 {
-  "userId": 1,
   "term": "example",
   "translation": "пример",
   "transcription": "",
-  "example": ""
+  "example": null
 }
 ```
 
-Expected response:
+### Refresh Token
 
-```json
-{
-  "card": {
-    "id": 1,
-    "userId": 1,
-    "term": "example",
-    "translation": "пример",
-    "transcription": "",
-    "example": "",
-    "level": 0,
-    "nextReviewAt": null,
-    "learned": false,
-    "createdAt": "2026-05-21T00:00:00Z",
-    "lastReviewAt": null,
-    "totalReviews": 0,
-    "correctReviews": 0
-  }
-}
+Called automatically on `401` responses:
+
+```http
+POST /api/passport/v1/auth/refresh
+Content-Type: application/json
+
+"<refreshToken>"
 ```
 
 ## Extension Message Protocol
@@ -206,11 +217,8 @@ Request:
 
 Behavior:
 
-- loads `userId` from extension settings;
-- validates that `userId` is a positive integer;
-- sends the card to `POST /cards`.
-
-The popup does not send `userId`; the background worker injects it from settings.
+- sends the card to `POST /api/cards/cards` with the current auth token;
+- the backend derives the user from the token — no `userId` is sent.
 
 ### `settings.get`
 
@@ -226,36 +234,62 @@ Behavior:
 
 - returns normalized extension settings from `chrome.storage.local`.
 
-## Settings
+### `auth.sync`
 
-Settings are stored in `chrome.storage.local`.
+Sent by `content/token-sync.js` from the web app origin.
 
-Current settings:
+Request:
+
+```json
+{
+  "type": "auth.sync",
+  "authToken": "<access token from web localStorage>",
+  "refreshToken": "<refresh token from web localStorage>"
+}
+```
+
+Behavior:
+
+- writes both tokens to `chrome.storage.local`;
+- if both tokens are empty, clears them (logout).
+
+### `auth.status`
+
+Request:
+
+```json
+{ "type": "auth.status" }
+```
+
+Response `data`:
+
+```json
+{ "signedIn": true }
+```
+
+## Settings and Storage
+
+Settings and tokens are all stored in `chrome.storage.local`.
 
 | Key | Default | Meaning |
 | --- | --- | --- |
-| `apiBaseUrl` | `http://localhost:8081` | Base URL of the REST API |
-| `userId` | empty string | Internal LanguageCardsBot user id |
+| `apiBaseUrl` | `http://localhost:5050` | URL of the API gateway (also the origin of the web SPA) |
+| `authToken` | empty | Access token synced from web `localStorage.auth_token` |
+| `refreshToken` | empty | Refresh token synced from web `localStorage.refresh_token` |
+| `customProviders` | `[]` | Extra subtitle providers configured in Options |
 
-`apiBaseUrl` is normalized by trimming trailing slashes.
+`apiBaseUrl` is normalized by trimming trailing slashes. Tokens are written and cleared by `content/token-sync.js` running on the API base URL origin, and refreshed by `shared/api-client.js` on 401.
 
-## Getting User ID
+## Signing In
 
-The Chrome extension needs the internal LanguageCardsBot user id.
+The extension has no login UI of its own — it reuses the web app's session.
 
-In Telegram, send:
+1. Open `apiBaseUrl` in a browser tab (`http://localhost:5050` locally).
+2. Log in through the web app.
+3. The extension's `content/token-sync.js` picks up the `auth_token` / `refresh_token` from `localStorage` and stores them in `chrome.storage.local`.
+4. Every extension API call attaches `Authorization: Bearer <accessToken>`. On `401`, the extension refreshes once via `/api/passport/v1/auth/refresh`.
 
-```text
-/user_id
-```
-
-or:
-
-```text
-/id
-```
-
-The bot returns a numeric id. Put that number into the extension options page.
+Logging out from the web app clears both `localStorage` entries; `token-sync.js` forwards the empty values, and the extension clears its own copies on the next `auth.sync` message.
 
 ## Local Installation
 
@@ -281,14 +315,12 @@ The bot returns a numeric id. Put that number into the extension options page.
    ```
 
 7. Open the extension options page.
-8. Set:
-
-   ```text
-   API base URL = http://localhost:8081
-   User ID = value from /user_id in Telegram
-   ```
+8. Confirm `API base URL = http://localhost:5050` (the API gateway / web SPA origin).
+9. Open `http://localhost:5050` in a tab, log in through the web app. The extension picks up the token automatically.
 
 ## Local Usage
+
+### Popup flow
 
 1. Click the Language Cards extension icon.
 2. Enter a term.
@@ -300,6 +332,23 @@ The bot returns a numeric id. Put that number into the extension options page.
 5. Click Save card.
 
 The card is created for the configured `User ID`.
+
+### Selection translator (all pages)
+
+1. On any page, select a short piece of text with the mouse (up to 100 characters).
+2. A small `A↔` icon appears near the right edge of the selection.
+3. Click the icon.
+4. In the tooltip that appears, click Перевести to load the translation.
+5. Click Сохранить to create a card. `example` is auto-filled with the sentence around the selection (up to 500 characters).
+
+The icon is skipped inside `<input>`, `<textarea>` and `contenteditable` regions, and disappears when you scroll, resize, or click outside.
+
+### Subtitle clicker (per host)
+
+1. Open a video page (YouTube, Netflix, kino.pub, or a custom provider configured in Options).
+2. Open the extension popup and turn the Subtitles toggle On for the current host.
+3. Reload the video page.
+4. Click a word inside the subtitles to open the translate/save tooltip.
 
 ## Development Workflow
 
@@ -341,6 +390,10 @@ node --check apps/chrome-extension/shared/api-client.js
 node --check apps/chrome-extension/shared/config.js
 node --check apps/chrome-extension/popup/popup.js
 node --check apps/chrome-extension/options/options.js
+node --check apps/chrome-extension/content/translation-tooltip.js
+node --check apps/chrome-extension/content/selection-translator.js
+node --check apps/chrome-extension/content/subtitle-clicker.js
+node --check apps/chrome-extension/content/token-sync.js
 ```
 
 Check backend build:
@@ -357,17 +410,15 @@ docker compose -f src/Cards.Presentation/docker-compose.yml config
 
 ## Troubleshooting
 
-### `Set a numeric LanguageCardsBot user id in extension options.`
+### `Sign in via web app to use the extension.`
 
-The extension does not have a valid `userId`.
+The extension has no valid token (either never synced, or the refresh failed).
 
 Fix:
 
-1. Send `/user_id` to the Telegram bot.
-2. Copy the returned number.
-3. Open extension Options.
-4. Paste it into User ID.
-5. Save.
+1. Open `apiBaseUrl` (default `http://localhost:5050`) in a browser tab.
+2. Log in through the web app.
+3. Reload the extension popup / retry the action. The Options page should show "Signed in via web app…".
 
 ### `Failed to fetch`
 
@@ -400,26 +451,12 @@ Check:
 
 - `term` is not empty;
 - `translation` is present if backend validation requires it;
-- `userId` exists in the cards database;
+- the user in the token has been provisioned on the Cards side (usually via first web login);
 - database connection string is configured for `Cards.Presentation`.
 
 ### gRPC error appears while using the extension
 
-The extension should not call the gRPC port.
-
-Use:
-
-```text
-http://localhost:8081
-```
-
-Do not use:
-
-```text
-http://localhost:8080
-```
-
-`8080` is for gRPC over HTTP/2. Browser REST clients should use `8081`.
+The extension only talks to the API gateway REST port. Do not point `apiBaseUrl` at `http://localhost:8080` — that is gRPC over HTTP/2.
 
 ## Security Notes
 
@@ -468,14 +505,15 @@ Recommended next steps:
 
 ## File Ownership
 
-`manifest.json` owns extension capabilities and permissions.
+`manifest.json` owns extension capabilities, permissions, and the global content-script registration for the selection translator.
 
 `background/service-worker.js` owns:
 
 - message routing;
 - settings lookup;
 - API client creation;
-- validation that should be shared across UI surfaces.
+- validation that should be shared across UI surfaces;
+- per-host registration of the subtitle clicker (and its shared tooltip dependency).
 
 `shared/api-client.js` owns:
 
@@ -492,3 +530,11 @@ Recommended next steps:
 `popup/` owns the main user flow.
 
 `options/` owns extension configuration.
+
+`content/translation-tooltip.js` owns the translate/save tooltip DOM and lifecycle, exposed as `window.__lcTranslationTooltip`. Both subtitle-clicker and selection-translator delegate to it.
+
+`content/selection-translator.js` owns the global selection-icon flow: watches `mouseup`, extracts the surrounding sentence, and invokes the shared tooltip.
+
+`content/subtitle-clicker.js` owns per-host subtitle overlays and delegates word clicks to the shared tooltip while pausing/resuming the underlying `<video>`.
+
+`content/token-sync.js` owns web-app-origin token capture: reads `auth_token` / `refresh_token` from `localStorage` and forwards them to the background via `auth.sync`.

@@ -23,7 +23,12 @@ onMounted(async () => {
   hideTranslations.value = profile.value.hideTranslations
 })
 
-const presets = [30, 60, 90, 180, 360, 720, 1440]
+const presets = [0, 30, 60, 90, 180, 360, 720, 1440]
+
+function presetLabel(minutes: number): string {
+  if (minutes === 0) return 'Выкл'
+  return minutes >= 60 ? `${minutes / 60}ч` : `${minutes}м`
+}
 
 async function save() {
   saving.value = true
@@ -151,19 +156,33 @@ async function deleteAllCards() {
               v-for="p in presets"
               :key="p"
               class="preset"
-              :class="{ active: reminderMinutes === p }"
+              :class="{ active: reminderMinutes === p, off: p === 0 }"
               @click="reminderMinutes = p"
             >
-              {{ p >= 60 ? `${p / 60}ч` : `${p}м` }}
+              {{ presetLabel(p) }}
             </button>
           </div>
+          <div class="custom-row">
+            <label class="custom-label">или свой:</label>
+            <input
+              v-model.number="reminderMinutes"
+              type="number"
+              class="custom-input"
+              min="1"
+              step="1"
+            />
+            <span class="custom-unit">мин</span>
+          </div>
           <span class="hint mono">
-            текущий: {{ reminderMinutes }} мин · следующее в
-            {{
-              profile?.nextReminderAt
-                ? new Date(profile.nextReminderAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
-                : '—'
-            }}
+            <template v-if="reminderMinutes === 0">напоминания выключены</template>
+            <template v-else>
+              текущий: {{ reminderMinutes }} мин · следующее в
+              {{
+                profile?.nextReminderAt
+                  ? new Date(profile.nextReminderAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+                  : '—'
+              }}
+            </template>
           </span>
         </div>
         <div class="field row">
@@ -339,5 +358,39 @@ async function deleteAllCards() {
 .tg-input:focus {
   outline: none;
   border-color: var(--ochre);
+}
+.custom-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.custom-label {
+  font-size: 12px;
+  color: var(--ink-mute);
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+.custom-input {
+  width: 80px;
+  padding: 6px 10px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink);
+  box-sizing: border-box;
+}
+.custom-input:focus {
+  outline: none;
+  border-color: var(--ochre);
+}
+.custom-unit {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-mute);
 }
 </style>

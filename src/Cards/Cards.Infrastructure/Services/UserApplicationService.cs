@@ -34,7 +34,7 @@ public sealed class UserApplicationService(
             ChatId = command.ChatId,
             Username = NormalizeUsername(command.Username),
             CreatedAt = ToUtc(command.CreatedAt ?? DateTime.UtcNow),
-            ReminderIntervalMinutes = Math.Max(1, command.ReminderIntervalMinutes),
+            ReminderIntervalMinutes = command.ReminderIntervalMinutes < 0 ? 1 : command.ReminderIntervalMinutes,
             NextReminderAtUtc = ToUtc(command.NextReminderAtUtc),
             HideTranslations = command.HideTranslations
         };
@@ -54,7 +54,7 @@ public sealed class UserApplicationService(
         existingUser.KeycloakId = command.KeycloakId;
         existingUser.ChatId = command.ChatId;
         existingUser.Username = NormalizeUsername(command.Username);
-        existingUser.ReminderIntervalMinutes = Math.Max(1, command.ReminderIntervalMinutes);
+        existingUser.ReminderIntervalMinutes = command.ReminderIntervalMinutes < 0 ? 1 : command.ReminderIntervalMinutes;
         existingUser.NextReminderAtUtc = ToUtc(command.NextReminderAtUtc);
         existingUser.HideTranslations = command.HideTranslations;
 

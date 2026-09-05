@@ -1,32 +1,48 @@
-import { getSettings, saveSettings, getCustomProviders, saveCustomProviders } from "../shared/config.js";
+import { getSettings, saveSettings, getCustomProviders, saveCustomProviders, getTokens } from "../shared/config.js";
 
 // --- Settings form ---
 
 const form = document.querySelector("#settings");
 const apiBaseUrl = document.querySelector("#apiBaseUrl");
-const userId = document.querySelector("#userId");
 const status = document.querySelector("#status");
+const authStatus = document.querySelector("#authStatus");
 
 loadSettings();
+refreshAuthStatus();
 form.addEventListener("submit", handleSubmit);
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && (changes.authToken || changes.refreshToken)) {
+    refreshAuthStatus();
+  }
+});
 
 async function loadSettings() {
   const settings = await getSettings();
   apiBaseUrl.value = settings.apiBaseUrl;
-  userId.value = settings.userId;
 }
 
 async function handleSubmit(event) {
   event.preventDefault();
 
   const settings = await saveSettings({
-    apiBaseUrl: apiBaseUrl.value,
-    userId: userId.value
+    apiBaseUrl: apiBaseUrl.value
   });
 
   apiBaseUrl.value = settings.apiBaseUrl;
-  userId.value = settings.userId;
   status.textContent = "Saved.";
+  refreshAuthStatus();
+}
+
+async function refreshAuthStatus() {
+  const { authToken } = await getTokens();
+  const { apiBaseUrl: url } = await getSettings();
+  if (authToken) {
+    authStatus.textContent = `Signed in via web app at ${url}.`;
+    authStatus.classList.remove("error");
+  } else {
+    authStatus.textContent = `Not signed in. Open ${url} in a tab and log in.`;
+    authStatus.classList.add("error");
+  }
 }
 
 // --- Custom providers ---

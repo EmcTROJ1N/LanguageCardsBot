@@ -63,6 +63,17 @@ button {
   color: #486177;
 }
 
+.status.error {
+  color: #b42318;
+}
+
+.hint {
+  font-weight: 400;
+  font-size: 12px;
+  color: #486177;
+  line-height: 1.4;
+}
+
 .providers-section {
   margin-top: 40px;
   padding-top: 24px;

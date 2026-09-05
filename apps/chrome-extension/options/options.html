@@ -14,17 +14,18 @@
         <label>
           API base URL
           <input id="apiBaseUrl" name="apiBaseUrl" type="url" required>
-        </label>
-
-        <label>
-          User ID
-          <input id="userId" name="userId" type="number" min="1" step="1" required>
+          <small class="hint">
+            URL of the web app / API gateway (e.g. <code>http://localhost:5050</code>).
+            Sign in on this URL in your browser and the extension will pick up the token automatically.
+          </small>
         </label>
 
         <button type="submit">Save</button>
       </form>
 
       <p id="status" class="status" role="status"></p>
+
+      <p id="authStatus" class="status" role="status"></p>
 
       <section class="providers-section">
         <h2>Subtitle Providers</h2>

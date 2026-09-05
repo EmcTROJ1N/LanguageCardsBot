@@ -6,30 +6,20 @@ import { getDueCards } from '@/entities/card'
 import type { Card } from '@/entities/card'
 import type { StatsToday } from '@/entities/stats'
 import type { Profile } from '@/entities/user'
-import { AppBtn, TodoBanner } from '@/shared/ui'
+import { AppBtn } from '@/shared/ui'
 
-// TODO: now захардкожена — заменить на Date.now() после подключения реального времени/сессии
-// TODO: userId:0 в statsApi.getToday() — заменить на Keycloak ID
-// TODO: getLevelDistribution() возвращает [] — панель Pipeline пуста; нужен бэкенд-эндпоинт
-// TODO: напоминания (upcomingReminders) вычисляются из настроек профиля, реального расписания нет
-const now = new Date('2026-08-11T15:22:00Z')
+const now = new Date()
 
 const allCards = ref<Card[]>([])
 const statsToday = ref<StatsToday | null>(null)
 const profile = ref<Profile | null>(null)
-const levelDistribution = ref<{ level: number; count: number }[]>([])
 
 onMounted(async () => {
-  const [cards, stats, prof, levels] = await Promise.all([
-    cardsApi.getAll(),
-    statsApi.getToday(),
-    userApi.getProfile(),
-    statsApi.getLevelDistribution(),
-  ])
+  profile.value = await userApi.getProfile()
+  const userId = profile.value.cardsUserId ?? 0
+  const [cards, stats] = await Promise.all([cardsApi.getAll(), statsApi.getToday(userId)])
   allCards.value = cards
   statsToday.value = stats
-  profile.value = prof
-  levelDistribution.value = levels
 })
 
 const due = computed(() => getDueCards(allCards.value))
@@ -73,12 +63,17 @@ const upcomingReminders = computed(() => {
   })
 })
 
+const levelDistribution = computed(() => {
+  const counts = new Map<number, number>()
+  for (const c of allCards.value) counts.set(c.level, (counts.get(c.level) ?? 0) + 1)
+  return Array.from(counts.entries())
+    .map(([level, count]) => ({ level, count }))
+    .sort((a, b) => a.level - b.level)
+})
+
 const pipeline = computed(() => {
   const max = Math.max(...levelDistribution.value.map((l) => l.count), 1)
-  return levelDistribution.value.map((l) => ({
-    ...l,
-    pct: (l.count / max) * 100,
-  }))
+  return levelDistribution.value.map((l) => ({ ...l, pct: (l.count / max) * 100 }))
 })
 </script>
 
@@ -225,10 +220,6 @@ const pipeline = computed(() => {
 
     </div>
 
-    <TodoBanner
-      label="Кабинет"
-      text="`now` захардкожена ('2026-08-11') — нужна Date.now() · Pipeline пуст, нет level-distribution · напоминания — мок из настроек профиля, реального бэкенда нет · userId:0 в statsApi"
-    />
   </section>
 </template>
 

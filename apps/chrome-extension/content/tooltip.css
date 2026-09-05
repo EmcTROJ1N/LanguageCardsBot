@@ -63,10 +63,6 @@
   color: #ffffff;
 }
 
-.lc-btn-translate {
-  background: #2357a5;
-}
-
 .lc-btn-save {
   background: #12b76a;
 }
@@ -97,6 +93,38 @@
   padding: 4px 14px;
   border-radius: 4px;
   max-width: 80vw;
+}
+
+/* Floating action icon shown next to a text selection */
+#lc-selection-icon {
+  position: fixed;
+  z-index: 2147483647;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #182230;
+  color: #ffffff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.25);
+  user-select: none;
+  transition: transform 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
+}
+
+#lc-selection-icon svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  pointer-events: none;
+}
+
+#lc-selection-icon:hover {
+  background: #243347;
+  transform: scale(1.06);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* Custom overlay for TextTrack mode (sites with native <track> elements) */

@@ -42,8 +42,14 @@ public class UserEntity : IEntityWithId
     /// </summary>
     /// <param name="sentAtUtc">UTC timestamp of the just-sent reminder.</param>
     /// <returns>The newly computed <see cref="NextReminderAtUtc"/> value.</returns>
-    public DateTime ScheduleNextReminder(DateTime sentAtUtc)
+    public DateTime? ScheduleNextReminder(DateTime sentAtUtc)
     {
+        if (ReminderIntervalMinutes == 0)
+        {
+            NextReminderAtUtc = null;
+            return null;
+        }
+
         NextReminderAtUtc = sentAtUtc.AddMinutes(Math.Max(1, ReminderIntervalMinutes));
         return NextReminderAtUtc.Value;
     }

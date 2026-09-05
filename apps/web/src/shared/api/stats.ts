@@ -16,12 +16,10 @@ type GetTodayStatsResponseDto = {
 }
 
 export const statsApi = {
-  async getToday(): Promise<StatsToday> {
-    // TODO: replace userId:0 with real user ID from auth session
-    const data = await apiFetch<GetTodayStatsResponseDto>('/api/cards/v3/stats/today/0')
+  async getToday(userId: number): Promise<StatsToday> {
+    const data = await apiFetch<GetTodayStatsResponseDto>(`/api/cards/v3/stats/today/${userId}`)
     const s = data.stats
     return {
-      // TODO: "due" count — backend has no dedicated endpoint; derive from cards or extend StatsController
       due: 0,
       learned: s.learnedCards,
       totalCards: s.totalCards,
@@ -30,10 +28,5 @@ export const statsApi = {
       reviewsToday: s.totalReviewsToday,
       correctToday: s.correctReviewsToday,
     }
-  },
-
-  async getLevelDistribution(): Promise<{ level: number; count: number }[]> {
-    // TODO: no backend endpoint; needs GET /api/cards/v3/stats/level-distribution
-    return []
   },
 }

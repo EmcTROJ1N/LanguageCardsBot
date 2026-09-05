@@ -8,9 +8,7 @@
     { hostname: "www.netflix.com", selector: ".player-timedtext-text-container", observeType: "mutation" }
   ];
 
-  const LC_TOOLTIP_ID = "lc-tooltip";
   let lastWrappedText = "";
-  let tooltipCleanup = null;
 
   init();
 
@@ -157,106 +155,14 @@
       span.addEventListener("click", e => {
         e.stopPropagation();
         pauseVideo();
-        showTooltip(span.getAttribute("data-lc-word"), span);
+        window.__lcTranslationTooltip?.show({
+          term: span.getAttribute("data-lc-word"),
+          anchorRect: span.getBoundingClientRect(),
+          context: lastWrappedText,
+          onClose: resumeVideo
+        });
       });
     });
-  }
-
-  // --- Tooltip ---
-
-  function showTooltip(word, anchorEl) {
-    removeTooltip();
-
-    const tooltip = document.createElement("div");
-    tooltip.id = LC_TOOLTIP_ID;
-    tooltip.innerHTML = `
-      <div class="lc-word">${escHtml(word)}</div>
-      <div class="lc-area"></div>
-      <div class="lc-actions">
-        <button class="lc-btn lc-btn-translate">Перевести</button>
-      </div>`;
-    document.body.appendChild(tooltip);
-    positionTooltip(tooltip, anchorEl);
-
-    let translation = null;
-
-    tooltip.querySelector(".lc-btn-translate").addEventListener("click", async () => {
-      const area = tooltip.querySelector(".lc-area");
-      const translateBtn = tooltip.querySelector(".lc-btn-translate");
-      translateBtn.disabled = true;
-      area.innerHTML = '<span class="lc-loading">···</span>';
-
-      try {
-        const data = await sendMsg({ type: "cards.translate", term: word });
-        translation = data.result;
-        area.innerHTML = [
-          translation.transcription
-            ? `<div class="lc-transcription">${escHtml(translation.transcription)}</div>`
-            : "",
-          translation.translation
-            ? `<div class="lc-translation">${escHtml(translation.translation)}</div>`
-            : ""
-        ].join("");
-
-        const saveBtn = document.createElement("button");
-        saveBtn.className = "lc-btn lc-btn-save";
-        saveBtn.textContent = "Сохранить";
-        tooltip.querySelector(".lc-actions").appendChild(saveBtn);
-
-        saveBtn.addEventListener("click", async () => {
-          saveBtn.disabled = true;
-          try {
-            await sendMsg({
-              type: "cards.add",
-              card: {
-                term: word,
-                translation: translation.translation || "",
-                transcription: translation.transcription || "",
-                example: lastWrappedText || null
-              }
-            });
-            tooltip.querySelector(".lc-actions").innerHTML =
-              '<span class="lc-saved">Сохранено ✓</span>';
-            setTimeout(() => { removeTooltip(); resumeVideo(); }, 1000);
-          } catch (err) {
-            saveBtn.disabled = false;
-            area.textContent = err.message;
-          }
-        });
-      } catch (err) {
-        translateBtn.disabled = false;
-        area.textContent = err.message;
-      }
-    });
-
-    const onOutside = e => {
-      if (!tooltip.contains(e.target)) { removeTooltip(); resumeVideo(); }
-    };
-    const onEscape = e => {
-      if (e.key === "Escape") { removeTooltip(); resumeVideo(); }
-    };
-    setTimeout(() => document.addEventListener("click", onOutside, true), 0);
-    document.addEventListener("keydown", onEscape);
-    tooltipCleanup = () => {
-      document.removeEventListener("click", onOutside, true);
-      document.removeEventListener("keydown", onEscape);
-    };
-  }
-
-  function positionTooltip(tooltip, anchorEl) {
-    tooltip.style.cssText = "position:fixed;visibility:hidden;top:0;left:0;";
-    const tr = tooltip.getBoundingClientRect();
-    const ar = anchorEl.getBoundingClientRect();
-    let top = ar.top - tr.height - 8;
-    if (top < 8) top = ar.bottom + 8;
-    let left = ar.left + ar.width / 2 - tr.width / 2;
-    left = Math.max(8, Math.min(left, window.innerWidth - tr.width - 8));
-    tooltip.style.cssText = `position:fixed;top:${top}px;left:${left}px;`;
-  }
-
-  function removeTooltip() {
-    if (tooltipCleanup) { tooltipCleanup(); tooltipCleanup = null; }
-    document.getElementById(LC_TOOLTIP_ID)?.remove();
   }
 
   // --- Video control ---
@@ -269,24 +175,6 @@
   function resumeVideo() {
     const v = document.querySelector("video");
     if (v?.paused) v.play().catch(() => {});
-  }
-
-  // --- Message passing ---
-
-  function sendMsg(message) {
-    return new Promise((resolve, reject) => {
-      chrome.runtime.sendMessage(message, response => {
-        if (chrome.runtime.lastError) {
-          reject(new Error(chrome.runtime.lastError.message));
-          return;
-        }
-        if (!response?.ok) {
-          reject(new Error(response?.error ?? "Extension request failed."));
-          return;
-        }
-        resolve(response.data);
-      });
-    });
   }
 
   // --- Utilities ---

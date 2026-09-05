@@ -1,17 +1,27 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { statsApi } from '@/shared/api'
+import { cardsApi, statsApi, userApi } from '@/shared/api'
+import type { Card } from '@/entities/card'
 import type { StatsToday } from '@/entities/stats'
-import { PageHeader, StatTile, TodoBanner } from '@/shared/ui'
+import { PageHeader, StatTile } from '@/shared/ui'
 
-// TODO: userId захардкожен в 0 в statsApi.getToday() — заменить на реальный Keycloak ID из сессии
-// TODO: getLevelDistribution() возвращает [] — нужен GET /api/cards/v3/stats/level-distribution на бэкенде
 const stats = ref<StatsToday | null>(null)
-const levelDist = ref<{ level: number; count: number }[]>([])
+const allCards = ref<Card[]>([])
 
 onMounted(async () => {
-  stats.value = await statsApi.getToday()
-  levelDist.value = await statsApi.getLevelDistribution()
+  const profile = await userApi.getProfile()
+  const userId = profile.cardsUserId ?? 0
+  const [s, cards] = await Promise.all([statsApi.getToday(userId), cardsApi.getAll()])
+  stats.value = s
+  allCards.value = cards
+})
+
+const levelDist = computed(() => {
+  const counts = new Map<number, number>()
+  for (const c of allCards.value) counts.set(c.level, (counts.get(c.level) ?? 0) + 1)
+  return Array.from(counts.entries())
+    .map(([level, count]) => ({ level, count }))
+    .sort((a, b) => a.level - b.level)
 })
 
 const max = computed(() => Math.max(...levelDist.value.map((l) => l.count), 1))
@@ -58,10 +68,6 @@ const bestDayLabel = computed(() => {
       </div>
     </article>
 
-    <TodoBanner
-      label="Статистика"
-      text="userId захардкожен в 0 — нужен реальный Keycloak ID из сессии · график «По уровням» пуст, нет эндпоинта GET /api/cards/v3/stats/level-distribution"
-    />
   </section>
 </template>
 

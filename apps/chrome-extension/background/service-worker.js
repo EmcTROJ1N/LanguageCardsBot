@@ -1,5 +1,15 @@
 import { CardsApiClient } from "../shared/api-client.js";
-import { getSettings } from "../shared/config.js";
+import { getSettings, getTokens, saveTokens, clearTokens } from "../shared/config.js";
+
+const TOKEN_SYNC_ID = "token-sync";
+
+chrome.runtime.onInstalled.addListener(() => { registerTokenSync().catch(logError); });
+chrome.runtime.onStartup.addListener(() => { registerTokenSync().catch(logError); });
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && changes.apiBaseUrl) {
+    registerTokenSync().catch(logError);
+  }
+});
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   handleMessage(message)
@@ -18,13 +28,26 @@ async function handleMessage(message) {
       return client.translate(requireText(message.term, "term"));
 
     case "cards.add":
-      return client.addCard({
-        ...message.card,
-        userId: requireUserId(settings.userId)
-      });
+      return client.addCard(message.card);
 
     case "settings.get":
       return settings;
+
+    case "auth.sync":
+      if (message.authToken || message.refreshToken) {
+        await saveTokens({
+          authToken: message.authToken || "",
+          refreshToken: message.refreshToken || ""
+        });
+      } else {
+        await clearTokens();
+      }
+      return {};
+
+    case "auth.status": {
+      const { authToken } = await getTokens();
+      return { signedIn: Boolean(authToken) };
+    }
 
     case "subtitles.getStatus": {
       const hostname = message.hostname;
@@ -45,7 +68,10 @@ async function handleMessage(message) {
         await chrome.scripting.registerContentScripts([{
           id,
           matches: [pattern],
-          js: ["content/subtitle-clicker.js"],
+          js: [
+            "content/translation-tooltip.js",
+            "content/subtitle-clicker.js"
+          ],
           css: ["content/tooltip.css"],
           runAt: "document_idle"
         }]);
@@ -58,7 +84,10 @@ async function handleMessage(message) {
         }).catch(err => console.warn("[subtitle-clicker] CSS injection failed:", err.message));
         await chrome.scripting.executeScript({
           target: { tabId: tab.id },
-          files: ["content/subtitle-clicker.js"]
+          files: [
+            "content/translation-tooltip.js",
+            "content/subtitle-clicker.js"
+          ]
         }).catch(err => console.warn("[subtitle-clicker] Script injection failed:", err.message));
       }
       return {};
@@ -79,16 +108,50 @@ async function handleMessage(message) {
   }
 }
 
+async function registerTokenSync() {
+  const { apiBaseUrl } = await getSettings();
+  const pattern = toContentScriptPattern(apiBaseUrl);
+  if (!pattern) return;
+
+  const existing = await chrome.scripting.getRegisteredContentScripts({ ids: [TOKEN_SYNC_ID] });
+  if (existing.length > 0) {
+    await chrome.scripting.unregisterContentScripts({ ids: [TOKEN_SYNC_ID] });
+  }
+  await chrome.scripting.registerContentScripts([{
+    id: TOKEN_SYNC_ID,
+    matches: [pattern],
+    js: ["content/token-sync.js"],
+    runAt: "document_idle",
+    allFrames: false
+  }]);
+
+  const matchUrl = new URL("/*", apiBaseUrl).toString().replace(/\*$/, "");
+  const tabs = await chrome.tabs.query({ url: `${matchUrl}*` });
+  for (const tab of tabs) {
+    if (!tab.id) continue;
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      files: ["content/token-sync.js"]
+    }).catch(err => console.warn("[token-sync] Script injection failed:", err.message));
+  }
+}
+
+function toContentScriptPattern(baseUrl) {
+  try {
+    const u = new URL(baseUrl);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+    return `${u.protocol}//${u.host}/*`;
+  } catch {
+    return null;
+  }
+}
+
 function requireText(value, name) {
   const text = String(value ?? "").trim();
   if (!text) throw new Error(`${name} is required.`);
   return text;
 }
 
-function requireUserId(value) {
-  const userId = Number.parseInt(value, 10);
-  if (!Number.isInteger(userId) || userId <= 0) {
-    throw new Error("Set a numeric LanguageCardsBot user id in extension options.");
-  }
-  return userId;
+function logError(err) {
+  console.warn("[background]", err?.message ?? err);
 }

@@ -67,9 +67,11 @@ public sealed class CardReminderOrchestrator(
         int initialIntervalMinutes,
         CancellationToken ct)
     {
-        var delay = initialNextReminderAt.HasValue
-            ? TimeSpan.FromTicks(Math.Max(0, (initialNextReminderAt.Value - DateTime.UtcNow).Ticks))
-            : TimeSpan.FromMinutes(Math.Max(1, initialIntervalMinutes));
+        var delay = initialIntervalMinutes == 0
+            ? TimeSpan.FromMinutes(60)
+            : initialNextReminderAt.HasValue
+                ? TimeSpan.FromTicks(Math.Max(0, (initialNextReminderAt.Value - DateTime.UtcNow).Ticks))
+                : TimeSpan.FromMinutes(Math.Max(1, initialIntervalMinutes));
 
         while (!ct.IsCancellationRequested)
         {
@@ -87,6 +89,12 @@ public sealed class CardReminderOrchestrator(
                 {
                     UnregisterUser(userId);
                     return;
+                }
+
+                if (user.ReminderIntervalMinutes == 0)
+                {
+                    delay = TimeSpan.FromMinutes(60);
+                    continue;
                 }
 
                 var card = await cardRepo.GetRandomActiveCardAsync(user.Id, ct);
