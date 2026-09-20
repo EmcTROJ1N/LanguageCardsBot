@@ -5,6 +5,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Passport.Application;
 using Passport.Infrastructure;
 using Passport.Presentation;
+using Passport.Presentation.Middleware;
 using Scalar.AspNetCore;
 
 DotNetEnv.Env.TraversePath().Load();
@@ -34,6 +35,8 @@ if (app.Environment.IsDevelopment())
         options.OpenApiRoutePattern = "/api/passport/openapi/v1.json";
     });
 }
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -1,4 +1,5 @@
 using Passport.Application.Models;
+using Passport.Domain.Exceptions;
 
 namespace Passport.Application.Abstractions.Services;
 
@@ -12,24 +13,26 @@ public interface IAuthService
     /// </summary>
     /// <param name="command">Registration command.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns><c>true</c> when the user was created; otherwise <c>false</c>.</returns>
-    Task<bool> RegisterAsync(RegisterUserCommand command, CancellationToken cancellationToken = default);
+    /// <exception cref="UserAlreadyExistsException">A user with the same email is already registered.</exception>
+    Task RegisterAsync(RegisterUserCommand command, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Authenticates a user and issues tokens.
     /// </summary>
     /// <param name="command">Login command.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>Issued tokens, or <c>null</c> when credentials are invalid.</returns>
-    Task<AuthToken?> LoginAsync(LoginUserCommand command, CancellationToken cancellationToken = default);
+    /// <returns>Issued tokens.</returns>
+    /// <exception cref="InvalidCredentialsException">The provided credentials are invalid.</exception>
+    Task<AuthToken> LoginAsync(LoginUserCommand command, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Refreshes an access token using a refresh token.
     /// </summary>
     /// <param name="refreshToken">Refresh token.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>Newly issued tokens, or <c>null</c> when the refresh token is invalid.</returns>
-    Task<AuthToken?> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
+    /// <returns>Newly issued tokens.</returns>
+    /// <exception cref="InvalidRefreshTokenException">The refresh token is expired or invalid.</exception>
+    Task<AuthToken> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets a user profile by identifier.

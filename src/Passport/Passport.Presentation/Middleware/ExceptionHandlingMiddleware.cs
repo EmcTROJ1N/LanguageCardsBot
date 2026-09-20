@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Http.Extensions;
+using Passport.Domain.Exceptions;
 
 namespace Passport.Presentation.Middleware;
 
 /// <summary>
 /// Converts unhandled exceptions to JSON error responses.
-/// Expected infrastructure errors (e.g. Keycloak unreachable) return 503;
-/// all other exceptions return 500.
+/// Domain errors (auth failures, validation) return 4xx with a user-friendly message.
+/// Infrastructure errors (e.g. Keycloak unreachable) return 503.
+/// Unexpected exceptions return 500 and are logged as errors.
 /// </summary>
 internal sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
 {
@@ -26,16 +28,24 @@ internal sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<
     {
         var (statusCode, message) = exception switch
         {
+            InvalidCredentialsException or InvalidRefreshTokenException => (401, exception.Message),
+            UserAlreadyExistsException => (409, exception.Message),
+            AuthException => (400, exception.Message),
+            ArgumentException argEx => (400, FirstLine(argEx.Message)),
             HttpRequestException => (503, "Сервис авторизации временно недоступен. Попробуйте позже."),
             _ => (500, "Произошла непредвиденная ошибка. Попробуйте позже.")
         };
 
         if (statusCode == 500)
             logger.LogError(exception, "Unhandled exception for {Method} {Url}", context.Request.Method, context.Request.GetDisplayUrl());
-        else
+        else if (statusCode == 503)
             logger.LogWarning(exception, "Infrastructure error for {Method} {Url}", context.Request.Method, context.Request.GetDisplayUrl());
 
         context.Response.StatusCode = statusCode;
         await context.Response.WriteAsJsonAsync(new { error = message });
     }
+
+    // ArgumentException.Message appends "\r\n(Parameter '...')" — strip it for the user-facing message.
+    private static string FirstLine(string message) =>
+        message.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)[0];
 }

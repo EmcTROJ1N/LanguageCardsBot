@@ -1,5 +1,5 @@
 import type { Profile } from '@/entities/user'
-import { apiFetch } from './http'
+import { apiFetch, publicFetch } from './http'
 
 export type UpdateProfileDto = Partial<
   Pick<Profile, 'firstName' | 'lastName' | 'reminderIntervalMinutes' | 'hideTranslations' | 'chatId'>
@@ -36,7 +36,7 @@ let _cardsUser: CardsUserDto | null = null
 
 export const userApi = {
   async login(email: string, password: string): Promise<TokenResponse> {
-    return apiFetch<TokenResponse>('/api/passport/v1/auth/login', {
+    return publicFetch<TokenResponse>('/api/passport/v1/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     })
@@ -48,7 +48,7 @@ export const userApi = {
     firstName: string,
     lastName: string,
   ): Promise<void> {
-    await apiFetch<void>('/api/passport/v1/auth/register', {
+    await publicFetch<void>('/api/passport/v1/auth/register', {
       method: 'POST',
       body: JSON.stringify({ email, password, firstName, lastName }),
     })

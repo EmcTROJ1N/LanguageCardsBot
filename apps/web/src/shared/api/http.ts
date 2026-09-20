@@ -40,6 +40,32 @@ function redirectToLogin(): never {
   throw new Error('Unauthorized')
 }
 
+const PUBLIC_ERROR_MESSAGES: Record<number, string> = {
+  400: 'Проверьте введённые данные.',
+  401: 'Неверный email или пароль.',
+  403: 'Доступ запрещён.',
+  404: 'Ресурс не найден.',
+  503: 'Сервис временно недоступен. Попробуйте позже.',
+  500: 'Произошла непредвиденная ошибка. Попробуйте позже.',
+}
+
+export async function publicFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(path, {
+    ...init,
+    headers: { 'Content-Type': 'application/json', ...init?.headers },
+  })
+  if (res.ok) {
+    if (res.status === 204) return undefined as T
+    return res.json() as Promise<T>
+  }
+  let message = PUBLIC_ERROR_MESSAGES[res.status] ?? `HTTP ${res.status} ${res.statusText}`
+  try {
+    const body = await res.json() as { error?: string }
+    if (body.error) message = body.error
+  } catch {}
+  throw new Error(message)
+}
+
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, { ...init, headers: { ...authHeaders(), ...init?.headers } })
   if (res.status === 401) {

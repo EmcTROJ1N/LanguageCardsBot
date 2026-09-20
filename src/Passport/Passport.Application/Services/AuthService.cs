@@ -6,6 +6,7 @@ using Passport.Application.Abstractions.Clients;
 using Passport.Application.Abstractions.Services;
 using Passport.Application.Models;
 using Passport.Application.Options;
+using Passport.Domain.Exceptions;
 using Passport.Domain.ValueObjects;
 
 namespace Passport.Application.Services;
@@ -21,19 +22,20 @@ public sealed class AuthService(
     private string Realm { get; } = options.Value.Realm;
 
     /// <inheritdoc />
-    public async Task<bool> RegisterAsync(RegisterUserCommand command, CancellationToken cancellationToken = default)
+    public async Task RegisterAsync(RegisterUserCommand command, CancellationToken cancellationToken = default)
     {
         var email = Email.Create(command.Email);
         var password = NormalizeRequired(command.Password, nameof(command.Password));
         var firstName = NormalizeRequired(command.FirstName, nameof(command.FirstName));
         var lastName = NormalizeRequired(command.LastName, nameof(command.LastName));
 
-        var existing = await keycloakUserClient.GetUsersAsync(Realm,
+        var existing = await keycloakUserClient.GetUsersAsync(
+            Realm,
             new GetUsersRequestParameters { Email = email.Value, Exact = true },
             cancellationToken);
 
         if (existing.Any())
-            return false;
+            throw new UserAlreadyExistsException();
 
         await keycloakUserClient.CreateUserAsync(
             Realm,
@@ -55,23 +57,23 @@ public sealed class AuthService(
                 ]
             },
             cancellationToken);
-
-        return true;
     }
 
     /// <inheritdoc />
-    public Task<AuthToken?> LoginAsync(LoginUserCommand command, CancellationToken cancellationToken = default)
+    public async Task<AuthToken> LoginAsync(LoginUserCommand command, CancellationToken cancellationToken = default)
     {
         var email = Email.Create(command.Email);
         var password = NormalizeRequired(command.Password, nameof(command.Password));
-        return tokenClient.SignInAsync(email.Value, password, cancellationToken);
+        return await tokenClient.SignInAsync(email.Value, password, cancellationToken)
+               ?? throw new InvalidCredentialsException();
     }
 
     /// <inheritdoc />
-    public Task<AuthToken?> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
+    public async Task<AuthToken> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
         var normalizedToken = NormalizeRequired(refreshToken, nameof(refreshToken));
-        return tokenClient.RefreshTokenAsync(normalizedToken, cancellationToken);
+        return await tokenClient.RefreshTokenAsync(normalizedToken, cancellationToken)
+               ?? throw new InvalidRefreshTokenException();
     }
 
     /// <inheritdoc />

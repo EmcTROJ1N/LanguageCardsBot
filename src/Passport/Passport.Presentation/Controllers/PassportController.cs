@@ -13,28 +13,9 @@ public sealed class PassportController(IAuthService authService) : ControllerBas
     /// <inheritdoc/>
     public override async Task RegisterUser(UserRegistrationRequest body, CancellationToken cancellationToken = default)
     {
-        bool registered;
-        try
-        {
-            registered = await authService.RegisterAsync(
-                new RegisterUserCommand(body.Email, body.Password, body.FirstName, body.LastName),
-                cancellationToken);
-        }
-        catch (ArgumentException ex)
-        {
-            Response.StatusCode = 400;
-            await Response.WriteAsJsonAsync(new ErrorResponse { Error = ex.Message }, cancellationToken);
-            return;
-        }
-
-        if (!registered)
-        {
-            Response.StatusCode = 400;
-            await Response.WriteAsJsonAsync(
-                new ErrorResponse { Error = "User with the same email already exists." },
-                cancellationToken);
-            return;
-        }
+        await authService.RegisterAsync(
+            new RegisterUserCommand(body.Email, body.Password, body.FirstName, body.LastName),
+            cancellationToken);
 
         Response.StatusCode = 204;
     }
@@ -42,44 +23,14 @@ public sealed class PassportController(IAuthService authService) : ControllerBas
     /// <inheritdoc/>
     public override async Task<AuthTokenResponse> LoginUser(UserLoginRequest body, CancellationToken cancellationToken = default)
     {
-        AuthToken? token;
-        try
-        {
-            token = await authService.LoginAsync(new LoginUserCommand(body.Email, body.Password), cancellationToken);
-        }
-        catch (ArgumentException)
-        {
-            token = null;
-        }
-
-        if (token is null)
-        {
-            Response.StatusCode = 401;
-            return null!;
-        }
-
+        var token = await authService.LoginAsync(new LoginUserCommand(body.Email, body.Password), cancellationToken);
         return MapToResponse(token);
     }
 
     /// <inheritdoc/>
     public override async Task<AuthTokenResponse> RefreshToken(string body, CancellationToken cancellationToken = default)
     {
-        AuthToken? token;
-        try
-        {
-            token = await authService.RefreshTokenAsync(body, cancellationToken);
-        }
-        catch (ArgumentException)
-        {
-            token = null;
-        }
-
-        if (token is null)
-        {
-            Response.StatusCode = 401;
-            return null!;
-        }
-
+        var token = await authService.RefreshTokenAsync(body, cancellationToken);
         return MapToResponse(token);
     }
 
