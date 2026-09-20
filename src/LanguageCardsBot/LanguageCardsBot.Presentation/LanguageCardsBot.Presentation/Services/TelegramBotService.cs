@@ -19,7 +19,8 @@ public class TelegramBotService(
     ICommandDispatcher commandDispatcher,
     ICallbackDispatcher callbackDispatcher,
     IDocumentHandler documentHandler,
-    ICardInputHandler cardInputHandler)
+    ICardInputHandler cardInputHandler,
+    ILogger<TelegramBotService> logger)
 {
     /// <summary>Starts the Telegram long-polling loop.</summary>
     public Task InitializeAsync(CancellationToken cancellationToken = default)
@@ -33,10 +34,30 @@ public class TelegramBotService(
     /// <summary>Entry point for all incoming Telegram updates.</summary>
     public async Task HandleUpdateAsync(ITelegramBotClient _, Update update, CancellationToken ct)
     {
-        if (update.Message is { } message)
-            await HandleMessageAsync(message, ct);
-        else if (update.CallbackQuery is { } callbackQuery)
-            await HandleCallbackQueryAsync(callbackQuery, ct);
+        try
+        {
+            if (update.Message is { } message)
+                await HandleMessageAsync(message, ct);
+            else if (update.CallbackQuery is { } callbackQuery)
+                await HandleCallbackQueryAsync(callbackQuery, ct);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            logger.LogError(ex, "Unhandled exception processing update {UpdateId}", update.Id);
+
+            var chatId = update.Message?.Chat.Id ?? update.CallbackQuery?.Message?.Chat.Id;
+            if (chatId.HasValue)
+            {
+                try
+                {
+                    await botClient.SendMessage(chatId.Value, "Произошла ошибка. Попробуйте ещё раз.", cancellationToken: ct);
+                }
+                catch (Exception sendEx)
+                {
+                    logger.LogWarning(sendEx, "Failed to send error message to chat {ChatId}", chatId.Value);
+                }
+            }
+        }
     }
 
     private async Task HandleMessageAsync(Message message, CancellationToken ct)
@@ -100,7 +121,7 @@ public class TelegramBotService(
 
     internal Task HandlePollingErrorAsync(ITelegramBotClient _, Exception exception, CancellationToken __)
     {
-        Console.WriteLine($"Polling error: {exception.Message}");
+        logger.LogWarning(exception, "Telegram polling error");
         return Task.CompletedTask;
     }
 

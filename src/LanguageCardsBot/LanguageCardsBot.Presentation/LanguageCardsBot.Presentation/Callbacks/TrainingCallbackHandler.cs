@@ -13,6 +13,12 @@ public class TrainingCallbackHandler(
     ITelegramBotClient botClient,
     CardService.CardServiceClient cardService) : ICallbackHandler
 {
+    private static bool TryParseCardId(string data, string prefix, out int cardId)
+    {
+        var suffix = data[prefix.Length..];
+        return int.TryParse(suffix, out cardId);
+    }
+
     /// <inheritdoc/>
     public bool CanHandle(string callbackData)
         => callbackData.StartsWith("know_", StringComparison.Ordinal)
@@ -27,7 +33,7 @@ public class TrainingCallbackHandler(
 
         if (data.StartsWith("know_", StringComparison.Ordinal))
         {
-            var cardId = int.Parse(data.Split('_')[1]);
+            if (!TryParseCardId(data, "know_", out var cardId)) return;
             await cardService.UpdateCardReviewAsync(
                 new UpdateCardReviewRequest { CardId = cardId, IsCorrect = true },
                 cancellationToken: ct);
@@ -38,7 +44,7 @@ public class TrainingCallbackHandler(
         }
         else if (data.StartsWith("dontknow_", StringComparison.Ordinal))
         {
-            var cardId = int.Parse(data.Split('_')[1]);
+            if (!TryParseCardId(data, "dontknow_", out var cardId)) return;
             await cardService.UpdateCardReviewAsync(
                 new UpdateCardReviewRequest { CardId = cardId, IsCorrect = false },
                 cancellationToken: ct);

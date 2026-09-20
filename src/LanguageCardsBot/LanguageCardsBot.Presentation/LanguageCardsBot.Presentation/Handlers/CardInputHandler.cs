@@ -30,9 +30,9 @@ public class CardInputHandler(
                     cancellationToken: ct);
                 added.Add((term, translation));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                errors.Add($"'{line}': {ex.Message}");
+                errors.Add($"Не удалось добавить карточку: «{line}»");
             }
         }
 

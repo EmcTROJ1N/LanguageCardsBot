@@ -1,6 +1,7 @@
 using System.Reflection;
 using Cards.Presentation;
 using Cards.Presentation.Mapping;
+using Cards.Presentation.Middleware;
 using LanguageCardsBot.Observability.Extensions;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -30,6 +31,8 @@ builder.Services.AddHealthChecks();
 var app = builder.Build();
 
 await app.MigrateDatabase();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
