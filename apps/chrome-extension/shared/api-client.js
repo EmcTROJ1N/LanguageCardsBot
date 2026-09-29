@@ -5,13 +5,6 @@ export class CardsApiClient {
     this.baseUrl = baseUrl;
   }
 
-  async translate(term) {
-    return this.#request("/api/cards/v3/translation", {
-      method: "POST",
-      body: JSON.stringify({ term })
-    });
-  }
-
   async addCard(card) {
     return this.#request("/api/cards/cards", {
       method: "POST",

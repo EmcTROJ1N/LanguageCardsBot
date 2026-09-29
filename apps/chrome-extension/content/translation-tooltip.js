@@ -23,8 +23,7 @@
 
     (async () => {
       try {
-        const data = await sendMsg({ type: "cards.translate", term });
-        const translation = data.result;
+        const translation = await sendMsg({ type: "cards.translate", term });
         area.innerHTML = [
           translation.transcription
             ? `<div class="lc-transcription">${escHtml(translation.transcription)}</div>`

@@ -4,6 +4,7 @@ import { getSettings, saveSettings, getCustomProviders, saveCustomProviders, get
 
 const form = document.querySelector("#settings");
 const apiBaseUrl = document.querySelector("#apiBaseUrl");
+const targetLanguage = document.querySelector("#targetLanguage");
 const status = document.querySelector("#status");
 const authStatus = document.querySelector("#authStatus");
 
@@ -19,16 +20,19 @@ chrome.storage.onChanged.addListener((changes, area) => {
 async function loadSettings() {
   const settings = await getSettings();
   apiBaseUrl.value = settings.apiBaseUrl;
+  targetLanguage.value = settings.targetLanguage;
 }
 
 async function handleSubmit(event) {
   event.preventDefault();
 
   const settings = await saveSettings({
-    apiBaseUrl: apiBaseUrl.value
+    apiBaseUrl: apiBaseUrl.value,
+    targetLanguage: targetLanguage.value
   });
 
   apiBaseUrl.value = settings.apiBaseUrl;
+  targetLanguage.value = settings.targetLanguage;
   status.textContent = "Saved.";
   refreshAuthStatus();
 }

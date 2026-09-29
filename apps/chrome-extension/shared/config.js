@@ -1,17 +1,20 @@
 const DEFAULT_SETTINGS = {
-  apiBaseUrl: "http://localhost:5050"
+  apiBaseUrl: "http://localhost:5050",
+  targetLanguage: "ru"
 };
 
 export async function getSettings() {
   const stored = await chrome.storage.local.get(DEFAULT_SETTINGS);
   return {
-    apiBaseUrl: normalizeBaseUrl(stored.apiBaseUrl)
+    apiBaseUrl: normalizeBaseUrl(stored.apiBaseUrl),
+    targetLanguage: normalizeLanguage(stored.targetLanguage)
   };
 }
 
 export async function saveSettings(settings) {
   const nextSettings = {
-    apiBaseUrl: normalizeBaseUrl(settings.apiBaseUrl || DEFAULT_SETTINGS.apiBaseUrl)
+    apiBaseUrl: normalizeBaseUrl(settings.apiBaseUrl || DEFAULT_SETTINGS.apiBaseUrl),
+    targetLanguage: normalizeLanguage(settings.targetLanguage || DEFAULT_SETTINGS.targetLanguage)
   };
 
   await chrome.storage.local.set(nextSettings);
@@ -48,4 +51,9 @@ export async function clearTokens() {
 
 function normalizeBaseUrl(value) {
   return String(value ?? DEFAULT_SETTINGS.apiBaseUrl).trim().replace(/\/+$/, "");
+}
+
+function normalizeLanguage(value) {
+  const lang = String(value ?? DEFAULT_SETTINGS.targetLanguage).trim().toLowerCase();
+  return lang || DEFAULT_SETTINGS.targetLanguage;
 }

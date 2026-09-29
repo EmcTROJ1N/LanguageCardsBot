@@ -1,4 +1,5 @@
 import { CardsApiClient } from "../shared/api-client.js";
+import { translateDirect } from "../shared/translator.js";
 import { getSettings, getTokens, saveTokens, clearTokens } from "../shared/config.js";
 
 const TOKEN_SYNC_ID = "token-sync";
@@ -25,7 +26,7 @@ async function handleMessage(message) {
 
   switch (message?.type) {
     case "cards.translate":
-      return client.translate(requireText(message.term, "term"));
+      return translateDirect(requireText(message.term, "term"), settings.targetLanguage);
 
     case "cards.add":
       return client.addCard(message.card);
