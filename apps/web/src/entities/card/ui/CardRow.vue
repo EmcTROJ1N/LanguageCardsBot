@@ -9,7 +9,14 @@ const accuracy = computed(() => {
   return v === -1 ? null : Math.round(v * 100)
 })
 
-const now = new Date('2026-08-11T15:22:00Z')
+const now = new Date()
+const createdLabel = computed(() => {
+  const d = new Date(props.card.createdAt)
+  const day = String(d.getDate()).padStart(2, '0')
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const year = String(d.getFullYear()).slice(-2)
+  return `${day}.${month}.${year}`
+})
 const status = computed(() => {
   const s = statusOf(props.card)
   const klasses: Record<string, 'sage' | 'ochre' | 'muted'> = {
@@ -56,13 +63,14 @@ const nextLabel = computed(() => {
     </span>
 
     <span class="col-next mono">{{ nextLabel }}</span>
+    <span class="col-created mono">{{ createdLabel }}</span>
   </router-link>
 </template>
 
 <style scoped>
 .row {
   display: grid;
-  grid-template-columns: 22px minmax(0, 1.2fr) minmax(0, 2fr) 96px 44px 60px;
+  grid-template-columns: 22px minmax(0, 1.2fr) minmax(0, 2fr) 96px 44px 60px 72px;
   gap: 16px;
   align-items: center;
   padding: 6px 16px;
@@ -175,6 +183,12 @@ const nextLabel = computed(() => {
 }
 
 .col-next {
+  font-size: 11px;
+  color: var(--ink-mute);
+  text-align: right;
+}
+
+.col-created {
   font-size: 11px;
   color: var(--ink-mute);
   text-align: right;

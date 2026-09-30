@@ -14,7 +14,7 @@ async function exportCards(format: 'json' | 'csv') {
 }
 
 type Filter = 'all' | 'due' | 'learned' | 'new'
-type SortKey = 'status' | 'term' | 'translation' | 'level' | 'accuracy' | 'next'
+type SortKey = 'status' | 'term' | 'translation' | 'level' | 'accuracy' | 'next' | 'created'
 type SortDir = 'asc' | 'desc'
 type Group = 'none' | 'status' | 'level' | 'letter'
 
@@ -41,7 +41,7 @@ function toggleSort(key: SortKey) {
     sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
   } else {
     sortKey.value = key
-    sortDir.value = key === 'accuracy' || key === 'level' ? 'desc' : 'asc'
+    sortDir.value = key === 'accuracy' || key === 'level' || key === 'created' ? 'desc' : 'asc'
   }
 }
 
@@ -155,6 +155,7 @@ const columns: {
   { key: 'level', label: 'level', className: 'col-level-h' },
   { key: 'accuracy', label: 'точн.', align: 'right', className: 'col-acc-h' },
   { key: 'next', label: 'следующий', align: 'right', className: 'col-next-h' },
+  { key: 'created', label: 'добавлено', align: 'right', className: 'col-created-h' },
 ]
 </script>
 
@@ -370,7 +371,7 @@ const columns: {
 }
 .table__header {
   display: grid;
-  grid-template-columns: 22px minmax(0, 1.2fr) minmax(0, 2fr) 96px 44px 60px;
+  grid-template-columns: 22px minmax(0, 1.2fr) minmax(0, 2fr) 96px 44px 60px 72px;
   gap: 16px;
   padding: 6px 16px 8px;
   border-bottom: 2px solid var(--ink-soft);

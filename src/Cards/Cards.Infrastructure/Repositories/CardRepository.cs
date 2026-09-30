@@ -121,6 +121,7 @@ public class CardRepository(CardsMysqlDbContext dbContext): AbstractCrudReposito
             "accuracy"    => desc
                 ? set.OrderByDescending(c => c.TotalReviews == 0 ? 0.0 : (double)c.CorrectReviews / c.TotalReviews)
                 : set.OrderBy(c => c.TotalReviews == 0 ? 0.0 : (double)c.CorrectReviews / c.TotalReviews),
+            "created"     => desc ? set.OrderByDescending(c => c.CreatedAt) : set.OrderBy(c => c.CreatedAt),
             _ => desc ? set.OrderByDescending(c => c.Term) : set.OrderBy(c => c.Term),
         };
 
